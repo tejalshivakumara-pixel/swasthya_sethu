@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Health Records — Swasthya Setu</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --primary: #6C63FF;
+      --primary-dark: #4f46e5;
+      --secondary: #7c3aed;
+      --accent: #06b6d4;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg: #f8f7ff;
+      --card: #ffffff;
+      --text: #1e1b4b;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --grad: linear-gradient(135deg, #6C63FF 0%, #7c3aed 50%, #06b6d4 100%);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── LANG BAR ── */
+    .lang-bar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      position: sticky;
+      top: 0;
+      z-index: 101;
+    }
+    .lang-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); }
+    .lang-btn {
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 2px solid var(--border);
+      background: transparent;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+      color: var(--text-muted);
+      font-family: 'Nunito', sans-serif;
+    }
+    .lang-btn.active, .lang-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    /* ── BACK BAR ── */
+    .back-bar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 41px;
+      z-index: 100;
+    }
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 0.9rem;
+      color: var(--primary);
+      background: #ede9fe;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .back-btn:hover { background: var(--primary); color: #fff; }
+    .back-bar-title { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1rem; color: var(--text); }
+
+    /* HERO */
+    .hero { background: var(--grad); padding: 40px 24px 48px; text-align: center; position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+    .hero-logo { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 10px; }
+    .hero-logo .icon { font-size: 2.5rem; }
+    .hero-logo h1 { font-family: 'Nunito', sans-serif; font-size: 2.4rem; font-weight: 900; color: #fff; }
+    .hero p { color: rgba(255,255,255,0.88); font-size: 1rem; margin-bottom: 20px; }
+    .hero-badges { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+    .badge { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 7px 16px; border-radius: 50px; font-size: 0.82rem; font-weight: 600; backdrop-filter: blur(6px); }
+
+    /* LAYOUT */
+    .container { max-width: 1100px; margin: 0 auto; padding: 32px 20px 60px; }
+    .layout { display: grid; grid-template-columns: 280px 1fr; gap: 24px; }
+    @media(max-width:768px){ .layout { grid-template-columns: 1fr; } }
+
+    /* SIDEBAR */
+    .sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+    /* PATIENT PROFILE CARD */
+    .profile-card { background: var(--card); border-radius: 20px; box-shadow: 0 4px 24px rgba(0,0,0,.07); padding: 24px; text-align: center; position: relative; overflow: hidden; }
+    .profile-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 60px; background: var(--grad); }
+    .avatar { width: 70px; height: 70px; border-radius: 50%; background: var(--grad); display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 24px auto 12px; position: relative; z-index: 1; border: 4px solid #fff; box-shadow: 0 4px 16px rgba(108,99,255,.3); }
+    .profile-name { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1.1rem; color: var(--text); }
+    .profile-id { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 16px; }
+    .profile-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+    .stat-box { background: var(--bg); border-radius: 12px; padding: 10px 8px; text-align: center; }
+    .stat-val { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.1rem; color: var(--primary); }
+    .stat-label { font-size: 0.68rem; color: var(--text-muted); font-weight: 600; }
+    .edit-btn { width: 100%; margin-top: 14px; padding: 10px; background: transparent; border: 2px solid var(--border); border-radius: 10px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; transition: all .2s; }
+    .edit-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* NAV MENU */
+    .nav-card { background: var(--card); border-radius: 20px; box-shadow: 0 4px 24px rgba(0,0,0,.07); overflow: hidden; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 14px 20px; cursor: pointer; border-left: 3px solid transparent; transition: all .2s; font-weight: 600; font-size: 0.88rem; }
+    .nav-item:hover { background: var(--bg); border-left-color: var(--primary); color: var(--primary); }
+    .nav-item.active { background: linear-gradient(90deg, #ede9fe, transparent); border-left-color: var(--primary); color: var(--primary); }
+    .nav-item .nav-icon { font-size: 1.1rem; width: 24px; text-align: center; }
+    .nav-item .nav-badge { margin-left: auto; background: var(--primary); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2px 7px; border-radius: 20px; }
+
+    /* MAIN CONTENT */
+    .main-content { display: flex; flex-direction: column; gap: 20px; }
+
+    /* SECTION TITLE */
+    .section-title { font-family: 'Nunito', sans-serif; font-size: 1.2rem; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .section-title::after { content: ''; flex: 1; height: 2px; background: linear-gradient(90deg, var(--primary), transparent); border-radius: 2px; }
+    .section-title .edit-icon-btn { margin-left: auto; background: var(--bg); border: 2px solid var(--border); border-radius: 8px; padding: 4px 10px; font-size: 0.75rem; cursor: pointer; font-family: 'Nunito', sans-serif; font-weight: 700; color: var(--text-muted); transition: all .2s; white-space: nowrap; }
+    .section-title .edit-icon-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* CARDS */
+    .card { background: var(--card); border-radius: 20px; box-shadow: 0 4px 24px rgba(0,0,0,.07); padding: 24px; }
+
+    /* VITALS GRID */
+    .vitals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 14px; }
+    .vital-box { background: var(--bg); border-radius: 16px; padding: 18px 14px; text-align: center; border: 2px solid var(--border); position: relative; overflow: hidden; transition: all .25s; cursor: pointer; }
+    .vital-box:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(108,99,255,.12); }
+    .vital-box.warning { border-color: var(--warning); background: #fffbeb; }
+    .vital-box.danger { border-color: var(--danger); background: #fef2f2; }
+    .vital-box.good { border-color: var(--success); background: #f0fdf4; }
+    .vital-icon { font-size: 1.5rem; margin-bottom: 6px; }
+    .vital-val { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.3rem; color: var(--text); }
+    .vital-unit { font-size: 0.68rem; color: var(--text-muted); font-weight: 600; }
+    .vital-name { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; font-weight: 600; }
+    .vital-status { font-size: 0.65rem; font-weight: 700; margin-top: 4px; }
+    .vital-status.normal { color: var(--success); }
+    .vital-status.high { color: var(--danger); }
+    .vital-status.low { color: var(--warning); }
+    .vital-edit-hint { font-size: 0.6rem; color: var(--primary); margin-top: 3px; opacity: 0; transition: opacity .2s; }
+    .vital-box:hover .vital-edit-hint { opacity: 1; }
+
+    /* TIMELINE */
+    .timeline { position: relative; }
+    .timeline::before { content: ''; position: absolute; left: 20px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+    .tl-item { display: flex; gap: 16px; margin-bottom: 20px; position: relative; }
+    .tl-dot { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; position: relative; z-index: 1; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+    .tl-dot.appt { background: linear-gradient(135deg, #6C63FF, #7c3aed); }
+    .tl-dot.lab { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+    .tl-dot.rx { background: linear-gradient(135deg, #10b981, #059669); }
+    .tl-dot.vacc { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .tl-body { flex: 1; background: var(--bg); border-radius: 14px; padding: 14px 16px; border: 1px solid var(--border); }
+    .tl-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+    .tl-title { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.92rem; color: var(--text); }
+    .tl-date { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; white-space: nowrap; }
+    .tl-sub { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; }
+    .tl-tag { display: inline-block; font-size: 0.68rem; font-weight: 700; padding: 2px 10px; border-radius: 20px; }
+    .tl-tag.appt { background: #ede9fe; color: var(--primary); }
+    .tl-tag.lab { background: #e0f2fe; color: #0891b2; }
+    .tl-tag.rx { background: #d1fae5; color: #059669; }
+    .tl-tag.vacc { background: #fef3c7; color: #d97706; }
+
+    /* MEDICATIONS */
+    .med-list { display: flex; flex-direction: column; gap: 12px; }
+    .med-item { display: flex; align-items: center; gap: 14px; background: var(--bg); border-radius: 14px; padding: 14px 16px; border: 2px solid var(--border); transition: all .2s; }
+    .med-item:hover { border-color: var(--primary); }
+    .med-icon { width: 42px; height: 42px; border-radius: 12px; background: var(--grad); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+    .med-name { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.9rem; color: var(--text); }
+    .med-dose { font-size: 0.75rem; color: var(--text-muted); }
+    .med-schedule { margin-left: auto; text-align: right; }
+    .med-times { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
+    .med-time-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+    .med-time-dot.missed { background: var(--danger); }
+    .med-time-dot.upcoming { background: var(--border); }
+    .med-freq { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; margin-top: 4px; }
+
+    /* LAB RESULTS */
+    .lab-table { width: 100%; border-collapse: collapse; }
+    .lab-table th { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-align: left; padding: 8px 12px; border-bottom: 2px solid var(--border); }
+    .lab-table td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+    .lab-table tr:last-child td { border-bottom: none; }
+    .lab-table tr:hover td { background: var(--bg); }
+    .result-pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; }
+    .result-pill.normal { background: #d1fae5; color: #059669; }
+    .result-pill.high { background: #fee2e2; color: var(--danger); }
+    .result-pill.low { background: #fef3c7; color: #d97706; }
+
+    /* ADD RECORD FORM */
+    .add-form { display: none; }
+    .add-form.open { display: block; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+    @media(max-width:600px){ .form-grid { grid-template-columns: 1fr; } }
+    .field-group label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .field-group input, .field-group select, .field-group textarea { width: 100%; padding: 10px 14px; border: 2px solid var(--border); border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 0.88rem; color: var(--text); background: var(--card); outline: none; transition: border-color .2s; }
+    .field-group input:focus, .field-group select:focus, .field-group textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(108,99,255,.1); }
+    .full-width { grid-column: 1/-1; }
+
+    /* BUTTONS */
+    .btn { padding: 10px 22px; border-radius: 10px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.88rem; cursor: pointer; border: none; transition: all .25s; }
+    .btn-primary { background: var(--grad); color: #fff; box-shadow: 0 4px 14px rgba(108,99,255,.3); }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(108,99,255,.4); }
+    .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text-muted); }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-sm { padding: 7px 14px; font-size: 0.78rem; }
+    .btn-row { display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* TABS */
+    .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 20px; overflow-x: auto; }
+    .tab { padding: 10px 18px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.85rem; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; white-space: nowrap; color: var(--text-muted); transition: all .2s; }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab:hover { color: var(--primary); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* INFO BAR */
+    .info-bar { background: linear-gradient(90deg,#e0f2fe,#ede9fe); border-left: 4px solid var(--primary); border-radius: 0 12px 12px 0; padding: 11px 16px; font-size: 0.8rem; color: var(--text); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+
+    .hidden { display: none !important; }
+
+    /* SUMMARY CHIPS */
+    .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .chip { padding: 5px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
+    .chip-blue { background: #ede9fe; color: var(--primary); }
+    .chip-green { background: #d1fae5; color: #059669; }
+    .chip-red { background: #fee2e2; color: var(--danger); }
+    .chip-yellow { background: #fef3c7; color: #d97706; }
+    .chip .chip-remove { cursor: pointer; font-size: 0.8rem; opacity: 0.6; transition: opacity .2s; border: none; background: none; color: inherit; padding: 0; line-height: 1; }
+    .chip .chip-remove:hover { opacity: 1; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: #fff; padding: 14px 22px; border-radius: 14px; font-size: 0.88rem; font-weight: 600; box-shadow: 0 8px 32px rgba(0,0,0,.2); transform: translateY(80px); opacity: 0; transition: all .35s cubic-bezier(.34,1.56,.64,1); z-index: 9999; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(30, 27, 75, 0.5); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity .25s; }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal { background: var(--card); border-radius: 24px; padding: 32px; width: 100%; max-width: 540px; box-shadow: 0 24px 80px rgba(0,0,0,.18); transform: translateY(20px) scale(0.97); transition: transform .3s cubic-bezier(.34,1.56,.64,1); max-height: 90vh; overflow-y: auto; }
+    .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .modal-title { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.3rem; color: var(--text); }
+    .modal-close { width: 36px; height: 36px; border-radius: 10px; border: 2px solid var(--border); background: transparent; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: all .2s; color: var(--text-muted); }
+    .modal-close:hover { border-color: var(--danger); color: var(--danger); background: #fee2e2; }
+    .modal-section { margin-bottom: 20px; }
+    .modal-section-label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 10px; }
+    .modal-input { width: 100%; padding: 11px 14px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--text); background: var(--bg); outline: none; transition: border-color .2s; }
+    .modal-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(108,99,255,.1); background: var(--card); }
+    .modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border); }
+
+    /* TAG INPUT AREA */
+    .tag-input-area { border: 2px solid var(--border); border-radius: 12px; padding: 10px; background: var(--bg); transition: border-color .2s; }
+    .tag-input-area:focus-within { border-color: var(--primary); background: var(--card); }
+    .tag-input-area .chip-row { margin-top: 0; margin-bottom: 8px; min-height: 10px; }
+    .tag-input-area input { border: none; background: transparent; outline: none; font-family: 'Inter', sans-serif; font-size: 0.88rem; color: var(--text); width: 100%; padding: 4px 2px; }
+    .tag-input-area input::placeholder { color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+<!-- LANG BAR -->
+<div class="lang-bar">
+  <span class="lang-label">🌐 <span data-i18n="lang_label">Language:</span></span>
+  <button class="lang-btn active" onclick="setLang('en')">EN</button>
+  <button class="lang-btn" onclick="setLang('hi')">हिं</button>
+  <button class="lang-btn" onclick="setLang('kn')">ಕನ್ನಡ</button>
+  <button class="lang-btn" onclick="setLang('te')">తెలుగు</button>
+  <button class="lang-btn" onclick="setLang('ta')">தமிழ்</button>
+  <button class="lang-btn" onclick="setLang('mr')">मराठी</button>
+</div>
+
+<!-- BACK BAR -->
+<div class="back-bar">
+  <button class="back-btn" onclick="history.back()">← <span data-i18n="back">Back</span></button>
+  <span class="back-bar-title">📋 <span data-i18n="page_title">Health Records — Swasthya Setu</span></span>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-logo">
+    <span class="icon">🏥</span>
+    <h1>Swasthya Setu</h1>
+  </div>
+  <p data-i18n="hero_sub">AI-Powered Rural Healthcare Accessibility Platform</p>
+  <div class="hero-badges">
+    <span class="badge" data-i18n="badge_accessible">✨ Accessible</span>
+    <span class="badge" data-i18n="badge_ai">🤖 AI-Powered</span>
+    <span class="badge" data-i18n="badge_fast">⚡ Fast</span>
+    <span class="badge" data-i18n="badge_rural">🌿 Rural-Friendly</span>
+    <span class="badge" data-i18n="badge_offline">📶 Offline Support</span>
+  </div>
+</div>
+
+<div class="container">
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="profile-card">
+        <div class="avatar">👤</div>
+        <div class="profile-name" id="profile-name">Ramesh Kumar</div>
+        <div class="profile-id" id="profile-id-display">ID: SS-2024-00421 &bull; Blood: B+</div>
+        <div class="profile-stats">
+          <div class="stat-box"><div class="stat-val">8</div><div class="stat-label" data-i18n="stat_visits">Visits</div></div>
+          <div class="stat-box"><div class="stat-val">3</div><div class="stat-label" data-i18n="stat_medicines">Medicines</div></div>
+          <div class="stat-box"><div class="stat-val">5</div><div class="stat-label" data-i18n="stat_labs">Lab Tests</div></div>
+          <div class="stat-box"><div class="stat-val">4</div><div class="stat-label" data-i18n="stat_vaccines">Vaccines</div></div>
+        </div>
+        <button class="edit-btn" onclick="openProfileModal()">✏️ <span data-i18n="edit_profile">Edit Profile</span></button>
+      </div>
+
+      <div class="nav-card">
+        <div class="nav-item active" onclick="showSection('overview', this)"><span class="nav-icon">📊</span> <span data-i18n="nav_overview">Overview</span></div>
+        <div class="nav-item" onclick="showSection('history', this)"><span class="nav-icon">📋</span> <span data-i18n="nav_history">Visit History</span> <span class="nav-badge">8</span></div>
+        <div class="nav-item" onclick="showSection('medications', this)"><span class="nav-icon">💊</span> <span data-i18n="nav_medications">Medications</span> <span class="nav-badge">3</span></div>
+        <div class="nav-item" onclick="showSection('labs', this)"><span class="nav-icon">🔬</span> <span data-i18n="nav_labs">Lab Results</span> <span class="nav-badge">5</span></div>
+        <div class="nav-item" onclick="showSection('vitals', this)"><span class="nav-icon">❤️</span> <span data-i18n="nav_vitals">Vitals</span></div>
+        <div class="nav-item" onclick="showSection('vaccines', this)"><span class="nav-icon">💉</span> <span data-i18n="nav_vaccines">Vaccines</span></div>
+        <div class="nav-item" onclick="showSection('add', this)"><span class="nav-icon">➕</span> <span data-i18n="nav_add">Add Record</span></div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main-content">
+
+      <!-- OVERVIEW -->
+      <div id="section-overview">
+        <div class="info-bar">📋 <span data-i18n="info_overview">Your complete health records at a glance. Click any vital or use ✏️ buttons to edit your data.</span></div>
+        <div class="card" style="margin-bottom:20px;">
+          <div class="section-title">
+            ❤️ <span data-i18n="title_vitals">Latest Vitals</span>
+            <button class="edit-icon-btn" onclick="openVitalsModal()">✏️ <span data-i18n="edit_all_vitals">Edit All Vitals</span></button>
+          </div>
+          <div class="vitals-grid" id="vitals-grid-overview"></div>
+        </div>
+        <div class="card" style="margin-bottom:20px;">
+          <div class="section-title">
+            🏷️ <span data-i18n="title_conditions">Conditions &amp; Allergies</span>
+            <button class="edit-icon-btn" onclick="openConditionsModal()">✏️ <span data-i18n="edit_btn">Edit</span></button>
+          </div>
+          <div style="margin-bottom:12px;">
+            <div style="font-size:.8rem;font-weight:700;color:var(--text-muted);margin-bottom:8px;" data-i18n="label_conditions">CHRONIC CONDITIONS</div>
+            <div class="chip-row" id="conditions-display"></div>
+          </div>
+          <div>
+            <div style="font-size:.8rem;font-weight:700;color:var(--text-muted);margin-bottom:8px;" data-i18n="label_allergies">KNOWN ALLERGIES</div>
+            <div class="chip-row" id="allergies-display"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title">🕐 <span data-i18n="title_recent">Recent Activity</span></div>
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-dot appt">🏥</div>
+              <div class="tl-body">
+                <div class="tl-header"><div class="tl-title" data-i18n="act1_title">Dr. Ramesh Patil — General Checkup</div><div class="tl-date">Apr 20, 2026</div></div>
+                <div class="tl-sub" data-i18n="act1_sub">BP was elevated. Medication adjusted.</div>
+                <span class="tl-tag appt" data-i18n="tag_appt">Appointment</span>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot lab">🔬</div>
+              <div class="tl-body">
+                <div class="tl-header"><div class="tl-title" data-i18n="act2_title">Blood Sugar &amp; HbA1c Test</div><div class="tl-date">Apr 15, 2026</div></div>
+                <div class="tl-sub" data-i18n="act2_sub">HbA1c: 6.9% — Within target range.</div>
+                <span class="tl-tag lab" data-i18n="tag_lab">Lab Test</span>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot rx">💊</div>
+              <div class="tl-body">
+                <div class="tl-header"><div class="tl-title" data-i18n="act3_title">Prescription Updated</div><div class="tl-date">Apr 20, 2026</div></div>
+                <div class="tl-sub" data-i18n="act3_sub">Amlodipine 5mg added for BP management.</div>
+                <span class="tl-tag rx" data-i18n="tag_rx">Prescription</span>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot vacc">💉</div>
+              <div class="tl-body">
+                <div class="tl-header"><div class="tl-title" data-i18n="act4_title">COVID-19 Booster</div><div class="tl-date">Jan 10, 2026</div></div>
+                <div class="tl-sub" data-i18n="act4_sub">3rd dose — Covaxin. Next due: Jan 2027.</div>
+                <span class="tl-tag vacc" data-i18n="tag_vacc">Vaccine</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISIT HISTORY -->
+      <div id="section-history" class="hidden">
+        <div class="card">
+          <div class="section-title">📋 <span data-i18n="title_history">Visit History</span></div>
+          <div class="timeline" id="visit-timeline"></div>
+        </div>
+      </div>
+
+      <!-- MEDICATIONS -->
+      <div id="section-medications" class="hidden">
+        <div class="card">
+          <div class="section-title">💊 <span data-i18n="title_medications">Current Medications</span></div>
+          <div class="med-list" id="med-list"></div>
+        </div>
+      </div>
+
+      <!-- LAB RESULTS -->
+      <div id="section-labs" class="hidden">
+        <div class="card">
+          <div class="section-title">🔬 <span data-i18n="title_labs">Lab Results</span></div>
+          <div class="tabs">
+            <div class="tab active" onclick="switchTab('blood', this)" data-i18n="tab_blood">🩸 Blood Work</div>
+            <div class="tab" onclick="switchTab('urine', this)" data-i18n="tab_urine">🧪 Urine</div>
+            <div class="tab" onclick="switchTab('imaging', this)" data-i18n="tab_imaging">🩻 Imaging</div>
+          </div>
+          <div class="tab-panel active" id="tab-blood">
+            <table class="lab-table">
+              <thead><tr><th data-i18n="th_test">Test</th><th data-i18n="th_result">Result</th><th data-i18n="th_normal">Normal Range</th><th data-i18n="th_date">Date</th><th data-i18n="th_status">Status</th></tr></thead>
+              <tbody>
+                <tr><td>HbA1c</td><td>6.9%</td><td>4–5.6%</td><td>Apr 15, 2026</td><td><span class="result-pill high" data-i18n="pill_high">High</span></td></tr>
+                <tr><td data-i18n="test_fbs">Fasting Blood Sugar</td><td>108 mg/dL</td><td>70–100 mg/dL</td><td>Apr 15, 2026</td><td><span class="result-pill high" data-i18n="pill_high">High</span></td></tr>
+                <tr><td data-i18n="test_chol">Total Cholesterol</td><td>185 mg/dL</td><td>&lt;200 mg/dL</td><td>Mar 2, 2026</td><td><span class="result-pill normal" data-i18n="pill_normal">Normal</span></td></tr>
+                <tr><td data-i18n="test_hgb">Hemoglobin</td><td>13.8 g/dL</td><td>13.5–17.5 g/dL</td><td>Mar 2, 2026</td><td><span class="result-pill normal" data-i18n="pill_normal">Normal</span></td></tr>
+                <tr><td data-i18n="test_tsh">TSH (Thyroid)</td><td>2.1 mIU/L</td><td>0.5–4.5 mIU/L</td><td>Jan 20, 2026</td><td><span class="result-pill normal" data-i18n="pill_normal">Normal</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tab-panel" id="tab-urine">
+            <table class="lab-table">
+              <thead><tr><th data-i18n="th_test">Test</th><th data-i18n="th_result">Result</th><th data-i18n="th_normal">Normal</th><th data-i18n="th_date">Date</th><th data-i18n="th_status">Status</th></tr></thead>
+              <tbody>
+                <tr><td data-i18n="test_uglucose">Urine Glucose</td><td data-i18n="val_negative">Negative</td><td data-i18n="val_negative">Negative</td><td>Apr 15, 2026</td><td><span class="result-pill normal" data-i18n="pill_normal">Normal</span></td></tr>
+                <tr><td data-i18n="test_protein">Protein</td><td data-i18n="val_trace">Trace</td><td data-i18n="val_negative">Negative</td><td>Apr 15, 2026</td><td><span class="result-pill low" data-i18n="val_trace">Trace</span></td></tr>
+                <tr><td data-i18n="test_creat">Creatinine</td><td>1.0 mg/dL</td><td>0.7–1.3 mg/dL</td><td>Mar 2, 2026</td><td><span class="result-pill normal" data-i18n="pill_normal">Normal</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tab-panel" id="tab-imaging">
+            <table class="lab-table">
+              <thead><tr><th data-i18n="th_type">Type</th><th data-i18n="th_body">Body Part</th><th data-i18n="th_finding">Finding</th><th data-i18n="th_date">Date</th><th data-i18n="th_status">Status</th></tr></thead>
+              <tbody>
+                <tr><td data-i18n="img_xray">X-Ray</td><td data-i18n="img_chest">Chest</td><td data-i18n="img_xray_find">No abnormality detected</td><td>Feb 10, 2026</td><td><span class="result-pill normal" data-i18n="pill_clear">Clear</span></td></tr>
+                <tr><td data-i18n="img_ecg">ECG</td><td data-i18n="img_heart">Heart</td><td data-i18n="img_ecg_find">Normal sinus rhythm</td><td>Apr 20, 2026</td><td><span class="result-pill normal" data-i18n="pill_normal">Normal</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- VITALS PAGE -->
+      <div id="section-vitals" class="hidden">
+        <div class="card">
+          <div class="section-title">
+            ❤️ <span data-i18n="title_vitals_history">Vitals History</span>
+            <button class="edit-icon-btn" onclick="openVitalsModal()">✏️ <span data-i18n="edit_vitals">Edit Vitals</span></button>
+          </div>
+          <div class="info-bar">📈 <span data-i18n="info_vitals">Click ✏️ Edit Vitals to update your readings, or log a new one below.</span></div>
+          <div class="vitals-grid" id="vitals-grid-page" style="margin-bottom:24px;"></div>
+          <div class="section-title">➕ <span data-i18n="title_log">Log New Reading</span></div>
+          <div class="form-grid">
+            <div class="field-group"><label data-i18n="label_vital_type">Vital Type</label>
+              <select id="new-vital-type">
+                <option data-i18n="vital_bp">Blood Pressure</option>
+                <option data-i18n="vital_hr">Heart Rate</option>
+                <option data-i18n="vital_temp">Temperature</option>
+                <option data-i18n="vital_bs">Blood Sugar</option>
+                <option data-i18n="vital_wt">Weight</option>
+                <option data-i18n="vital_spo2">SpO₂</option>
+              </select>
+            </div>
+            <div class="field-group"><label data-i18n="label_value">Value</label><input type="text" id="new-vital-val" placeholder="e.g. 120/80 or 72"/></div>
+            <div class="field-group"><label data-i18n="label_date">Date</label><input type="date" id="new-vital-date"/></div>
+            <div class="field-group"><label data-i18n="label_notes">Notes</label><input type="text" id="new-vital-note" placeholder="Optional note"/></div>
+          </div>
+          <div class="btn-row"><button class="btn btn-primary" onclick="logVital()">💾 <span data-i18n="save_reading">Save Reading</span></button></div>
+        </div>
+      </div>
+
+      <!-- VACCINES -->
+      <div id="section-vaccines" class="hidden">
+        <div class="card">
+          <div class="section-title">💉 <span data-i18n="title_vaccines">Vaccination Record</span></div>
+          <table class="lab-table">
+            <thead><tr><th data-i18n="th_vaccine">Vaccine</th><th data-i18n="th_dose">Dose</th><th data-i18n="th_given">Date Given</th><th data-i18n="th_due">Next Due</th><th data-i18n="th_status">Status</th></tr></thead>
+            <tbody>
+              <tr><td>COVID-19 (Covaxin)</td><td data-i18n="dose_3rd">3rd (Booster)</td><td>Jan 10, 2026</td><td>Jan 2027</td><td><span class="result-pill normal" data-i18n="pill_uptodate">Up to date</span></td></tr>
+              <tr><td>Hepatitis B</td><td data-i18n="dose_3rd">3rd</td><td>Mar 5, 2023</td><td>—</td><td><span class="result-pill normal" data-i18n="pill_complete">Complete</span></td></tr>
+              <tr><td>Tetanus (TT)</td><td data-i18n="dose_booster">Booster</td><td>Jun 12, 2022</td><td>Jun 2032</td><td><span class="result-pill normal" data-i18n="pill_uptodate">Up to date</span></td></tr>
+              <tr><td data-i18n="vacc_flu">Influenza</td><td data-i18n="dose_annual">Annual</td><td>Oct 1, 2025</td><td>Oct 2026</td><td><span class="result-pill low" data-i18n="pill_duesoon">Due Soon</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ADD RECORD -->
+      <div id="section-add" class="hidden">
+        <div class="card">
+          <div class="section-title">➕ <span data-i18n="title_add">Add New Record</span></div>
+          <div class="field-group" style="margin-bottom:20px;">
+            <label data-i18n="label_record_type">Record Type</label>
+            <select id="record-type" onchange="updateAddForm()">
+              <option value="" data-i18n="select_type">— Select type —</option>
+              <option value="visit" data-i18n="type_visit">🏥 Doctor Visit</option>
+              <option value="lab" data-i18n="type_lab">🔬 Lab Result</option>
+              <option value="rx" data-i18n="type_rx">💊 Prescription / Medication</option>
+              <option value="vaccine" data-i18n="type_vaccine">💉 Vaccine</option>
+              <option value="vital" data-i18n="type_vital">❤️ Vital Reading</option>
+            </select>
+          </div>
+          <div class="add-form" id="form-visit">
+            <div class="form-grid">
+              <div class="field-group"><label data-i18n="label_doctor_name">Doctor Name</label><input type="text" id="v-doctor"/></div>
+              <div class="field-group"><label data-i18n="label_specialty">Specialty</label><input type="text" id="v-specialty"/></div>
+              <div class="field-group"><label data-i18n="label_visit_date">Date of Visit</label><input type="date" id="v-date"/></div>
+              <div class="field-group"><label data-i18n="label_clinic">Clinic / Hospital</label><input type="text" id="v-clinic"/></div>
+              <div class="field-group full-width"><label data-i18n="label_diagnosis">Diagnosis / Notes</label><textarea id="v-notes"></textarea></div>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-outline btn-sm" onclick="cancelAdd()" data-i18n="cancel_btn">Cancel</button>
+              <button class="btn btn-primary btn-sm" onclick="saveRecord('visit')">💾 <span data-i18n="save_visit">Save Visit</span></button>
+            </div>
+          </div>
+          <div class="add-form" id="form-lab">
+            <div class="form-grid">
+              <div class="field-group"><label data-i18n="label_test_name">Test Name</label><input type="text" id="l-test"/></div>
+              <div class="field-group"><label data-i18n="label_result_val">Result Value</label><input type="text" id="l-result"/></div>
+              <div class="field-group"><label data-i18n="label_normal_range">Normal Range</label><input type="text" id="l-range"/></div>
+              <div class="field-group"><label data-i18n="label_date">Date</label><input type="date" id="l-date"/></div>
+              <div class="field-group"><label data-i18n="label_status">Status</label>
+                <select id="l-status">
+                  <option value="normal" data-i18n="pill_normal">Normal</option>
+                  <option value="high" data-i18n="pill_high">High</option>
+                  <option value="low" data-i18n="pill_low">Low</option>
+                </select>
+              </div>
+              <div class="field-group"><label data-i18n="label_lab_name">Lab Name</label><input type="text" id="l-lab"/></div>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-outline btn-sm" onclick="cancelAdd()" data-i18n="cancel_btn">Cancel</button>
+              <button class="btn btn-primary btn-sm" onclick="saveRecord('lab')">💾 <span data-i18n="save_result">Save Result</span></button>
+            </div>
+          </div>
+          <div class="add-form" id="form-rx">
+            <div class="form-grid">
+              <div class="field-group"><label data-i18n="label_med_name">Medicine Name</label><input type="text" id="r-name"/></div>
+              <div class="field-group"><label data-i18n="label_dosage">Dosage</label><input type="text" id="r-dose"/></div>
+              <div class="field-group"><label data-i18n="label_frequency">Frequency</label>
+                <select id="r-freq">
+                  <option data-i18n="freq_once">Once daily</option>
+                  <option data-i18n="freq_twice">Twice daily</option>
+                  <option data-i18n="freq_thrice">Thrice daily</option>
+                  <option data-i18n="freq_needed">As needed</option>
+                </select>
+              </div>
+              <div class="field-group"><label data-i18n="label_prescribed_by">Prescribed By</label><input type="text" id="r-doc"/></div>
+              <div class="field-group"><label data-i18n="label_start_date">Start Date</label><input type="date" id="r-start"/></div>
+              <div class="field-group"><label data-i18n="label_end_date">End Date (if applicable)</label><input type="date" id="r-end"/></div>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-outline btn-sm" onclick="cancelAdd()" data-i18n="cancel_btn">Cancel</button>
+              <button class="btn btn-primary btn-sm" onclick="saveRecord('rx')">💾 <span data-i18n="save_med">Save Medication</span></button>
+            </div>
+          </div>
+          <div class="add-form" id="form-vaccine">
+            <div class="form-grid">
+              <div class="field-group"><label data-i18n="label_vaccine_name">Vaccine Name</label><input type="text" id="vc-name"/></div>
+              <div class="field-group"><label data-i18n="label_dose_num">Dose Number</label><input type="text" id="vc-dose"/></div>
+              <div class="field-group"><label data-i18n="label_given_date">Date Given</label><input type="date" id="vc-date"/></div>
+              <div class="field-group"><label data-i18n="label_next_due">Next Due Date</label><input type="date" id="vc-next"/></div>
+              <div class="field-group"><label data-i18n="label_given_at">Given At</label><input type="text" id="vc-place"/></div>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-outline btn-sm" onclick="cancelAdd()" data-i18n="cancel_btn">Cancel</button>
+              <button class="btn btn-primary btn-sm" onclick="saveRecord('vaccine')">💾 <span data-i18n="save_vaccine">Save Vaccine</span></button>
+            </div>
+          </div>
+          <div class="add-form" id="form-vital">
+            <div class="form-grid">
+              <div class="field-group"><label data-i18n="label_vital_type">Vital Type</label>
+                <select id="vt-type">
+                  <option data-i18n="vital_bp">Blood Pressure</option>
+                  <option data-i18n="vital_hr">Heart Rate</option>
+                  <option data-i18n="vital_temp">Temperature</option>
+                  <option data-i18n="vital_bs">Blood Sugar</option>
+                  <option data-i18n="vital_wt">Weight</option>
+                  <option data-i18n="vital_spo2">SpO₂</option>
+                </select>
+              </div>
+              <div class="field-group"><label data-i18n="label_value">Value</label><input type="text" id="vt-val"/></div>
+              <div class="field-group"><label data-i18n="label_date">Date</label><input type="date" id="vt-date"/></div>
+              <div class="field-group"><label data-i18n="label_notes">Notes</label><input type="text" id="vt-note"/></div>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-outline btn-sm" onclick="cancelAdd()" data-i18n="cancel_btn">Cancel</button>
+              <button class="btn btn-primary btn-sm" onclick="saveRecord('vital')">💾 <span data-i18n="save_reading">Save Reading</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EDIT PROFILE -->
+<div class="modal-overlay" id="modal-profile">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✏️ <span data-i18n="modal_profile_title">Edit Patient Profile</span></div>
+      <button class="modal-close" onclick="closeModal('modal-profile')">✕</button>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-label" data-i18n="label_full_name">Full Name</div>
+      <input class="modal-input" id="edit-name" type="text"/>
+    </div>
+    <div class="modal-row">
+      <div class="modal-section">
+        <div class="modal-section-label" data-i18n="label_patient_id">Patient ID</div>
+        <input class="modal-input" id="edit-pid" type="text"/>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label" data-i18n="label_blood_group">Blood Group</div>
+        <select class="modal-input" id="edit-blood">
+          <option>A+</option><option>A−</option><option>B+</option><option>B−</option>
+          <option>AB+</option><option>AB−</option><option>O+</option><option>O−</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-section">
+        <div class="modal-section-label" data-i18n="label_age">Age</div>
+        <input class="modal-input" id="edit-age" type="number" min="0" max="150"/>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label" data-i18n="label_gender">Gender</div>
+        <select class="modal-input" id="edit-gender">
+          <option data-i18n="gender_male">Male</option>
+          <option data-i18n="gender_female">Female</option>
+          <option data-i18n="gender_other">Other</option>
+          <option data-i18n="gender_prefer">Prefer not to say</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-label" data-i18n="label_phone">Phone Number</div>
+      <input class="modal-input" id="edit-phone" type="tel"/>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-label" data-i18n="label_village">Village / Town</div>
+      <input class="modal-input" id="edit-village" type="text"/>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-profile')" data-i18n="cancel_btn">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProfile()">💾 <span data-i18n="save_profile">Save Profile</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CONDITIONS & ALLERGIES -->
+<div class="modal-overlay" id="modal-conditions">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🏷️ <span data-i18n="modal_conditions_title">Edit Conditions &amp; Allergies</span></div>
+      <button class="modal-close" onclick="closeModal('modal-conditions')">✕</button>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-label" data-i18n="label_conditions">Chronic Conditions</div>
+      <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:10px;" data-i18n="hint_conditions">Type a condition and press Enter or comma to add it.</p>
+      <div class="tag-input-area">
+        <div class="chip-row" id="conditions-tags"></div>
+        <input type="text" id="condition-input" onkeydown="handleTagInput(event,'conditions')"/>
+      </div>
+    </div>
+    <div class="modal-section" style="margin-top:20px;">
+      <div class="modal-section-label" data-i18n="label_allergies">Known Allergies</div>
+      <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:10px;" data-i18n="hint_allergies">Type an allergy and press Enter or comma to add it.</p>
+      <div class="tag-input-area">
+        <div class="chip-row" id="allergies-tags"></div>
+        <input type="text" id="allergy-input" onkeydown="handleTagInput(event,'allergies')"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-conditions')" data-i18n="cancel_btn">Cancel</button>
+      <button class="btn btn-primary" onclick="saveConditions()">💾 <span data-i18n="save_changes">Save Changes</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EDIT VITALS -->
+<div class="modal-overlay" id="modal-vitals">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header">
+      <div class="modal-title">❤️ <span data-i18n="modal_vitals_title">Edit Latest Vitals</span></div>
+      <button class="modal-close" onclick="closeModal('modal-vitals')">✕</button>
+    </div>
+    <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:20px;" data-i18n="vitals_hint">Update any reading. Status will auto-calculate based on the value entered.</p>
+    <div id="vitals-edit-fields" style="display:flex;flex-direction:column;gap:14px;"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-vitals')" data-i18n="cancel_btn">Cancel</button>
+      <button class="btn btn-primary" onclick="saveVitals()">💾 <span data-i18n="save_vitals">Save Vitals</span></button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// TRANSLATIONS
+// ══════════════════════════════════════════════
+const TRANSLATIONS = {
+  en: {
+    lang_label:'Language:', back:'Back', page_title:'Health Records — Swasthya Setu',
+    hero_sub:'AI-Powered Rural Healthcare Accessibility Platform',
+    badge_accessible:'✨ Accessible', badge_ai:'🤖 AI-Powered', badge_fast:'⚡ Fast',
+    badge_rural:'🌿 Rural-Friendly', badge_offline:'📶 Offline Support',
+    stat_visits:'Visits', stat_medicines:'Medicines', stat_labs:'Lab Tests', stat_vaccines:'Vaccines',
+    edit_profile:'Edit Profile',
+    nav_overview:'Overview', nav_history:'Visit History', nav_medications:'Medications',
+    nav_labs:'Lab Results', nav_vitals:'Vitals', nav_vaccines:'Vaccines', nav_add:'Add Record',
+    info_overview:'Your complete health records at a glance. Click any vital or use ✏️ buttons to edit your data.',
+    title_vitals:'Latest Vitals', edit_all_vitals:'Edit All Vitals', edit_btn:'Edit',
+    title_conditions:'Conditions & Allergies', label_conditions:'CHRONIC CONDITIONS', label_allergies:'KNOWN ALLERGIES',
+    title_recent:'Recent Activity',
+    act1_title:'Dr. Ramesh Patil — General Checkup', act1_sub:'BP was elevated. Medication adjusted.',
+    act2_title:'Blood Sugar & HbA1c Test', act2_sub:'HbA1c: 6.9% — Within target range.',
+    act3_title:'Prescription Updated', act3_sub:'Amlodipine 5mg added for BP management.',
+    act4_title:'COVID-19 Booster', act4_sub:'3rd dose — Covaxin. Next due: Jan 2027.',
+    tag_appt:'Appointment', tag_lab:'Lab Test', tag_rx:'Prescription', tag_vacc:'Vaccine',
+    title_history:'Visit History', title_medications:'Current Medications', title_labs:'Lab Results',
+    tab_blood:'🩸 Blood Work', tab_urine:'🧪 Urine', tab_imaging:'🩻 Imaging',
+    th_test:'Test', th_result:'Result', th_normal:'Normal Range', th_date:'Date', th_status:'Status',
+    th_type:'Type', th_body:'Body Part', th_finding:'Finding',
+    pill_normal:'Normal', pill_high:'High', pill_low:'Low', pill_clear:'Clear',
+    pill_uptodate:'Up to date', pill_complete:'Complete', pill_duesoon:'Due Soon',
+    test_fbs:'Fasting Blood Sugar', test_chol:'Total Cholesterol', test_hgb:'Hemoglobin', test_tsh:'TSH (Thyroid)',
+    test_uglucose:'Urine Glucose', test_protein:'Protein', test_creat:'Creatinine',
+    val_negative:'Negative', val_trace:'Trace',
+    img_xray:'X-Ray', img_chest:'Chest', img_xray_find:'No abnormality detected',
+    img_ecg:'ECG', img_heart:'Heart', img_ecg_find:'Normal sinus rhythm',
+    title_vitals_history:'Vitals History', edit_vitals:'Edit Vitals',
+    info_vitals:'Click ✏️ Edit Vitals to update your readings, or log a new one below.',
+    title_log:'Log New Reading',
+    label_vital_type:'Vital Type', label_value:'Value', label_date:'Date', label_notes:'Notes',
+    vital_bp:'Blood Pressure', vital_hr:'Heart Rate', vital_temp:'Temperature',
+    vital_bs:'Blood Sugar', vital_wt:'Weight', vital_spo2:'SpO₂',
+    save_reading:'Save Reading',
+    title_vaccines:'Vaccination Record',
+    th_vaccine:'Vaccine', th_dose:'Dose', th_given:'Date Given', th_due:'Next Due',
+    dose_3rd:'3rd (Booster)', dose_booster:'Booster', dose_annual:'Annual',
+    vacc_flu:'Influenza',
+    title_add:'Add New Record', label_record_type:'Record Type',
+    select_type:'— Select type —', type_visit:'🏥 Doctor Visit', type_lab:'🔬 Lab Result',
+    type_rx:'💊 Prescription / Medication', type_vaccine:'💉 Vaccine', type_vital:'❤️ Vital Reading',
+    label_doctor_name:'Doctor Name', label_specialty:'Specialty', label_visit_date:'Date of Visit',
+    label_clinic:'Clinic / Hospital', label_diagnosis:'Diagnosis / Notes',
+    label_test_name:'Test Name', label_result_val:'Result Value', label_normal_range:'Normal Range',
+    label_status:'Status', label_lab_name:'Lab Name',
+    label_med_name:'Medicine Name', label_dosage:'Dosage', label_frequency:'Frequency',
+    label_prescribed_by:'Prescribed By', label_start_date:'Start Date', label_end_date:'End Date (if applicable)',
+    label_vaccine_name:'Vaccine Name', label_dose_num:'Dose Number', label_given_date:'Date Given',
+    label_next_due:'Next Due Date', label_given_at:'Given At',
+    freq_once:'Once daily', freq_twice:'Twice daily', freq_thrice:'Thrice daily', freq_needed:'As needed',
+    cancel_btn:'Cancel', save_visit:'Save Visit', save_result:'Save Result',
+    save_med:'Save Medication', save_vaccine:'Save Vaccine',
+    modal_profile_title:'Edit Patient Profile',
+    label_full_name:'Full Name', label_patient_id:'Patient ID', label_blood_group:'Blood Group',
+    label_age:'Age', label_gender:'Gender', label_phone:'Phone Number', label_village:'Village / Town',
+    gender_male:'Male', gender_female:'Female', gender_other:'Other', gender_prefer:'Prefer not to say',
+    save_profile:'Save Profile',
+    modal_conditions_title:'Edit Conditions & Allergies',
+    hint_conditions:'Type a condition and press Enter or comma to add it.',
+    hint_allergies:'Type an allergy and press Enter or comma to add it.',
+    save_changes:'Save Changes',
+    modal_vitals_title:'Edit Latest Vitals',
+    vitals_hint:'Update any reading. Status will auto-calculate based on the value entered.',
+    save_vitals:'Save Vitals',
+    vital_status_normal:'✅ Normal', vital_status_high:'⚠️ High / Elevated', vital_status_danger:'🔴 Danger',
+    toast_profile:'✅ Profile updated successfully!',
+    toast_conditions:'✅ Conditions & Allergies updated!',
+    toast_vitals:'✅ Vitals updated successfully!',
+    toast_saved:'✅ Record saved successfully!',
+    toast_vital_saved:'reading saved!',
+    no_conditions:'No conditions recorded', no_allergies:'No allergies recorded',
+  },
+  hi: {
+    lang_label:'भाषा:', back:'वापस', page_title:'स्वास्थ्य रिकॉर्ड — स्वास्थ्य सेतु',
+    hero_sub:'एआई-संचालित ग्रामीण स्वास्थ्य सेवा प्लेटफॉर्म',
+    badge_accessible:'✨ सुलभ', badge_ai:'🤖 एआई-शक्तिचलित', badge_fast:'⚡ तेज़',
+    badge_rural:'🌿 ग्रामीण-अनुकूल', badge_offline:'📶 ऑफलाइन समर्थन',
+    stat_visits:'विजिट', stat_medicines:'दवाइयाँ', stat_labs:'लैब टेस्ट', stat_vaccines:'टीके',
+    edit_profile:'प्रोफाइल संपादित करें',
+    nav_overview:'अवलोकन', nav_history:'विजिट इतिहास', nav_medications:'दवाइयाँ',
+    nav_labs:'लैब परिणाम', nav_vitals:'वाइटल्स', nav_vaccines:'टीके', nav_add:'रिकॉर्ड जोड़ें',
+    info_overview:'एक नज़र में आपके संपूर्ण स्वास्थ्य रिकॉर्ड।',
+    title_vitals:'नवीनतम वाइटल्स', edit_all_vitals:'सभी वाइटल्स संपादित करें', edit_btn:'संपादित करें',
+    title_conditions:'स्थितियाँ और एलर्जी', label_conditions:'दीर्घकालिक स्थितियाँ', label_allergies:'ज्ञात एलर्जी',
+    title_recent:'हाल की गतिविधि',
+    act1_title:'डॉ. रमेश पाटिल — सामान्य जांच', act1_sub:'बीपी बढ़ा हुआ था। दवाई बदली गई।',
+    act2_title:'ब्लड शुगर और HbA1c टेस्ट', act2_sub:'HbA1c: 6.9% — लक्ष्य सीमा के भीतर।',
+    act3_title:'प्रिस्क्रिप्शन अपडेट', act3_sub:'बीपी प्रबंधन के लिए Amlodipine 5mg जोड़ा गया।',
+    act4_title:'COVID-19 बूस्टर', act4_sub:'तीसरी खुराक — कोवैक्सीन। अगला: जनवरी 2027।',
+    tag_appt:'अपॉइंटमेंट', tag_lab:'लैब टेस्ट', tag_rx:'प्रिस्क्रिप्शन', tag_vacc:'टीका',
+    title_history:'विजिट इतिहास', title_medications:'वर्तमान दवाइयाँ', title_labs:'लैब परिणाम',
+    tab_blood:'🩸 रक्त जांच', tab_urine:'🧪 मूत्र', tab_imaging:'🩻 इमेजिंग',
+    th_test:'टेस्ट', th_result:'परिणाम', th_normal:'सामान्य सीमा', th_date:'तारीख', th_status:'स्थिति',
+    th_type:'प्रकार', th_body:'शरीर का हिस्सा', th_finding:'निष्कर्ष',
+    pill_normal:'सामान्य', pill_high:'अधिक', pill_low:'कम', pill_clear:'स्पष्ट',
+    pill_uptodate:'अद्यतन', pill_complete:'पूर्ण', pill_duesoon:'जल्द देय',
+    test_fbs:'उपवास रक्त शर्करा', test_chol:'कुल कोलेस्ट्रॉल', test_hgb:'हीमोग्लोबिन', test_tsh:'TSH (थायरॉइड)',
+    test_uglucose:'मूत्र ग्लूकोज', test_protein:'प्रोटीन', test_creat:'क्रिएटिनिन',
+    val_negative:'नकारात्मक', val_trace:'ट्रेस',
+    img_xray:'एक्स-रे', img_chest:'छाती', img_xray_find:'कोई असामान्यता नहीं',
+    img_ecg:'ECG', img_heart:'हृदय', img_ecg_find:'सामान्य साइनस लय',
+    title_vitals_history:'वाइटल्स इतिहास', edit_vitals:'वाइटल्स संपादित करें',
+    info_vitals:'अपनी रीडिंग अपडेट करने के लिए ✏️ दबाएं या नीचे नई रीडिंग लॉग करें।',
+    title_log:'नई रीडिंग लॉग करें',
+    label_vital_type:'वाइटल प्रकार', label_value:'मान', label_date:'तारीख', label_notes:'नोट्स',
+    vital_bp:'रक्तचाप', vital_hr:'हृदय गति', vital_temp:'तापमान',
+    vital_bs:'रक्त शर्करा', vital_wt:'वजन', vital_spo2:'SpO₂',
+    save_reading:'रीडिंग सेव करें',
+    title_vaccines:'टीकाकरण रिकॉर्ड',
+    th_vaccine:'टीका', th_dose:'खुराक', th_given:'दी गई तारीख', th_due:'अगली देय',
+    dose_3rd:'तीसरी (बूस्टर)', dose_booster:'बूस्टर', dose_annual:'वार्षिक',
+    vacc_flu:'इन्फ्लुएंजा',
+    title_add:'नया रिकॉर्ड जोड़ें', label_record_type:'रिकॉर्ड प्रकार',
+    select_type:'— प्रकार चुनें —', type_visit:'🏥 डॉक्टर विजिट', type_lab:'🔬 लैब परिणाम',
+    type_rx:'💊 प्रिस्क्रिप्शन / दवाई', type_vaccine:'💉 टीका', type_vital:'❤️ वाइटल रीडिंग',
+    label_doctor_name:'डॉक्टर का नाम', label_specialty:'विशेषता', label_visit_date:'विजिट की तारीख',
+    label_clinic:'क्लिनिक / अस्पताल', label_diagnosis:'निदान / नोट्स',
+    label_test_name:'टेस्ट का नाम', label_result_val:'परिणाम मान', label_normal_range:'सामान्य सीमा',
+    label_status:'स्थिति', label_lab_name:'लैब का नाम',
+    label_med_name:'दवाई का नाम', label_dosage:'खुराक', label_frequency:'बारंबारता',
+    label_prescribed_by:'लिखने वाले डॉक्टर', label_start_date:'शुरू तारीख', label_end_date:'समाप्ति तारीख (यदि लागू)',
+    label_vaccine_name:'टीके का नाम', label_dose_num:'खुराक संख्या', label_given_date:'दी गई तारीख',
+    label_next_due:'अगली देय तारीख', label_given_at:'कहाँ दिया गया',
+    freq_once:'दिन में एक बार', freq_twice:'दिन में दो बार', freq_thrice:'दिन में तीन बार', freq_needed:'जरूरत पर',
+    cancel_btn:'रद्द करें', save_visit:'विजिट सेव करें', save_result:'परिणाम सेव करें',
+    save_med:'दवाई सेव करें', save_vaccine:'टीका सेव करें',
+    modal_profile_title:'रोगी प्रोफाइल संपादित करें',
+    label_full_name:'पूरा नाम', label_patient_id:'रोगी आईडी', label_blood_group:'रक्त समूह',
+    label_age:'आयु', label_gender:'लिंग', label_phone:'फोन नंबर', label_village:'गांव / शहर',
+    gender_male:'पुरुष', gender_female:'महिला', gender_other:'अन्य', gender_prefer:'बताना नहीं चाहते',
+    save_profile:'प्रोफाइल सेव करें',
+    modal_conditions_title:'स्थितियाँ और एलर्जी संपादित करें',
+    hint_conditions:'कोई स्थिति टाइप करें और Enter या कोमा दबाएं।',
+    hint_allergies:'कोई एलर्जी टाइप करें और Enter या कोमा दबाएं।',
+    save_changes:'परिवर्तन सेव करें',
+    modal_vitals_title:'नवीनतम वाइटल्स संपादित करें',
+    vitals_hint:'कोई भी रीडिंग अपडेट करें।',
+    save_vitals:'वाइटल्स सेव करें',
+    vital_status_normal:'✅ सामान्य', vital_status_high:'⚠️ अधिक / ऊंचा', vital_status_danger:'🔴 खतरनाक',
+    toast_profile:'✅ प्रोफाइल सफलतापूर्वक अपडेट!',
+    toast_conditions:'✅ स्थितियाँ और एलर्जी अपडेट!',
+    toast_vitals:'✅ वाइटल्स सफलतापूर्वक अपडेट!',
+    toast_saved:'✅ रिकॉर्ड सफलतापूर्वक सेव!',
+    toast_vital_saved:'रीडिंग सेव हो गई!',
+    no_conditions:'कोई स्थिति दर्ज नहीं', no_allergies:'कोई एलर्जी दर्ज नहीं',
+  },
+  kn: {
+    lang_label:'ಭಾಷೆ:', back:'ಹಿಂದೆ', page_title:'ಆರೋಗ್ಯ ದಾಖಲೆಗಳು — ಸ್ವಾಸ್ಥ್ಯ ಸೇತು',
+    hero_sub:'ಎಐ-ಚಾಲಿತ ಗ್ರಾಮೀಣ ಆರೋಗ್ಯ ಸೇವಾ ವೇದಿಕೆ',
+    badge_accessible:'✨ ಸುಲಭ', badge_ai:'🤖 ಎಐ-ಚಾಲಿತ', badge_fast:'⚡ ವೇಗ',
+    badge_rural:'🌿 ಗ್ರಾಮೀಣ-ಸ್ನೇಹಿ', badge_offline:'📶 ಆಫ್‌ಲೈನ್ ಬೆಂಬಲ',
+    stat_visits:'ಭೇಟಿಗಳು', stat_medicines:'ಔಷಧಿಗಳು', stat_labs:'ಲ್ಯಾಬ್ ಪರೀಕ್ಷೆಗಳು', stat_vaccines:'ಲಸಿಕೆಗಳು',
+    edit_profile:'ಪ್ರೊಫೈಲ್ ತಿದ್ದಿ',
+    nav_overview:'ಅವಲೋಕನ', nav_history:'ಭೇಟಿ ಇತಿಹಾಸ', nav_medications:'ಔಷಧಿಗಳು',
+    nav_labs:'ಲ್ಯಾಬ್ ಫಲಿತಾಂಶಗಳು', nav_vitals:'ವೈಟಲ್ಸ್', nav_vaccines:'ಲಸಿಕೆಗಳು', nav_add:'ದಾಖಲೆ ಸೇರಿಸಿ',
+    info_overview:'ನಿಮ್ಮ ಸಂಪೂರ್ಣ ಆರೋಗ್ಯ ದಾಖಲೆಗಳ ಒಂದು ನೋಟ।',
+    title_vitals:'ಇತ್ತೀಚಿನ ವೈಟಲ್ಸ್', edit_all_vitals:'ಎಲ್ಲಾ ವೈಟಲ್ಸ್ ತಿದ್ದಿ', edit_btn:'ತಿದ್ದಿ',
+    title_conditions:'ಸ್ಥಿತಿಗಳು ಮತ್ತು ಅಲರ್ಜಿ', label_conditions:'ದೀರ್ಘಕಾಲಿಕ ಸ್ಥಿತಿಗಳು', label_allergies:'ತಿಳಿದ ಅಲರ್ಜಿಗಳು',
+    title_recent:'ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆ',
+    act1_title:'ಡಾ. ರಮೇಶ್ ಪಾಟೀಲ್ — ಸಾಮಾನ್ಯ ತಪಾಸಣೆ', act1_sub:'BP ಹೆಚ್ಚಾಗಿತ್ತು. ಔಷಧ ಬದಲಾಯಿಸಲಾಯಿತು.',
+    act2_title:'ರಕ್ತ ಸಕ್ಕರೆ ಮತ್ತು HbA1c ಪರೀಕ್ಷೆ', act2_sub:'HbA1c: 6.9% — ಗುರಿ ಮಿತಿಯಲ್ಲಿ.',
+    act3_title:'ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ನವೀಕರಿಸಲಾಯಿತು', act3_sub:'BP ನಿರ್ವಹಣೆಗೆ Amlodipine 5mg ಸೇರಿಸಲಾಯಿತು.',
+    act4_title:'COVID-19 ಬೂಸ್ಟರ್', act4_sub:'3ನೇ ಡೋಸ್ — ಕೋವ್ಯಾಕ್ಸಿನ್. ಮುಂದಿನ: ಜನ 2027.',
+    tag_appt:'ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್', tag_lab:'ಲ್ಯಾಬ್ ಪರೀಕ್ಷೆ', tag_rx:'ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್', tag_vacc:'ಲಸಿಕೆ',
+    title_history:'ಭೇಟಿ ಇತಿಹಾಸ', title_medications:'ಪ್ರಸ್ತುತ ಔಷಧಿಗಳು', title_labs:'ಲ್ಯಾಬ್ ಫಲಿತಾಂಶಗಳು',
+    tab_blood:'🩸 ರಕ್ತ ಪರೀಕ್ಷೆ', tab_urine:'🧪 ಮೂತ್ರ', tab_imaging:'🩻 ಇಮೇಜಿಂಗ್',
+    th_test:'ಪರೀಕ್ಷೆ', th_result:'ಫಲಿತಾಂಶ', th_normal:'ಸಾಮಾನ್ಯ ಮಿತಿ', th_date:'ದಿನಾಂಕ', th_status:'ಸ್ಥಿತಿ',
+    th_type:'ವಿಧ', th_body:'ದೇಹದ ಭಾಗ', th_finding:'ಸಂಶೋಧನೆ',
+    pill_normal:'ಸಾಮಾನ್ಯ', pill_high:'ಹೆಚ್ಚು', pill_low:'ಕಡಿಮೆ', pill_clear:'ಸ್ಪಷ್ಟ',
+    pill_uptodate:'ನವೀಕರಿತ', pill_complete:'ಪೂರ್ಣ', pill_duesoon:'ಶೀಘ್ರ ದೇಯ',
+    test_fbs:'ಉಪವಾಸ ರಕ್ತ ಸಕ್ಕರೆ', test_chol:'ಒಟ್ಟು ಕೊಲೆಸ್ಟ್ರಾಲ್', test_hgb:'ಹಿಮೋಗ್ಲೋಬಿನ್', test_tsh:'TSH (ಥೈರಾಯ್ಡ್)',
+    test_uglucose:'ಮೂತ್ರ ಗ್ಲೂಕೋಸ್', test_protein:'ಪ್ರೊಟೀನ್', test_creat:'ಕ್ರಿಯೇಟಿನಿನ್',
+    val_negative:'ನಕಾರಾತ್ಮಕ', val_trace:'ಟ್ರೇಸ್',
+    img_xray:'ಎಕ್ಸ್-ರೇ', img_chest:'ಎದೆ', img_xray_find:'ಯಾವುದೇ ಅಸಹಜತೆ ಇಲ್ಲ',
+    img_ecg:'ECG', img_heart:'ಹೃದಯ', img_ecg_find:'ಸಾಮಾನ್ಯ ಸೈನಸ್ ಲಯ',
+    title_vitals_history:'ವೈಟಲ್ಸ್ ಇತಿಹಾಸ', edit_vitals:'ವೈಟಲ್ಸ್ ತಿದ್ದಿ',
+    info_vitals:'ನಿಮ್ಮ ರೀಡಿಂಗ್‌ಗಳನ್ನು ನವೀಕರಿಸಲು ✏️ ಒತ್ತಿ ಅಥವಾ ಕೆಳಗೆ ಹೊಸ ರೀಡಿಂಗ್ ಲಾಗ್ ಮಾಡಿ.',
+    title_log:'ಹೊಸ ರೀಡಿಂಗ್ ಲಾಗ್ ಮಾಡಿ',
+    label_vital_type:'ವೈಟಲ್ ವಿಧ', label_value:'ಮೌಲ್ಯ', label_date:'ದಿನಾಂಕ', label_notes:'ಟಿಪ್ಪಣಿಗಳು',
+    vital_bp:'ರಕ್ತದೊತ್ತಡ', vital_hr:'ಹೃದಯ ಬಡಿತ', vital_temp:'ತಾಪಮಾನ',
+    vital_bs:'ರಕ್ತ ಸಕ್ಕರೆ', vital_wt:'ತೂಕ', vital_spo2:'SpO₂',
+    save_reading:'ರೀಡಿಂಗ್ ಉಳಿಸಿ',
+    title_vaccines:'ಲಸಿಕೆ ದಾಖಲೆ',
+    th_vaccine:'ಲಸಿಕೆ', th_dose:'ಡೋಸ್', th_given:'ನೀಡಿದ ದಿನಾಂಕ', th_due:'ಮುಂದಿನ ದೇಯ',
+    dose_3rd:'3ನೇ (ಬೂಸ್ಟರ್)', dose_booster:'ಬೂಸ್ಟರ್', dose_annual:'ವಾರ್ಷಿಕ',
+    vacc_flu:'ಇನ್ಫ್ಲುಯೆಂಜಾ',
+    title_add:'ಹೊಸ ದಾಖಲೆ ಸೇರಿಸಿ', label_record_type:'ದಾಖಲೆ ವಿಧ',
+    select_type:'— ವಿಧ ಆಯ್ಕೆ ಮಾಡಿ —', type_visit:'🏥 ವೈದ್ಯರ ಭೇಟಿ', type_lab:'🔬 ಲ್ಯಾಬ್ ಫಲಿತಾಂಶ',
+    type_rx:'💊 ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ / ಔಷಧಿ', type_vaccine:'💉 ಲಸಿಕೆ', type_vital:'❤️ ವೈಟಲ್ ರೀಡಿಂಗ್',
+    label_doctor_name:'ವೈದ್ಯರ ಹೆಸರು', label_specialty:'ವಿಶೇಷತೆ', label_visit_date:'ಭೇಟಿ ದಿನಾಂಕ',
+    label_clinic:'ಕ್ಲಿನಿಕ್ / ಆಸ್ಪತ್ರೆ', label_diagnosis:'ರೋಗನಿರ್ಣಯ / ಟಿಪ್ಪಣಿಗಳು',
+    label_test_name:'ಪರೀಕ್ಷೆ ಹೆಸರು', label_result_val:'ಫಲಿತಾಂಶ ಮೌಲ್ಯ', label_normal_range:'ಸಾಮಾನ್ಯ ಮಿತಿ',
+    label_status:'ಸ್ಥಿತಿ', label_lab_name:'ಲ್ಯಾಬ್ ಹೆಸರು',
+    label_med_name:'ಔಷಧದ ಹೆಸರು', label_dosage:'ಡೋಸ್', label_frequency:'ಆವೃತ್ತಿ',
+    label_prescribed_by:'ಸೂಚಿಸಿದ ವೈದ್ಯರು', label_start_date:'ಪ್ರಾರಂಭ ದಿನಾಂಕ', label_end_date:'ಅಂತ್ಯ ದಿನಾಂಕ (ಅನ್ವಯವಿದ್ದರೆ)',
+    label_vaccine_name:'ಲಸಿಕೆ ಹೆಸರು', label_dose_num:'ಡೋಸ್ ಸಂಖ್ಯೆ', label_given_date:'ನೀಡಿದ ದಿನಾಂಕ',
+    label_next_due:'ಮುಂದಿನ ದೇಯ ದಿನಾಂಕ', label_given_at:'ಎಲ್ಲಿ ನೀಡಲಾಯಿತು',
+    freq_once:'ದಿನಕ್ಕೊಮ್ಮೆ', freq_twice:'ದಿನಕ್ಕೆ ಎರಡು ಬಾರಿ', freq_thrice:'ದಿನಕ್ಕೆ ಮೂರು ಬಾರಿ', freq_needed:'ಅಗತ್ಯದ ಮೇಲೆ',
+    cancel_btn:'ರದ್ದು ಮಾಡಿ', save_visit:'ಭೇಟಿ ಉಳಿಸಿ', save_result:'ಫಲಿತಾಂಶ ಉಳಿಸಿ',
+    save_med:'ಔಷಧಿ ಉಳಿಸಿ', save_vaccine:'ಲಸಿಕೆ ಉಳಿಸಿ',
+    modal_profile_title:'ರೋಗಿಯ ಪ್ರೊಫೈಲ್ ತಿದ್ದಿ',
+    label_full_name:'ಪೂರ್ಣ ಹೆಸರು', label_patient_id:'ರೋಗಿ ಐಡಿ', label_blood_group:'ರಕ್ತ ಗುಂಪು',
+    label_age:'ವಯಸ್ಸು', label_gender:'ಲಿಂಗ', label_phone:'ಫೋನ್ ಸಂಖ್ಯೆ', label_village:'ಗ್ರಾಮ / ಪಟ್ಟಣ',
+    gender_male:'ಪುರುಷ', gender_female:'ಮಹಿಳೆ', gender_other:'ಇತರ', gender_prefer:'ಹೇಳಲು ಇಷ್ಟಪಡುವುದಿಲ್ಲ',
+    save_profile:'ಪ್ರೊಫೈಲ್ ಉಳಿಸಿ',
+    modal_conditions_title:'ಸ್ಥಿತಿಗಳು ಮತ್ತು ಅಲರ್ಜಿ ತಿದ್ದಿ',
+    hint_conditions:'ಸ್ಥಿತಿಯನ್ನು ಟೈಪ್ ಮಾಡಿ ಮತ್ತು Enter ಅಥವಾ ಅಲ್ಪವಿರಾಮ ಒತ್ತಿ.',
+    hint_allergies:'ಅಲರ್ಜಿಯನ್ನು ಟೈಪ್ ಮಾಡಿ ಮತ್ತು Enter ಅಥವಾ ಅಲ್ಪವಿರಾಮ ಒತ್ತಿ.',
+    save_changes:'ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ',
+    modal_vitals_title:'ಇತ್ತೀಚಿನ ವೈಟಲ್ಸ್ ತಿದ್ದಿ',
+    vitals_hint:'ಯಾವುದೇ ರೀಡಿಂಗ್ ನವೀಕರಿಸಿ.',
+    save_vitals:'ವೈಟಲ್ಸ್ ಉಳಿಸಿ',
+    vital_status_normal:'✅ ಸಾಮಾನ್ಯ', vital_status_high:'⚠️ ಹೆಚ್ಚು / ಉನ್ನತ', vital_status_danger:'🔴 ಅಪಾಯ',
+    toast_profile:'✅ ಪ್ರೊಫೈಲ್ ಯಶಸ್ವಿಯಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ!',
+    toast_conditions:'✅ ಸ್ಥಿತಿಗಳು ಮತ್ತು ಅಲರ್ಜಿ ನವೀಕರಿಸಲಾಗಿದೆ!',
+    toast_vitals:'✅ ವೈಟಲ್ಸ್ ಯಶಸ್ವಿಯಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ!',
+    toast_saved:'✅ ದಾಖಲೆ ಯಶಸ್ವಿಯಾಗಿ ಉಳಿಸಲಾಗಿದೆ!',
+    toast_vital_saved:'ರೀಡಿಂಗ್ ಉಳಿಸಲಾಗಿದೆ!',
+    no_conditions:'ಯಾವುದೇ ಸ್ಥಿತಿ ದಾಖಲಿಸಿಲ್ಲ', no_allergies:'ಯಾವುದೇ ಅಲರ್ಜಿ ದಾಖಲಿಸಿಲ್ಲ',
+  },
+  te: {
+    lang_label:'భాష:', back:'వెనకకు', page_title:'ఆరోగ్య రికార్డులు — స్వాస్థ్య సేతు',
+    hero_sub:'ఎఐ-ఆధారిత గ్రామీణ ఆరోగ్య సేవా వేదిక',
+    badge_accessible:'✨ అందుబాటు', badge_ai:'🤖 ఎఐ-ఆధారిత', badge_fast:'⚡ వేగం',
+    badge_rural:'🌿 గ్రామీణ-స్నేహపూర్వక', badge_offline:'📶 ఆఫ్‌లైన్ మద్దతు',
+    stat_visits:'సందర్శనలు', stat_medicines:'మందులు', stat_labs:'లాబ్ పరీక్షలు', stat_vaccines:'టీకాలు',
+    edit_profile:'ప్రొఫైల్ సవరించు',
+    nav_overview:'అవలోకనం', nav_history:'సందర్శన చరిత్ర', nav_medications:'మందులు',
+    nav_labs:'లాబ్ ఫలితాలు', nav_vitals:'వైటల్స్', nav_vaccines:'టీకాలు', nav_add:'రికార్డు జోడించు',
+    info_overview:'మీ సంపూర్ణ ఆరోగ్య రికార్డుల ఒక చూపు.',
+    title_vitals:'తాజా వైటల్స్', edit_all_vitals:'అన్ని వైటల్స్ సవరించు', edit_btn:'సవరించు',
+    title_conditions:'స్థితులు మరియు అలర్జీలు', label_conditions:'దీర్ఘకాలిక స్థితులు', label_allergies:'తెలిసిన అలర్జీలు',
+    title_recent:'ఇటీవలి కార్యకలాపం',
+    act1_title:'డాక్టర్. రమేష్ పాటిల్ — సాధారణ తనిఖీ', act1_sub:'BP పెరిగింది. మందు సవరించబడింది.',
+    act2_title:'బ్లడ్ షుగర్ మరియు HbA1c పరీక్ష', act2_sub:'HbA1c: 6.9% — లక్ష్య పరిధిలో.',
+    act3_title:'ప్రిస్క్రిప్షన్ నవీకరించబడింది', act3_sub:'BP నిర్వహణకు Amlodipine 5mg జోడించబడింది.',
+    act4_title:'COVID-19 బూస్టర్', act4_sub:'3వ డోస్ — కోవాక్సిన్. తదుపరి: జనవరి 2027.',
+    tag_appt:'అపాయింట్‌మెంట్', tag_lab:'లాబ్ పరీక్ష', tag_rx:'ప్రిస్క్రిప్షన్', tag_vacc:'టీకా',
+    title_history:'సందర్శన చరిత్ర', title_medications:'ప్రస్తుత మందులు', title_labs:'లాబ్ ఫలితాలు',
+    tab_blood:'🩸 రక్త పరీక్ష', tab_urine:'🧪 మూత్రం', tab_imaging:'🩻 ఇమేజింగ్',
+    th_test:'పరీక్ష', th_result:'ఫలితం', th_normal:'సాధారణ పరిధి', th_date:'తేదీ', th_status:'స్థితి',
+    th_type:'రకం', th_body:'శరీర భాగం', th_finding:'పరిశోధన',
+    pill_normal:'సాధారణం', pill_high:'అధికం', pill_low:'తక్కువ', pill_clear:'స్పష్టం',
+    pill_uptodate:'నవీకృతం', pill_complete:'పూర్తి', pill_duesoon:'త్వరలో అవసరం',
+    test_fbs:'ఉపవాస రక్త చక్కెర', test_chol:'మొత్తం కొలెస్ట్రాల్', test_hgb:'హిమోగ్లోబిన్', test_tsh:'TSH (థైరాయిడ్)',
+    test_uglucose:'మూత్ర గ్లూకోజ్', test_protein:'ప్రోటీన్', test_creat:'క్రియాటినిన్',
+    val_negative:'ప్రతికూల', val_trace:'ట్రేస్',
+    img_xray:'ఎక్స్-రే', img_chest:'ఛాతీ', img_xray_find:'ఎటువంటి అసాధారణత లేదు',
+    img_ecg:'ECG', img_heart:'హృదయం', img_ecg_find:'సాధారణ సైనస్ లయ',
+    title_vitals_history:'వైటల్స్ చరిత్ర', edit_vitals:'వైటల్స్ సవరించు',
+    info_vitals:'రీడింగ్‌లు నవీకరించడానికి ✏️ నొక్కండి లేదా కింద కొత్త రీడింగ్ లాగ్ చేయండి.',
+    title_log:'కొత్త రీడింగ్ లాగ్ చేయండి',
+    label_vital_type:'వైటల్ రకం', label_value:'విలువ', label_date:'తేదీ', label_notes:'నోట్స్',
+    vital_bp:'రక్తపోటు', vital_hr:'హృదయ స్పందన', vital_temp:'ఉష్ణోగ్రత',
+    vital_bs:'రక్త చక్కెర', vital_wt:'బరువు', vital_spo2:'SpO₂',
+    save_reading:'రీడింగ్ సేవ్ చేయండి',
+    title_vaccines:'టీకా రికార్డు',
+    th_vaccine:'టీకా', th_dose:'డోస్', th_given:'ఇచ్చిన తేదీ', th_due:'తదుపరి అవసరం',
+    dose_3rd:'3వ (బూస్టర్)', dose_booster:'బూస్టర్', dose_annual:'వార్షిక',
+    vacc_flu:'ఇన్ఫ్లుఎంజా',
+    title_add:'కొత్త రికార్డు జోడించండి', label_record_type:'రికార్డు రకం',
+    select_type:'— రకం ఎంచుకోండి —', type_visit:'🏥 వైద్యుని సందర్శన', type_lab:'🔬 లాబ్ ఫలితం',
+    type_rx:'💊 ప్రిస్క్రిప్షన్ / మందు', type_vaccine:'💉 టీకా', type_vital:'❤️ వైటల్ రీడింగ్',
+    label_doctor_name:'వైద్యుని పేరు', label_specialty:'స్పెషాలిటీ', label_visit_date:'సందర్శన తేదీ',
+    label_clinic:'క్లినిక్ / ఆసుపత్రి', label_diagnosis:'నిర్ధారణ / నోట్స్',
+    label_test_name:'పరీక్ష పేరు', label_result_val:'ఫలితం విలువ', label_normal_range:'సాధారణ పరిధి',
+    label_status:'స్థితి', label_lab_name:'లాబ్ పేరు',
+    label_med_name:'మందు పేరు', label_dosage:'మోతాదు', label_frequency:'తరచుదనం',
+    label_prescribed_by:'సూచించిన వైద్యుడు', label_start_date:'ప్రారంభ తేదీ', label_end_date:'ముగింపు తేదీ (వర్తించినట్లయితే)',
+    label_vaccine_name:'టీకా పేరు', label_dose_num:'డోస్ సంఖ్య', label_given_date:'ఇచ్చిన తేదీ',
+    label_next_due:'తదుపరి అవసరం తేదీ', label_given_at:'ఎక్కడ ఇచ్చారు',
+    freq_once:'రోజుకోసారి', freq_twice:'రోజుకు రెండుసార్లు', freq_thrice:'రోజుకు మూడుసార్లు', freq_needed:'అవసరమైనప్పుడు',
+    cancel_btn:'రద్దు చేయండి', save_visit:'సందర్శన సేవ్ చేయండి', save_result:'ఫలితం సేవ్ చేయండి',
+    save_med:'మందు సేవ్ చేయండి', save_vaccine:'టీకా సేవ్ చేయండి',
+    modal_profile_title:'రోగి ప్రొఫైల్ సవరించండి',
+    label_full_name:'పూర్తి పేరు', label_patient_id:'రోగి ID', label_blood_group:'రక్త సమూహం',
+    label_age:'వయసు', label_gender:'లింగం', label_phone:'ఫోన్ నంబర్', label_village:'గ్రామం / పట్టణం',
+    gender_male:'పురుషుడు', gender_female:'స్త్రీ', gender_other:'ఇతర', gender_prefer:'చెప్పడం ఇష్టం లేదు',
+    save_profile:'ప్రొఫైల్ సేవ్ చేయండి',
+    modal_conditions_title:'స్థితులు మరియు అలర్జీలు సవరించండి',
+    hint_conditions:'స్థితి టైప్ చేసి Enter లేదా కామా నొక్కండి.',
+    hint_allergies:'అలర్జీ టైప్ చేసి Enter లేదా కామా నొక్కండి.',
+    save_changes:'మార్పులు సేవ్ చేయండి',
+    modal_vitals_title:'తాజా వైటల్స్ సవరించండి',
+    vitals_hint:'ఏదైనా రీడింగ్ నవీకరించండి.',
+    save_vitals:'వైటల్స్ సేవ్ చేయండి',
+    vital_status_normal:'✅ సాధారణం', vital_status_high:'⚠️ అధికం / ఉన్నతం', vital_status_danger:'🔴 ప్రమాదం',
+    toast_profile:'✅ ప్రొఫైల్ విజయవంతంగా నవీకరించబడింది!',
+    toast_conditions:'✅ స్థితులు మరియు అలర్జీలు నవీకరించబడ్డాయి!',
+    toast_vitals:'✅ వైటల్స్ విజయవంతంగా నవీకరించబడ్డాయి!',
+    toast_saved:'✅ రికార్డు విజయవంతంగా సేవ్ చేయబడింది!',
+    toast_vital_saved:'రీడింగ్ సేవ్ అయింది!',
+    no_conditions:'స్థితులు దాఖలు లేవు', no_allergies:'అలర్జీలు దాఖలు లేవు',
+  },
+  ta: {
+    lang_label:'மொழி:', back:'பின்செல்', page_title:'சுகாதார பதிவுகள் — ஸ்வாஸ்த்ய சேது',
+    hero_sub:'AI-இயக்கப்படும் கிராமப்புற சுகாதார அணுகல் தளம்',
+    badge_accessible:'✨ அணுகல்', badge_ai:'🤖 AI-இயக்கப்படும்', badge_fast:'⚡ வேகம்',
+    badge_rural:'🌿 கிராம-நட்பு', badge_offline:'📶 ஆஃப்லைன் ஆதரவு',
+    stat_visits:'வருகைகள்', stat_medicines:'மருந்துகள்', stat_labs:'ஆய்வக சோதனைகள்', stat_vaccines:'தடுப்பூசிகள்',
+    edit_profile:'சுயவிவரம் திருத்தவும்',
+    nav_overview:'கண்ணோட்டம்', nav_history:'வருகை வரலாறு', nav_medications:'மருந்துகள்',
+    nav_labs:'ஆய்வக முடிவுகள்', nav_vitals:'வைட்டல்கள்', nav_vaccines:'தடுப்பூசிகள்', nav_add:'பதிவு சேர்',
+    info_overview:'உங்கள் முழு சுகாதார பதிவுகளின் ஒரு பார்வை.',
+    title_vitals:'சமீபத்திய வைட்டல்கள்', edit_all_vitals:'அனைத்து வைட்டல்களையும் திருத்தவும்', edit_btn:'திருத்தவும்',
+    title_conditions:'நோய்கள் மற்றும் ஒவ்வாமைகள்', label_conditions:'நாட்பட்ட நோய்கள்', label_allergies:'தெரிந்த ஒவ்வாமைகள்',
+    title_recent:'சமீபத்திய செயல்பாடு',
+    act1_title:'டாக்டர். ரமேஷ் பாட்டீல் — பொது சோதனை', act1_sub:'BP உயர்ந்திருந்தது. மருந்து சரிசெய்யப்பட்டது.',
+    act2_title:'இரத்த சர்க்கரை மற்றும் HbA1c சோதனை', act2_sub:'HbA1c: 6.9% — இலக்கு வரம்பிற்குள்.',
+    act3_title:'மருந்துச்சீட்டு புதுப்பிக்கப்பட்டது', act3_sub:'BP மேலாண்மைக்கு Amlodipine 5mg சேர்க்கப்பட்டது.',
+    act4_title:'COVID-19 பூஸ்டர்', act4_sub:'3வது டோஸ் — கோவாக்சின். அடுத்தது: ஜன 2027.',
+    tag_appt:'சந்திப்பு', tag_lab:'ஆய்வக சோதனை', tag_rx:'மருந்துச்சீட்டு', tag_vacc:'தடுப்பூசி',
+    title_history:'வருகை வரலாறு', title_medications:'தற்போதைய மருந்துகள்', title_labs:'ஆய்வக முடிவுகள்',
+    tab_blood:'🩸 இரத்த பரிசோதனை', tab_urine:'🧪 சிறுநீர்', tab_imaging:'🩻 படமெடுப்பு',
+    th_test:'சோதனை', th_result:'முடிவு', th_normal:'சாதாரண வரம்பு', th_date:'தேதி', th_status:'நிலை',
+    th_type:'வகை', th_body:'உடல் பகுதி', th_finding:'கண்டுபிடிப்பு',
+    pill_normal:'சாதாரண', pill_high:'அதிகம்', pill_low:'குறைவு', pill_clear:'தெளிவு',
+    pill_uptodate:'புதுப்பித்தது', pill_complete:'முழுமை', pill_duesoon:'விரைவில் தேவை',
+    test_fbs:'உண்ணா நிலை இரத்த சர்க்கரை', test_chol:'மொத்த கொலஸ்ட்ரால்', test_hgb:'ஹீமோகுளோபின்', test_tsh:'TSH (தைராய்டு)',
+    test_uglucose:'சிறுநீர் குளுக்கோஸ்', test_protein:'புரதம்', test_creat:'கிரியேட்டினின்',
+    val_negative:'எதிர்மறை', val_trace:'சுவடு',
+    img_xray:'எக்ஸ்-ரே', img_chest:'மார்பு', img_xray_find:'எந்த அசாதாரணமும் இல்லை',
+    img_ecg:'ECG', img_heart:'இதயம்', img_ecg_find:'சாதாரண சைனஸ் தாளம்',
+    title_vitals_history:'வைட்டல்கள் வரலாறு', edit_vitals:'வைட்டல்கள் திருத்தவும்',
+    info_vitals:'உங்கள் அளவீடுகளை புதுப்பிக்க ✏️ கிளிக் செய்யுங்கள் அல்லது கீழே புதிய அளவீடு பதிவு செய்யுங்கள்.',
+    title_log:'புதிய அளவீடு பதிவு செய்யவும்',
+    label_vital_type:'வைட்டல் வகை', label_value:'மதிப்பு', label_date:'தேதி', label_notes:'குறிப்புகள்',
+    vital_bp:'இரத்த அழுத்தம்', vital_hr:'இதய துடிப்பு', vital_temp:'வெப்பநிலை',
+    vital_bs:'இரத்த சர்க்கரை', vital_wt:'எடை', vital_spo2:'SpO₂',
+    save_reading:'அளவீடு சேமிக்கவும்',
+    title_vaccines:'தடுப்பூசி பதிவு',
+    th_vaccine:'தடுப்பூசி', th_dose:'டோஸ்', th_given:'கொடுத்த தேதி', th_due:'அடுத்த தேவை',
+    dose_3rd:'3வது (பூஸ்டர்)', dose_booster:'பூஸ்டர்', dose_annual:'வருடாந்திர',
+    vacc_flu:'இன்ஃப்ளுயென்சா',
+    title_add:'புதிய பதிவு சேர்க்கவும்', label_record_type:'பதிவு வகை',
+    select_type:'— வகை தேர்ந்தெடுக்கவும் —', type_visit:'🏥 மருத்துவர் வருகை', type_lab:'🔬 ஆய்வக முடிவு',
+    type_rx:'💊 மருந்துச்சீட்டு / மருந்து', type_vaccine:'💉 தடுப்பூசி', type_vital:'❤️ வைட்டல் அளவீடு',
+    label_doctor_name:'மருத்துவரின் பெயர்', label_specialty:'சிறப்பு', label_visit_date:'வருகை தேதி',
+    label_clinic:'கிளினிக் / மருத்துவமனை', label_diagnosis:'நோய் கண்டுபிடிப்பு / குறிப்புகள்',
+    label_test_name:'சோதனை பெயர்', label_result_val:'முடிவு மதிப்பு', label_normal_range:'சாதாரண வரம்பு',
+    label_status:'நிலை', label_lab_name:'ஆய்வக பெயர்',
+    label_med_name:'மருந்தின் பெயர்', label_dosage:'அளவு', label_frequency:'அதிர்வெண்',
+    label_prescribed_by:'பரிந்துரைத்த மருத்துவர்', label_start_date:'தொடக்க தேதி', label_end_date:'முடிவு தேதி (பொருந்தினால்)',
+    label_vaccine_name:'தடுப்பூசி பெயர்', label_dose_num:'டோஸ் எண்', label_given_date:'கொடுத்த தேதி',
+    label_next_due:'அடுத்த தேவை தேதி', label_given_at:'எங்கு கொடுக்கப்பட்டது',
+    freq_once:'நாளொரு முறை', freq_twice:'நாளிரு முறை', freq_thrice:'நாள் மூன்று முறை', freq_needed:'தேவைப்படும்போது',
+    cancel_btn:'ரத்து செய்யவும்', save_visit:'வருகை சேமிக்கவும்', save_result:'முடிவு சேமிக்கவும்',
+    save_med:'மருந்து சேமிக்கவும்', save_vaccine:'தடுப்பூசி சேமிக்கவும்',
+    modal_profile_title:'நோயாளி சுயவிவரம் திருத்தவும்',
+    label_full_name:'முழு பெயர்', label_patient_id:'நோயாளி ID', label_blood_group:'இரத்த வகை',
+    label_age:'வயது', label_gender:'பாலினம்', label_phone:'தொலைபேசி எண்', label_village:'கிராமம் / நகரம்',
+    gender_male:'ஆண்', gender_female:'பெண்', gender_other:'மற்றவை', gender_prefer:'சொல்ல விரும்பவில்லை',
+    save_profile:'சுயவிவரம் சேமிக்கவும்',
+    modal_conditions_title:'நோய்கள் மற்றும் ஒவ்வாமைகள் திருத்தவும்',
+    hint_conditions:'ஒரு நோயை தட்டச்சு செய்து Enter அல்லது கமா அழுத்தவும்.',
+    hint_allergies:'ஒரு ஒவ்வாமையை தட்டச்சு செய்து Enter அல்லது கமா அழுத்தவும்.',
+    save_changes:'மாற்றங்களை சேமிக்கவும்',
+    modal_vitals_title:'சமீபத்திய வைட்டல்களை திருத்தவும்',
+    vitals_hint:'எந்த அளவீட்டையும் புதுப்பிக்கவும்.',
+    save_vitals:'வைட்டல்கள் சேமிக்கவும்',
+    vital_status_normal:'✅ சாதாரண', vital_status_high:'⚠️ அதிகம் / உயர்ந்த', vital_status_danger:'🔴 ஆபத்து',
+    toast_profile:'✅ சுயவிவரம் வெற்றிகரமாக புதுப்பிக்கப்பட்டது!',
+    toast_conditions:'✅ நோய்கள் மற்றும் ஒவ்வாமைகள் புதுப்பிக்கப்பட்டன!',
+    toast_vitals:'✅ வைட்டல்கள் வெற்றிகரமாக புதுப்பிக்கப்பட்டன!',
+    toast_saved:'✅ பதிவு வெற்றிகரமாக சேமிக்கப்பட்டது!',
+    toast_vital_saved:'அளவீடு சேமிக்கப்பட்டது!',
+    no_conditions:'எந்த நோயும் பதிவு செய்யப்படவில்லை', no_allergies:'எந்த ஒவ்வாமையும் பதிவு செய்யப்படவில்லை',
+  },
+  mr: {
+    lang_label:'भाषा:', back:'मागे', page_title:'आरोग्य नोंदी — स्वास्थ्य सेतू',
+    hero_sub:'एआय-चालित ग्रामीण आरोग्य सेवा प्रवेश व्यासपीठ',
+    badge_accessible:'✨ सुलभ', badge_ai:'🤖 एआय-चालित', badge_fast:'⚡ जलद',
+    badge_rural:'🌿 ग्रामीण-अनुकूल', badge_offline:'📶 ऑफलाइन समर्थन',
+    stat_visits:'भेटी', stat_medicines:'औषधे', stat_labs:'लॅब चाचण्या', stat_vaccines:'लसी',
+    edit_profile:'प्रोफाइल संपादित करा',
+    nav_overview:'आढावा', nav_history:'भेट इतिहास', nav_medications:'औषधे',
+    nav_labs:'लॅब निकाल', nav_vitals:'वायटल्स', nav_vaccines:'लसी', nav_add:'नोंद जोडा',
+    info_overview:'एका दृष्टिक्षेपात आपले संपूर्ण आरोग्य रेकॉर्ड.',
+    title_vitals:'ताज्या वायटल्स', edit_all_vitals:'सर्व वायटल्स संपादित करा', edit_btn:'संपादित करा',
+    title_conditions:'स्थिती आणि ऍलर्जी', label_conditions:'जुनाट स्थिती', label_allergies:'ज्ञात ऍलर्जी',
+    title_recent:'अलीकडील क्रियाकलाप',
+    act1_title:'डॉ. रमेश पाटील — सामान्य तपासणी', act1_sub:'BP वाढले होते. औषध बदलले.',
+    act2_title:'रक्त शर्करा आणि HbA1c चाचणी', act2_sub:'HbA1c: 6.9% — लक्ष्य मर्यादेत.',
+    act3_title:'प्रिस्क्रिप्शन अपडेट', act3_sub:'BP व्यवस्थापनासाठी Amlodipine 5mg जोडले.',
+    act4_title:'COVID-19 बूस्टर', act4_sub:'3री मात्रा — कोवॅक्सिन. पुढे: जाने 2027.',
+    tag_appt:'भेट', tag_lab:'लॅब चाचणी', tag_rx:'प्रिस्क्रिप्शन', tag_vacc:'लस',
+    title_history:'भेट इतिहास', title_medications:'सध्याची औषधे', title_labs:'लॅब निकाल',
+    tab_blood:'🩸 रक्त चाचणी', tab_urine:'🧪 लघवी', tab_imaging:'🩻 इमेजिंग',
+    th_test:'चाचणी', th_result:'निकाल', th_normal:'सामान्य श्रेणी', th_date:'तारीख', th_status:'स्थिती',
+    th_type:'प्रकार', th_body:'शरीराचा भाग', th_finding:'निष्कर्ष',
+    pill_normal:'सामान्य', pill_high:'जास्त', pill_low:'कमी', pill_clear:'स्पष्ट',
+    pill_uptodate:'अद्ययावत', pill_complete:'पूर्ण', pill_duesoon:'लवकरच देय',
+    test_fbs:'उपवासातील रक्त शर्करा', test_chol:'एकूण कोलेस्टेरॉल', test_hgb:'हिमोग्लोबिन', test_tsh:'TSH (थायरॉइड)',
+    test_uglucose:'मूत्र ग्लुकोज', test_protein:'प्रथिने', test_creat:'क्रिएटिनिन',
+    val_negative:'नकारात्मक', val_trace:'ट्रेस',
+    img_xray:'एक्स-रे', img_chest:'छाती', img_xray_find:'कोणतीही असामान्यता नाही',
+    img_ecg:'ECG', img_heart:'हृदय', img_ecg_find:'सामान्य साइनस लय',
+    title_vitals_history:'वायटल्स इतिहास', edit_vitals:'वायटल्स संपादित करा',
+    info_vitals:'आपले रीडिंग अपडेट करण्यासाठी ✏️ दाबा किंवा खाली नवे रीडिंग लॉग करा.',
+    title_log:'नवे रीडिंग लॉग करा',
+    label_vital_type:'वायटल प्रकार', label_value:'मूल्य', label_date:'तारीख', label_notes:'नोट्स',
+    vital_bp:'रक्तदाब', vital_hr:'हृदय गती', vital_temp:'तापमान',
+    vital_bs:'रक्त शर्करा', vital_wt:'वजन', vital_spo2:'SpO₂',
+    save_reading:'रीडिंग जतन करा',
+    title_vaccines:'लसीकरण नोंद',
+    th_vaccine:'लस', th_dose:'मात्रा', th_given:'दिलेली तारीख', th_due:'पुढे देय',
+    dose_3rd:'3री (बूस्टर)', dose_booster:'बूस्टर', dose_annual:'वार्षिक',
+    vacc_flu:'इन्फ्लुएंझा',
+    title_add:'नवी नोंद जोडा', label_record_type:'नोंद प्रकार',
+    select_type:'— प्रकार निवडा —', type_visit:'🏥 डॉक्टर भेट', type_lab:'🔬 लॅब निकाल',
+    type_rx:'💊 प्रिस्क्रिप्शन / औषध', type_vaccine:'💉 लस', type_vital:'❤️ वायटल रीडिंग',
+    label_doctor_name:'डॉक्टरचे नाव', label_specialty:'विशेषता', label_visit_date:'भेटीची तारीख',
+    label_clinic:'क्लिनिक / रुग्णालय', label_diagnosis:'निदान / नोट्स',
+    label_test_name:'चाचणीचे नाव', label_result_val:'निकाल मूल्य', label_normal_range:'सामान्य श्रेणी',
+    label_status:'स्थिती', label_lab_name:'लॅबचे नाव',
+    label_med_name:'औषधाचे नाव', label_dosage:'मात्रा', label_frequency:'वारंवारता',
+    label_prescribed_by:'लिहून दिले', label_start_date:'सुरुवात तारीख', label_end_date:'समाप्ती तारीख (लागू असल्यास)',
+    label_vaccine_name:'लसीचे नाव', label_dose_num:'मात्रा क्रमांक', label_given_date:'दिलेली तारीख',
+    label_next_due:'पुढे देय तारीख', label_given_at:'कुठे दिले',
+    freq_once:'दिवसातून एकदा', freq_twice:'दिवसातून दोनदा', freq_thrice:'दिवसातून तीनदा', freq_needed:'गरजेनुसार',
+    cancel_btn:'रद्द करा', save_visit:'भेट जतन करा', save_result:'निकाल जतन करा',
+    save_med:'औषध जतन करा', save_vaccine:'लस जतन करा',
+    modal_profile_title:'रुग्ण प्रोफाइल संपादित करा',
+    label_full_name:'पूर्ण नाव', label_patient_id:'रुग्ण ID', label_blood_group:'रक्त गट',
+    label_age:'वय', label_gender:'लिंग', label_phone:'फोन नंबर', label_village:'गाव / शहर',
+    gender_male:'पुरुष', gender_female:'महिला', gender_other:'इतर', gender_prefer:'सांगणे पसंत नाही',
+    save_profile:'प्रोफाइल जतन करा',
+    modal_conditions_title:'स्थिती आणि ऍलर्जी संपादित करा',
+    hint_conditions:'एक स्थिती टाइप करा आणि Enter किंवा स्वल्पविराम दाबा.',
+    hint_allergies:'एक ऍलर्जी टाइप करा आणि Enter किंवा स्वल्पविराम दाबा.',
+    save_changes:'बदल जतन करा',
+    modal_vitals_title:'ताज्या वायटल्स संपादित करा',
+    vitals_hint:'कोणतेही रीडिंग अपडेट करा.',
+    save_vitals:'वायटल्स जतन करा',
+    vital_status_normal:'✅ सामान्य', vital_status_high:'⚠️ जास्त / उंचावलेले', vital_status_danger:'🔴 धोका',
+    toast_profile:'✅ प्रोफाइल यशस्वीरित्या अपडेट!',
+    toast_conditions:'✅ स्थिती आणि ऍलर्जी अपडेट!',
+    toast_vitals:'✅ वायटल्स यशस्वीरित्या अपडेट!',
+    toast_saved:'✅ नोंद यशस्वीरित्या जतन!',
+    toast_vital_saved:'रीडिंग जतन झाले!',
+    no_conditions:'कोणतीही स्थिती नोंदवली नाही', no_allergies:'कोणतीही ऍलर्जी नोंदवली नाही',
+  }
+};
+
+let currentLang = localStorage.getItem('ss_lang') || 'en';
+function t(key) { return (TRANSLATIONS[currentLang] || TRANSLATIONS.en)[key] || key; }
+
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = t(key);
+    if (val) el.textContent = val;
+  });
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.getAttribute('onclick') === `setLang('${currentLang}')`) btn.classList.add('active');
+  });
+  // Re-render dynamic content that uses t()
+  renderConditionsDisplay();
+  if (document.getElementById('vitals-grid-overview').children.length) {
+    renderVitalsGrid('vitals-grid-overview');
+    renderVitalsGrid('vitals-grid-page');
+  }
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('ss_lang', lang);
+  applyTranslations();
+  renderVisits();
+  renderMeds();
+}
+
+// ── STATE ──
+let profile = { name:'Ramesh Kumar', id:'SS-2024-00421', blood:'B+', age:'', gender:'Male', phone:'', village:'' };
+let conditions = ['Hypertension', 'Type 2 Diabetes (Managed)'];
+let allergies = ['Penicillin', 'Dust Mites'];
+let vitals = [
+  { icon:'❤️', val:'72',     unit:'bpm',  name:'Heart Rate',    statusClass:'good',    statusText:'Normal',    key:'heartrate' },
+  { icon:'🩸', val:'138/88', unit:'mmHg', name:'Blood Pressure',statusClass:'warning', statusText:'High',      key:'bp' },
+  { icon:'🌡️', val:'98.4',   unit:'°F',   name:'Temperature',   statusClass:'good',    statusText:'Normal',    key:'temp' },
+  { icon:'💨', val:'98%',    unit:'SpO₂', name:'Oxygen Sat.',   statusClass:'good',    statusText:'Normal',    key:'spo2' },
+  { icon:'⚖️', val:'82',     unit:'kg',   name:'Weight',        statusClass:'warning', statusText:'Overweight',key:'weight' },
+  { icon:'📏', val:'168',    unit:'cm',   name:'Height',        statusClass:'good',    statusText:'Normal',    key:'height' },
+];
+let tempConditions = [], tempAllergies = [];
+const conditionColors = ['chip-red','chip-yellow','chip-blue','chip-green'];
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderVitalsGrid('vitals-grid-overview');
+  renderVitalsGrid('vitals-grid-page');
+  renderConditionsDisplay();
+  renderVisits();
+  renderMeds();
+  const today = new Date().toISOString().split('T')[0];
+  document.querySelectorAll('input[type=date]').forEach(el => { if (!el.value) el.value = today; });
+  applyTranslations();
+});
+
+function renderVitalsGrid(containerId) {
+  const grid = document.getElementById(containerId);
+  if (!grid) return;
+  const statusLabels = { good: t('pill_normal'), warning: t('pill_high'), danger: '🔴' };
+  grid.innerHTML = '';
+  vitals.forEach(v => {
+    grid.innerHTML += `<div class="vital-box ${v.statusClass}" onclick="openVitalsModal()">
+      <div class="vital-icon">${v.icon}</div>
+      <div class="vital-val">${v.val}</div>
+      <div class="vital-unit">${v.unit}</div>
+      <div class="vital-name">${v.name}</div>
+      <div class="vital-status ${v.statusClass==='good'?'normal':'high'}">${v.statusText}</div>
+      <div class="vital-edit-hint">✏️ click to edit</div>
+    </div>`;
+  });
+}
+
+function renderConditionsDisplay() {
+  const cd = document.getElementById('conditions-display');
+  const ad = document.getElementById('allergies-display');
+  if (cd) cd.innerHTML = conditions.length
+    ? conditions.map((c,i) => `<span class="chip ${conditionColors[i%conditionColors.length]}">${c}</span>`).join('')
+    : `<span style="font-size:.8rem;color:var(--text-muted);">${t('no_conditions')}</span>`;
+  if (ad) ad.innerHTML = allergies.length
+    ? allergies.map((a,i) => `<span class="chip ${conditionColors[i%conditionColors.length]}">${a}</span>`).join('')
+    : `<span style="font-size:.8rem;color:var(--text-muted);">${t('no_allergies')}</span>`;
+}
+
+// ── MODALS ──
+function openModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) closeModal(o.id); }));
+
+function openProfileModal() {
+  document.getElementById('edit-name').value = profile.name;
+  document.getElementById('edit-pid').value  = profile.id;
+  document.getElementById('edit-blood').value= profile.blood;
+  document.getElementById('edit-age').value  = profile.age;
+  document.getElementById('edit-gender').value= profile.gender;
+  document.getElementById('edit-phone').value = profile.phone;
+  document.getElementById('edit-village').value= profile.village;
+  openModal('modal-profile');
+}
+function saveProfile() {
+  const name = document.getElementById('edit-name').value.trim();
+  if (!name) { showToast('⚠️ Please enter a patient name'); return; }
+  profile.name   = name;
+  profile.id     = document.getElementById('edit-pid').value.trim() || profile.id;
+  profile.blood  = document.getElementById('edit-blood').value;
+  profile.age    = document.getElementById('edit-age').value;
+  profile.gender = document.getElementById('edit-gender').value;
+  profile.phone  = document.getElementById('edit-phone').value.trim();
+  profile.village= document.getElementById('edit-village').value.trim();
+  document.getElementById('profile-name').textContent = profile.name;
+  document.getElementById('profile-id-display').innerHTML =
+    `ID: ${profile.id} &bull; Blood: ${profile.blood}`+
+    (profile.age?` &bull; Age: ${profile.age}`:'')+
+    (profile.village?`<br><span style="font-size:.7rem;">${profile.village}</span>`:'');
+  closeModal('modal-profile');
+  showToast(t('toast_profile'));
+}
+
+function openConditionsModal() {
+  tempConditions=[...conditions]; tempAllergies=[...allergies];
+  renderModalTags('conditions-tags', tempConditions, 'conditions');
+  renderModalTags('allergies-tags',  tempAllergies,  'allergies');
+  document.getElementById('condition-input').value='';
+  document.getElementById('allergy-input').value='';
+  openModal('modal-conditions');
+}
+function renderModalTags(containerId, arr, type) {
+  const c = document.getElementById(containerId); c.innerHTML='';
+  arr.forEach((item,i) => {
+    const s=document.createElement('span'); s.className=`chip ${conditionColors[i%conditionColors.length]}`;
+    s.innerHTML=`${item} <button class="chip-remove" onclick="removeTag('${type}',${i})">✕</button>`;
+    c.appendChild(s);
+  });
+}
+function removeTag(type, index) {
+  if (type==='conditions') { tempConditions.splice(index,1); renderModalTags('conditions-tags',tempConditions,'conditions'); }
+  else { tempAllergies.splice(index,1); renderModalTags('allergies-tags',tempAllergies,'allergies'); }
+}
+function handleTagInput(e, type) {
+  if (e.key==='Enter'||e.key===',') {
+    e.preventDefault();
+    const inputId = type==='conditions'?'condition-input':'allergy-input';
+    const val = document.getElementById(inputId).value.replace(',','').trim();
+    if (!val) return;
+    if (type==='conditions') { tempConditions.push(val); renderModalTags('conditions-tags',tempConditions,'conditions'); }
+    else { tempAllergies.push(val); renderModalTags('allergies-tags',tempAllergies,'allergies'); }
+    document.getElementById(inputId).value='';
+  }
+}
+function saveConditions() {
+  const ci=document.getElementById('condition-input').value.trim();
+  const ai=document.getElementById('allergy-input').value.trim();
+  if (ci) tempConditions.push(ci);
+  if (ai) tempAllergies.push(ai);
+  conditions=[...tempConditions]; allergies=[...tempAllergies];
+  renderConditionsDisplay();
+  closeModal('modal-conditions');
+  showToast(t('toast_conditions'));
+}
+
+function openVitalsModal() {
+  const c=document.getElementById('vitals-edit-fields'); c.innerHTML='';
+  vitals.forEach((v,i) => {
+    c.innerHTML+=`<div style="display:grid;grid-template-columns:auto 1fr 1fr;align-items:center;gap:12px;background:var(--bg);border-radius:14px;padding:14px 16px;border:2px solid var(--border);">
+      <div style="font-size:1.4rem;width:36px;text-align:center;">${v.icon}</div>
+      <div><div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:.88rem;color:var(--text);margin-bottom:2px;">${v.name}</div>
+      <div style="font-size:.72rem;color:var(--text-muted);">Unit: ${v.unit}</div></div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <input class="modal-input" id="vital-val-${i}" value="${v.val}" style="padding:8px 12px;font-size:.9rem;font-family:'Nunito',sans-serif;font-weight:800;"/>
+        <select class="modal-input" id="vital-status-${i}" style="padding:8px 12px;font-size:.78rem;">
+          <option value="good" ${v.statusClass==='good'?'selected':''}>${t('vital_status_normal')}</option>
+          <option value="warning" ${v.statusClass==='warning'?'selected':''}>${t('vital_status_high')}</option>
+          <option value="danger" ${v.statusClass==='danger'?'selected':''}>${t('vital_status_danger')}</option>
+        </select>
+      </div>
+    </div>`;
+  });
+  openModal('modal-vitals');
+}
+function saveVitals() {
+  const labels={good:t('pill_normal'),warning:t('pill_high'),danger:'Critical'};
+  vitals.forEach((v,i)=>{
+    const ve=document.getElementById(`vital-val-${i}`), se=document.getElementById(`vital-status-${i}`);
+    if(ve&&se){v.val=ve.value.trim()||v.val; v.statusClass=se.value; v.statusText=labels[se.value]||'Normal';}
+  });
+  renderVitalsGrid('vitals-grid-overview'); renderVitalsGrid('vitals-grid-page');
+  closeModal('modal-vitals'); showToast(t('toast_vitals'));
+}
+
+// ── SECTION NAV ──
+const sections=['overview','history','medications','labs','vitals','vaccines','add'];
+function showSection(id, el) {
+  sections.forEach(s=>document.getElementById('section-'+s)?.classList.add('hidden'));
+  document.getElementById('section-'+id)?.classList.remove('hidden');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function switchTab(id, el) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id)?.classList.add('active'); el.classList.add('active');
+}
+
+// ── VISIT HISTORY ──
+const visits=[
+  {icon:'🏥',type:'appt',title:'Dr. Ramesh Patil — General Checkup',       date:'Apr 20, 2026',sub:'BP elevated (138/88). Amlodipine added. Follow-up in 2 weeks.'},
+  {icon:'🏥',type:'appt',title:'Dr. Asha Kulkarni — Pediatrics (Son)',      date:'Mar 15, 2026',sub:'Child\'s routine checkup. Growth on track. Vaccines updated.'},
+  {icon:'🔬',type:'lab', title:'Blood Panel — District Lab',                date:'Mar 2, 2026', sub:'Cholesterol normal. Hemoglobin normal. Vitamin D slightly low.'},
+  {icon:'🏥',type:'appt',title:'Dr. Ramesh Patil — Follow Up',              date:'Feb 5, 2026', sub:'BP improved to 128/82. Continue current medication.'},
+  {icon:'💉',type:'vacc',title:'COVID-19 Booster Dose',                     date:'Jan 10, 2026',sub:'Covaxin — 3rd dose. No adverse reaction.'},
+  {icon:'🔬',type:'lab', title:'HbA1c & Blood Sugar Test',                  date:'Jan 5, 2026', sub:'HbA1c: 7.2%. Doctor adjusted Metformin dosage.'},
+  {icon:'🏥',type:'appt',title:'Dr. Kiran Hegde — Dermatology',             date:'Dec 18, 2025',sub:'Skin rash — diagnosed as eczema. Prescribed topical cream.'},
+  {icon:'🏥',type:'appt',title:'Dr. Ramesh Patil — Initial Consultation',   date:'Nov 3, 2025', sub:'Hypertension diagnosed. Lifestyle changes + medication started.'},
+];
+function renderVisits() {
+  const tl=document.getElementById('visit-timeline'); if(!tl)return;
+  const labels={appt:t('tag_appt'),lab:t('tag_lab'),vacc:t('tag_vacc'),rx:t('tag_rx')};
+  tl.innerHTML=visits.map(v=>`<div class="tl-item">
+    <div class="tl-dot ${v.type}">${v.icon}</div>
+    <div class="tl-body">
+      <div class="tl-header"><div class="tl-title">${v.title}</div><div class="tl-date">${v.date}</div></div>
+      <div class="tl-sub">${v.sub}</div>
+      <span class="tl-tag ${v.type}">${labels[v.type]||v.type}</span>
+    </div>
+  </div>`).join('');
+}
+
+// ── MEDICATIONS ──
+const meds=[
+  {icon:'💊',name:'Metformin 500mg',dose:'500mg — for Blood Sugar control',freq:'Twice daily (morning & night)',times:['taken','taken','upcoming']},
+  {icon:'💉',name:'Amlodipine 5mg', dose:'5mg — for Blood Pressure',       freq:'Once daily (morning)',          times:['taken','upcoming','upcoming']},
+  {icon:'🌿',name:'Vitamin D3 60K', dose:'60,000 IU — weekly supplement',  freq:'Once weekly (Sunday)',          times:['taken','upcoming']},
+];
+function renderMeds() {
+  const ml=document.getElementById('med-list'); if(!ml)return;
+  ml.innerHTML=meds.map(m=>`<div class="med-item">
+    <div class="med-icon">${m.icon}</div>
+    <div><div class="med-name">${m.name}</div><div class="med-dose">${m.dose}</div></div>
+    <div class="med-schedule">
+      <div class="med-times">${m.times.map(t=>`<div class="med-time-dot ${t==='taken'?'':'upcoming'}"></div>`).join('')}</div>
+      <div class="med-freq">${m.freq}</div>
+    </div>
+  </div>`).join('');
+}
+
+// ── ADD RECORD ──
+function updateAddForm() {
+  const val=document.getElementById('record-type').value;
+  document.querySelectorAll('.add-form').forEach(f=>f.classList.remove('open'));
+  if(val) document.getElementById('form-'+val)?.classList.add('open');
+}
+function cancelAdd() { document.getElementById('record-type').value=''; document.querySelectorAll('.add-form').forEach(f=>f.classList.remove('open')); }
+function saveRecord(type) { showToast(t('toast_saved')); cancelAdd(); }
+
+function logVital() {
+  const type=document.getElementById('new-vital-type').value;
+  const val=document.getElementById('new-vital-val').value;
+  if(!val){showToast('⚠️ Please enter a value');return;}
+  showToast(`✅ ${type} ${t('toast_vital_saved')}`);
+  document.getElementById('new-vital-val').value='';
+  document.getElementById('new-vital-note').value='';
+}
+
+function showToast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>

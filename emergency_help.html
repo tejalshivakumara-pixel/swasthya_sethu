@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Emergency Help — Swasthya Setu</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --red: #ef4444;
+      --red-dark: #b91c1c;
+      --red-light: #fee2e2;
+      --orange: #f97316;
+      --orange-light: #fff7ed;
+      --primary: #6C63FF;
+      --success: #10b981;
+      --success-light: #d1fae5;
+      --warning: #f59e0b;
+      --warning-light: #fef3c7;
+      --bg: #fff5f5;
+      --card: #ffffff;
+      --text: #1a0a0a;
+      --text-muted: #6b7280;
+      --border: #fecaca;
+      --grad-emergency: linear-gradient(135deg, #ef4444 0%, #b91c1c 60%, #7f1d1d 100%);
+      --grad-soft: linear-gradient(135deg, #6C63FF 0%, #7c3aed 100%);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    @keyframes pulse-ring  { 0% { transform:scale(1);opacity:.8; } 100% { transform:scale(1.6);opacity:0; } }
+    @keyframes heartbeat   { 0%,100%{transform:scale(1);}14%{transform:scale(1.08);}28%{transform:scale(1);}42%{transform:scale(1.05);}70%{transform:scale(1);} }
+    @keyframes fadeUp      { from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);} }
+    @keyframes blink       { 0%,100%{opacity:1;}50%{opacity:.4;} }
+    @keyframes slideIn     { from{opacity:0;transform:translateX(-10px);}to{opacity:1;transform:translateX(0);} }
+
+    /* ── LANG BAR ── */
+    .lang-bar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      position: sticky;
+      top: 0;
+      z-index: 102;
+    }
+    .lang-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); }
+    .lang-btn {
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 2px solid var(--border);
+      background: transparent;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+      color: var(--text-muted);
+      font-family: 'Nunito', sans-serif;
+    }
+    .lang-btn.active, .lang-btn:hover { background: var(--red); color: #fff; border-color: var(--red); }
+
+    /* ── HERO ── */
+    .hero { background:var(--grad-emergency); padding:0; position:relative; overflow:hidden; }
+    .hero::before { content:''; position:absolute; inset:0; background:radial-gradient(circle at 20% 50%, rgba(255,255,255,.07) 0%, transparent 60%); }
+    .hero-inner { position:relative;z-index:1; display:flex;flex-direction:column;align-items:center; padding:40px 24px 50px; text-align:center; }
+    .hero-badge { display:inline-flex;align-items:center;gap:8px; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); padding:6px 16px;border-radius:50px; font-size:.78rem;font-weight:700;color:rgba(255,255,255,.9); margin-bottom:20px; animation:fadeUp .5s ease both; }
+    .hero-badge .dot { width:7px;height:7px;border-radius:50%;background:#fff;animation:blink 1.2s infinite; }
+    .hero-title { font-family:'Nunito',sans-serif;font-size:2.6rem;font-weight:900;color:#fff;line-height:1.1;margin-bottom:12px;animation:fadeUp .5s .1s ease both; }
+    .hero-sub { color:rgba(255,255,255,.82);font-size:.95rem;max-width:500px;margin-bottom:32px;animation:fadeUp .5s .2s ease both; }
+    .sos-wrap { position:relative;display:inline-flex;align-items:center;justify-content:center;margin-bottom:32px;animation:fadeUp .5s .3s ease both;cursor:pointer; }
+    .sos-ring { position:absolute;width:130px;height:130px;border-radius:50%;border:3px solid rgba(255,255,255,.5);animation:pulse-ring 1.8s cubic-bezier(.4,0,.6,1) infinite; }
+    .sos-ring:nth-child(2){animation-delay:.6s;} .sos-ring:nth-child(3){animation-delay:1.2s;}
+    .sos-btn { position:relative;z-index:1;width:110px;height:110px;border-radius:50%;background:#fff;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 0 0 6px rgba(255,255,255,.2),0 12px 40px rgba(0,0,0,.3);transition:transform .15s;animation:heartbeat 2s ease infinite; }
+    .sos-btn:active{transform:scale(.94);}
+    .sos-btn .sos-icon{font-size:2.4rem;} .sos-btn .sos-label{font-family:'Nunito',sans-serif;font-weight:900;font-size:.72rem;color:var(--red);letter-spacing:.08em;}
+    .hero-chips{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;animation:fadeUp .5s .4s ease both;}
+    .hero-chip{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:#fff;padding:6px 14px;border-radius:50px;font-size:.78rem;font-weight:600;}
+
+    /* ── MAIN ── */
+    .container{max-width:1000px;margin:0 auto;padding:32px 20px 60px;}
+    .section-title{font-family:'Nunito',sans-serif;font-size:1.15rem;font-weight:900;color:var(--text);display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+    .section-title::after{content:'';flex:1;height:2px;background:linear-gradient(90deg,var(--red),transparent);border-radius:2px;}
+
+    /* ── CALL GRID ── */
+    .call-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:32px;}
+    .call-card{border-radius:20px;padding:22px 18px;display:flex;flex-direction:column;gap:12px;cursor:pointer;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;text-decoration:none;animation:fadeUp .5s ease both;}
+    .call-card:hover{transform:translateY(-4px);box-shadow:0 12px 36px rgba(0,0,0,.15);}
+    .call-card:active{transform:scale(.97);}
+    .call-card.red   {background:var(--grad-emergency);color:#fff;box-shadow:0 6px 24px rgba(239,68,68,.35);}
+    .call-card.orange{background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;box-shadow:0 6px 24px rgba(249,115,22,.3);}
+    .call-card.blue  {background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;box-shadow:0 6px 24px rgba(59,130,246,.3);}
+    .call-card.green {background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 6px 24px rgba(16,185,129,.3);}
+    .call-card.purple{background:var(--grad-soft);color:#fff;box-shadow:0 6px 24px rgba(108,99,255,.3);}
+    .call-icon{font-size:2rem;} .call-name{font-family:'Nunito',sans-serif;font-weight:900;font-size:1rem;}
+    .call-number{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.6rem;letter-spacing:.03em;}
+    .call-desc{font-size:.75rem;opacity:.85;} .call-tap{font-size:.7rem;opacity:.7;margin-top:auto;display:flex;align-items:center;gap:4px;}
+    .call-card::after{content:'📞';position:absolute;right:14px;top:14px;font-size:1.1rem;opacity:.4;}
+
+    /* ── HOSPITALS ── */
+    .hospitals-card{background:var(--card);border-radius:24px;padding:24px;box-shadow:0 4px 24px rgba(0,0,0,.07);margin-bottom:28px;}
+    .hospital-list{display:flex;flex-direction:column;gap:14px;}
+    .hospital-item{display:flex;align-items:flex-start;gap:14px;padding:16px;border-radius:16px;background:var(--bg);border:2px solid var(--border);transition:all .2s;cursor:pointer;animation:slideIn .3s ease both;}
+    .hospital-item:hover{border-color:var(--red);background:#fff5f5;transform:translateX(4px);}
+    .hosp-icon{width:46px;height:46px;border-radius:14px;background:var(--red-light);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+    .hosp-info{flex:1;} .hosp-name{font-family:'Nunito',sans-serif;font-weight:800;font-size:.95rem;color:var(--text);margin-bottom:3px;}
+    .hosp-addr{font-size:.78rem;color:var(--text-muted);margin-bottom:6px;}
+    .hosp-meta{display:flex;gap:10px;flex-wrap:wrap;}
+    .hosp-tag{font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:20px;}
+    .hosp-tag.open{background:var(--success-light);color:#059669;}
+    .hosp-tag.dist{background:#ede9fe;color:var(--primary);}
+    .hosp-tag.type{background:var(--warning-light);color:#d97706;}
+    .hosp-right{text-align:right;flex-shrink:0;}
+    .hosp-phone{font-family:'Nunito',sans-serif;font-weight:900;font-size:.88rem;color:var(--red);}
+    .hosp-dir{font-size:.7rem;color:var(--text-muted);margin-top:4px;}
+    .add-hospital-btn{width:100%;margin-top:14px;padding:12px;border-radius:14px;border:2px dashed var(--border);background:transparent;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:.88rem;color:var(--red);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .add-hospital-btn:hover{background:var(--red-light);border-color:var(--red);}
+
+    /* ── CONTACTS — EDITABLE ── */
+    .contacts-card{background:var(--card);border-radius:24px;padding:24px;box-shadow:0 4px 24px rgba(0,0,0,.07);margin-bottom:28px;}
+    .contacts-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+    .contacts-header .section-title{margin-bottom:0;flex:1;}
+    .contact-list{display:flex;flex-direction:column;gap:12px;}
+    .contact-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;background:var(--bg);border:2px solid var(--border);transition:all .2s;animation:slideIn .3s ease both;}
+    .contact-item:hover{border-color:var(--red);}
+    .contact-avatar{width:44px;height:44px;border-radius:50%;background:var(--grad-emergency);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;color:#fff;font-family:'Nunito',sans-serif;font-weight:900;}
+    .contact-info{flex:1;}
+    .contact-name{font-family:'Nunito',sans-serif;font-weight:800;font-size:.92rem;color:var(--text);}
+    .contact-rel{font-size:.72rem;color:var(--text-muted);}
+    .contact-phone-display{font-family:'Nunito',sans-serif;font-weight:900;font-size:.88rem;color:var(--red);white-space:nowrap;}
+    .contact-actions{display:flex;gap:6px;flex-shrink:0;}
+    .icon-btn{width:34px;height:34px;border-radius:10px;border:2px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .2s;}
+    .icon-btn:hover{border-color:var(--red);background:var(--red-light);}
+    .icon-btn.call:hover{border-color:var(--success);background:var(--success-light);}
+    .icon-btn.edit-btn:hover{border-color:#f59e0b;background:#fef3c7;}
+    .contact-item.editing{border-color:#f59e0b;background:#fffbeb;}
+    .edit-fields{flex:1;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+    .edit-field{padding:7px 11px;border:2px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:.83rem;color:var(--text);background:#fff;outline:none;transition:border-color .2s;}
+    .edit-field:focus{border-color:var(--warning);box-shadow:0 0 0 3px rgba(245,158,11,.1);}
+    .edit-field.f-name{flex:1;min-width:120px;}
+    .edit-field.f-phone{width:160px;}
+    .edit-select{padding:7px 11px;border:2px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:.83rem;color:var(--text);background:#fff;outline:none;transition:border-color .2s;cursor:pointer;}
+    .edit-select:focus{border-color:var(--warning);}
+    .icon-btn.save-btn{border-color:var(--success);color:var(--success);font-size:.75rem;width:auto;padding:0 10px;font-family:'Nunito',sans-serif;font-weight:800;}
+    .icon-btn.save-btn:hover{background:var(--success-light);}
+    .icon-btn.cancel-btn{border-color:var(--text-muted);color:var(--text-muted);}
+    .icon-btn.cancel-btn:hover{background:#f3f4f6;}
+    .priority-badge{font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;}
+    .priority-badge.p1{background:#fef3c7;color:#b45309;}
+    .priority-badge.p2{background:#ede9fe;color:#6d28d9;}
+    .priority-badge.p3{background:#f0fdf4;color:#15803d;}
+
+    /* ── FIRST AID ── */
+    .firstaid-card{background:var(--card);border-radius:24px;padding:24px;box-shadow:0 4px 24px rgba(0,0,0,.07);margin-bottom:28px;}
+    .firstaid-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;}
+    .firstaid-item{background:var(--bg);border-radius:16px;padding:18px;border:2px solid var(--border);cursor:pointer;transition:all .2s;}
+    .firstaid-item:hover{border-color:var(--orange);background:var(--orange-light);}
+    .fa-icon{font-size:1.8rem;margin-bottom:10px;}
+    .fa-title{font-family:'Nunito',sans-serif;font-weight:800;font-size:.92rem;color:var(--text);margin-bottom:6px;}
+
+    /* ── BUTTONS ── */
+    .btn{padding:11px 22px;border-radius:12px;font-family:'Nunito',sans-serif;font-weight:800;font-size:.9rem;cursor:pointer;border:none;transition:all .2s;}
+    .btn-red{background:var(--grad-emergency);color:#fff;box-shadow:0 4px 14px rgba(239,68,68,.35);}
+    .btn-red:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(239,68,68,.45);}
+    .btn-outline{background:transparent;border:2px solid var(--border);color:var(--text-muted);}
+    .btn-outline:hover{border-color:var(--red);color:var(--red);}
+    .btn-sm{padding:7px 14px;font-size:.78rem;}
+    .btn-row{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
+    .btn-add-contact{background:var(--red-light);color:var(--red);border:none;border-radius:10px;padding:6px 14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:.78rem;cursor:pointer;transition:all .2s;}
+    .btn-add-contact:hover{background:var(--red);color:#fff;}
+
+    /* ── FORM ── */
+    .field-group{margin-bottom:14px;}
+    .field-group label{display:block;font-size:.8rem;font-weight:700;color:var(--text);margin-bottom:6px;}
+    .field-group input,.field-group select{width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:12px;font-family:'Inter',sans-serif;font-size:.88rem;color:var(--text);background:var(--bg);outline:none;transition:border-color .2s;}
+    .field-group input:focus,.field-group select:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(239,68,68,.1);background:#fff;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+    /* ── MODAL ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(26,10,10,.55);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s;}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal{background:var(--card);border-radius:24px;padding:32px;width:100%;max-width:480px;box-shadow:0 24px 80px rgba(0,0,0,.2);transform:translateY(20px) scale(.97);transition:transform .3s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto;}
+    .modal-overlay.open .modal{transform:translateY(0) scale(1);}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+    .modal-title{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.2rem;color:var(--text);}
+    .modal-close{width:36px;height:36px;border-radius:10px;border:2px solid var(--border);background:transparent;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .2s;color:var(--text-muted);}
+    .modal-close:hover{border-color:var(--red);color:var(--red);background:var(--red-light);}
+
+    /* ── SOS MODAL ── */
+    .sos-modal-body{text-align:center;padding:10px 0;}
+    .sos-modal-icon{font-size:4rem;margin-bottom:12px;animation:heartbeat 1s ease infinite;}
+    .sos-modal-title{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.4rem;color:var(--red);margin-bottom:8px;}
+    .sos-modal-sub{font-size:.88rem;color:var(--text-muted);margin-bottom:24px;}
+    .sos-action-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+    .sos-action-btn{padding:16px 12px;border-radius:16px;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:.9rem;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .2s;}
+    .sos-action-btn .sab-icon{font-size:1.6rem;}
+    .sos-action-btn.ambulance{background:var(--grad-emergency);color:#fff;box-shadow:0 4px 14px rgba(239,68,68,.3);}
+    .sos-action-btn.police{background:linear-gradient(135deg,#1d4ed8,#1e3a8a);color:#fff;box-shadow:0 4px 14px rgba(29,78,216,.3);}
+    .sos-action-btn.fire{background:linear-gradient(135deg,#f97316,#c2410c);color:#fff;box-shadow:0 4px 14px rgba(249,115,22,.3);}
+    .sos-action-btn.family{background:linear-gradient(135deg,#10b981,#065f46);color:#fff;box-shadow:0 4px 14px rgba(16,185,129,.3);}
+    .sos-action-btn:hover{transform:translateY(-2px);}
+
+    /* ── FIRST AID MODAL ── */
+    .fa-modal-steps{list-style:none;display:flex;flex-direction:column;gap:10px;}
+    .fa-modal-steps li{display:flex;gap:12px;align-items:flex-start;padding:12px;background:var(--bg);border-radius:12px;border:1px solid var(--border);font-size:.88rem;color:var(--text);line-height:1.5;}
+    .step-num{width:28px;height:28px;border-radius:50%;background:var(--grad-emergency);color:#fff;font-family:'Nunito',sans-serif;font-weight:900;font-size:.82rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+    /* ── TOAST ── */
+    .toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:14px 22px;border-radius:14px;font-size:.88rem;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);z-index:9999;}
+    .toast.show{transform:translateY(0);opacity:1;}
+
+    /* ── BACK BAR ── */
+    .back-bar{background:var(--card);border-bottom:1px solid #fee2e2;padding:12px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:41px;z-index:100;}
+    .back-btn{display:flex;align-items:center;gap:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:.9rem;color:var(--red);background:var(--red-light);border:none;border-radius:10px;padding:8px 16px;cursor:pointer;transition:all .2s;}
+    .back-btn:hover{background:var(--red);color:#fff;}
+    .back-bar-title{font-family:'Nunito',sans-serif;font-weight:900;font-size:1rem;color:var(--text);}
+
+    /* DB badge */
+    .db-badge{display:inline-flex;align-items:center;gap:5px;background:#ede9fe;color:var(--primary);font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:middle;}
+
+    .call-card:nth-child(1){animation-delay:.05s;} .call-card:nth-child(2){animation-delay:.10s;}
+    .call-card:nth-child(3){animation-delay:.15s;} .call-card:nth-child(4){animation-delay:.20s;}
+    .call-card:nth-child(5){animation-delay:.25s;}
+
+    /* ── SIDEBAR LAYOUT ── */
+    .page-layout{display:grid;grid-template-columns:260px 1fr;align-items:start;}
+    @media(max-width:900px){.page-layout{grid-template-columns:1fr;}}
+
+    /* ── SIDEBAR ── */
+    .sidebar{position:sticky;top:82px;height:calc(100vh - 82px);background:var(--card);border-right:1px solid #fee2e2;display:flex;flex-direction:column;overflow-y:auto;padding:24px 0 40px;z-index:90;}
+    .sidebar-brand{display:flex;align-items:center;gap:10px;padding:0 20px 20px;border-bottom:1px solid #fee2e2;margin-bottom:8px;}
+    .sidebar-brand-icon{width:38px;height:38px;border-radius:10px;background:var(--grad-emergency);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+    .sidebar-brand-name{font-family:'Nunito',sans-serif;font-weight:900;font-size:1rem;color:var(--text);line-height:1.2;}
+    .sidebar-brand-sub{font-size:.65rem;color:var(--text-muted);}
+    .sidebar-section-label{font-size:.65rem;font-weight:800;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;padding:14px 20px 6px;}
+    .sidebar-nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;cursor:pointer;border-left:3px solid transparent;transition:all .2s;font-weight:600;font-size:.87rem;color:var(--text);text-decoration:none;}
+    .sidebar-nav-item:hover{background:var(--red-light);border-left-color:var(--red);color:var(--red);}
+    .sidebar-nav-item.active{background:linear-gradient(90deg,#fee2e2,transparent);border-left-color:var(--red);color:var(--red);}
+    .sidebar-nav-item .nav-icon{font-size:1.05rem;width:22px;text-align:center;flex-shrink:0;}
+
+    /* ── PAGE MAIN ── */
+    .page-main{min-height:calc(100vh - 82px);}
+    .page-main .container{max-width:100%;}
+  </style>
+</head>
+<body>
+
+<!-- LANG BAR -->
+<div class="lang-bar">
+  <span class="lang-label">🌐 Language:</span>
+  <button class="lang-btn" onclick="setLang('en')">EN</button>
+  <button class="lang-btn" onclick="setLang('hi')">हिं</button>
+  <button class="lang-btn" onclick="setLang('kn')">ಕನ್ನಡ</button>
+  <button class="lang-btn" onclick="setLang('te')">తెలుగు</button>
+  <button class="lang-btn" onclick="setLang('ta')">தமிழ்</button>
+  <button class="lang-btn" onclick="setLang('mr')">मराठी</button>
+</div>
+
+<!-- BACK BAR -->
+<div class="back-bar">
+  <button class="back-btn" onclick="history.back()">← <span data-i18n="back">Back</span></button>
+  <span class="back-bar-title">🚨 <span data-i18n="page_title">Emergency Help — Swasthya Setu</span></span>
+</div>
+
+<!-- PAGE LAYOUT -->
+<div class="page-layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-icon">🏥</div>
+    <div>
+      <div class="sidebar-brand-name">स्वास्थ्य सेतु</div>
+      <div class="sidebar-brand-sub">Swasthya Setu</div>
+    </div>
+  </div>
+
+  <div class="sidebar-section-label" data-i18n="nav_label">नेविगेशन</div>
+
+  <a class="sidebar-nav-item" href="index.html"><span class="nav-icon">🏠</span> <span data-i18n="nav_home">होम</span></a>
+  <a class="sidebar-nav-item" href="symptom_checker.html"><span class="nav-icon">🔍</span> <span data-i18n="nav_symptom">लक्षण जाँचकर्ता</span></a>
+  <a class="sidebar-nav-item" href="doctor_appointment.html"><span class="nav-icon">📅</span> <span data-i18n="nav_doctor">डॉक्टर अपॉइंटमेंट</span></a>
+  <a class="sidebar-nav-item" href="medicine_remainders.html"><span class="nav-icon">💊</span> <span data-i18n="nav_medicine">दवा अनुस्मारक</span></a>
+  <a class="sidebar-nav-item" href="health_records.html"><span class="nav-icon">📋</span> <span data-i18n="nav_records">स्वास्थ्य रिकॉर्ड</span></a>
+  <a class="sidebar-nav-item" href="prescription_scanner.html"><span class="nav-icon">🔬</span> <span data-i18n="nav_prescription">पर्चा स्कैनर</span></a>
+  <a class="sidebar-nav-item active" href="emergency_help.html"><span class="nav-icon">🚨</span> <span data-i18n="nav_emergency">आपातकालीन सहायता</span></a>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="page-main">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge"><span class="dot"></span> <span data-i18n="hero_badge">Emergency Services Active</span></div>
+    <h1 class="hero-title">🚨 <span data-i18n="hero_title">Emergency Help</span></h1>
+    <p class="hero-sub" data-i18n="hero_sub">One tap to reach ambulance, police, fire brigade and your family in a crisis.</p>
+    <div class="sos-wrap" onclick="openSOS()">
+      <div class="sos-ring"></div><div class="sos-ring"></div><div class="sos-ring"></div>
+      <button class="sos-btn">
+        <span class="sos-icon">🆘</span>
+        <span class="sos-label" data-i18n="sos_label">TAP SOS</span>
+      </button>
+    </div>
+    <div class="hero-chips">
+      <span class="hero-chip">🏥 <span data-i18n="chip_ambulance">Ambulance: 108</span></span>
+      <span class="hero-chip">🚔 <span data-i18n="chip_police">Police: 100</span></span>
+      <span class="hero-chip">🔥 <span data-i18n="chip_fire">Fire: 101</span></span>
+      <span class="hero-chip">📞 <span data-i18n="chip_women">Women: 1091</span></span>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="container">
+
+  <!-- EMERGENCY NUMBERS -->
+  <div class="section-title">📞 <span data-i18n="section_numbers">Emergency Numbers</span></div>
+  <div class="call-grid">
+    <a class="call-card red"    href="tel:108"><div class="call-icon">🚑</div><div class="call-name" data-i18n="card_ambulance_name">Ambulance</div><div class="call-number">108</div><div class="call-desc" data-i18n="card_ambulance_desc">Free ambulance service across India</div><div class="call-tap">👆 <span data-i18n="tap_call">Tap to call</span></div></a>
+    <a class="call-card blue"   href="tel:100"><div class="call-icon">🚔</div><div class="call-name" data-i18n="card_police_name">Police</div><div class="call-number">100</div><div class="call-desc" data-i18n="card_police_desc">Law enforcement emergency response</div><div class="call-tap">👆 <span data-i18n="tap_call">Tap to call</span></div></a>
+    <a class="call-card orange" href="tel:101"><div class="call-icon">🔥</div><div class="call-name" data-i18n="card_fire_name">Fire Brigade</div><div class="call-number">101</div><div class="call-desc" data-i18n="card_fire_desc">Fire emergency & rescue operations</div><div class="call-tap">👆 <span data-i18n="tap_call">Tap to call</span></div></a>
+    <a class="call-card green"  href="tel:1091"><div class="call-icon">🤰</div><div class="call-name" data-i18n="card_women_name">Women Helpline</div><div class="call-number">1091</div><div class="call-desc" data-i18n="card_women_desc">Women distress & safety helpline</div><div class="call-tap">👆 <span data-i18n="tap_call">Tap to call</span></div></a>
+    <a class="call-card purple" href="tel:1800111565"><div class="call-icon">🧠</div><div class="call-name" data-i18n="card_mental_name">Mental Health</div><div class="call-number">iCall</div><div class="call-desc" data-i18n="card_mental_desc">Psychological support & counselling</div><div class="call-tap">👆 <span data-i18n="tap_call">Tap to call</span></div></a>
+  </div>
+
+  <!-- NEARBY HOSPITALS -->
+  <div class="hospitals-card">
+    <div class="section-title">🏥 <span data-i18n="section_hospitals">Nearby Hospitals</span> <span class="db-badge">📊 DB Linked</span></div>
+    <div class="hospital-list" id="hospital-list"></div>
+    <button class="add-hospital-btn" onclick="openAddHospital()">➕ <span data-i18n="add_hospital_btn">Add a Hospital / Clinic</span></button>
+  </div>
+
+  <!-- MY EMERGENCY CONTACTS -->
+  <div class="contacts-card">
+    <div class="contacts-header">
+      <div class="section-title" style="margin-bottom:0;">👨‍👩‍👧 <span data-i18n="section_contacts">My Emergency Contacts</span> <span class="db-badge">✏️ Editable</span></div>
+      <button class="btn-add-contact" onclick="openAddContact()">➕ <span data-i18n="add_contact_btn">Add Contact</span></button>
+    </div>
+    <div class="contact-list" id="contact-list"></div>
+  </div>
+
+  <!-- FIRST AID TIPS -->
+  <div class="firstaid-card">
+    <div class="section-title">🩹 <span data-i18n="section_firstaid">First Aid Quick Guide</span></div>
+    <div class="firstaid-grid">
+      <div class="firstaid-item" onclick="openFirstAid('heart')"><div class="fa-icon">❤️</div><div class="fa-title" data-i18n="fa_heart_title">Heart Attack</div><div style="font-size:.78rem;color:var(--text-muted)"><span data-i18n="fa_heart_preview">Keep calm, call 108, loosen clothing…</span> <span style="color:var(--red);font-weight:700;" data-i18n="read_more">Read more →</span></div></div>
+      <div class="firstaid-item" onclick="openFirstAid('stroke')"><div class="fa-icon">🧠</div><div class="fa-title" data-i18n="fa_stroke_title">Stroke (Brain Attack)</div><div style="font-size:.78rem;color:var(--text-muted)"><span data-i18n="fa_stroke_preview">FAST method — Face, Arms, Speech…</span> <span style="color:var(--red);font-weight:700;" data-i18n="read_more">Read more →</span></div></div>
+      <div class="firstaid-item" onclick="openFirstAid('snake')"><div class="fa-icon">🐍</div><div class="fa-title" data-i18n="fa_snake_title">Snake Bite</div><div style="font-size:.78rem;color:var(--text-muted)"><span data-i18n="fa_snake_preview">Keep still, immobilize, rush to hospital…</span> <span style="color:var(--red);font-weight:700;" data-i18n="read_more">Read more →</span></div></div>
+      <div class="firstaid-item" onclick="openFirstAid('burn')"><div class="fa-icon">🔥</div><div class="fa-title" data-i18n="fa_burn_title">Severe Burns</div><div style="font-size:.78rem;color:var(--text-muted)"><span data-i18n="fa_burn_preview">Cool with water, cover loosely…</span> <span style="color:var(--red);font-weight:700;" data-i18n="read_more">Read more →</span></div></div>
+      <div class="firstaid-item" onclick="openFirstAid('choke')"><div class="fa-icon">😮‍💨</div><div class="fa-title" data-i18n="fa_choke_title">Choking</div><div style="font-size:.78rem;color:var(--text-muted)"><span data-i18n="fa_choke_preview">5 back blows, Heimlich maneuver…</span> <span style="color:var(--red);font-weight:700;" data-i18n="read_more">Read more →</span></div></div>
+      <div class="firstaid-item" onclick="openFirstAid('bleed')"><div class="fa-icon">🩸</div><div class="fa-title" data-i18n="fa_bleed_title">Severe Bleeding</div><div style="font-size:.78rem;color:var(--text-muted)"><span data-i18n="fa_bleed_preview">Apply pressure, elevate the limb…</span> <span style="color:var(--red);font-weight:700;" data-i18n="read_more">Read more →</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: SOS -->
+<div class="modal-overlay" id="modal-sos">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">🆘 <span data-i18n="sos_modal_title">Emergency SOS</span></div><button class="modal-close" onclick="closeModal('modal-sos')">✕</button></div>
+    <div class="sos-modal-body">
+      <div class="sos-modal-icon">🆘</div>
+      <div class="sos-modal-title" data-i18n="sos_who">Who do you need?</div>
+      <div class="sos-modal-sub" data-i18n="sos_sub">Select the emergency service. The call will be placed immediately.</div>
+      <div class="sos-action-grid">
+        <button class="sos-action-btn ambulance" onclick="sosCall('Ambulance','108')"><span class="sab-icon">🚑</span><span data-i18n="card_ambulance_name">Ambulance</span><br><small>108</small></button>
+        <button class="sos-action-btn police"    onclick="sosCall('Police','100')"><span class="sab-icon">🚔</span><span data-i18n="card_police_name">Police</span><br><small>100</small></button>
+        <button class="sos-action-btn fire"      onclick="sosCall('Fire Brigade','101')"><span class="sab-icon">🔥</span><span data-i18n="card_fire_name">Fire Brigade</span><br><small>101</small></button>
+        <button class="sos-action-btn family"    onclick="callPrimaryContact()"><span class="sab-icon">👨‍👩‍👧</span><span data-i18n="sos_family">Family</span><br><small data-i18n="sos_emergency">Emergency</small></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ADD HOSPITAL -->
+<div class="modal-overlay" id="modal-hospital">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">🏥 <span data-i18n="modal_add_hospital">Add Hospital / Clinic</span></div><button class="modal-close" onclick="closeModal('modal-hospital')">✕</button></div>
+    <div class="field-group"><label data-i18n="label_hosp_name">Hospital / Clinic Name</label><input type="text" id="h-name" data-i18n-placeholder="placeholder_hosp_name"/></div>
+    <div class="field-group"><label data-i18n="label_hosp_addr">Address</label><input type="text" id="h-addr" data-i18n-placeholder="placeholder_hosp_addr"/></div>
+    <div class="form-row">
+      <div class="field-group"><label data-i18n="label_hosp_dist">Distance</label><input type="text" id="h-dist" data-i18n-placeholder="placeholder_hosp_dist"/></div>
+      <div class="field-group"><label data-i18n="label_hosp_time">Est. Travel Time</label><input type="text" id="h-time" data-i18n-placeholder="placeholder_hosp_time"/></div>
+    </div>
+    <div class="form-row">
+      <div class="field-group"><label data-i18n="label_hosp_phone">Phone</label><input type="tel" id="h-phone" placeholder="08372-XXXXXX"/></div>
+      <div class="field-group"><label data-i18n="label_hosp_type">Type</label>
+        <select id="h-type">
+          <option data-i18n="hosp_type_govt">Government</option>
+          <option data-i18n="hosp_type_pvt">Private</option>
+          <option data-i18n="hosp_type_phc">Primary Health</option>
+          <option data-i18n="hosp_type_spec">Specialty</option>
+          <option data-i18n="hosp_type_clinic">Clinic</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-group"><label data-i18n="label_hosp_avail">Availability</label>
+      <select id="h-avail">
+        <option data-i18n="avail_247">Open 24/7</option>
+        <option data-i18n="avail_day">Day only (8am-8pm)</option>
+        <option data-i18n="avail_emerg">Emergency Only</option>
+      </select>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-hospital')" data-i18n="btn_cancel">Cancel</button>
+      <button class="btn btn-red btn-sm" onclick="saveHospital()">💾 <span data-i18n="btn_save_hospital">Save Hospital</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ADD CONTACT -->
+<div class="modal-overlay" id="modal-contact">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">👤 <span data-i18n="modal_add_contact">Add Emergency Contact</span></div><button class="modal-close" onclick="closeModal('modal-contact')">✕</button></div>
+    <div class="field-group"><label data-i18n="label_contact_name">Full Name</label><input type="text" id="c-name" data-i18n-placeholder="placeholder_contact_name"/></div>
+    <div class="form-row">
+      <div class="field-group"><label data-i18n="label_contact_rel">Relationship</label>
+        <select id="c-rel">
+          <option data-i18n="rel_wife">Wife</option><option data-i18n="rel_husband">Husband</option>
+          <option data-i18n="rel_son">Son</option><option data-i18n="rel_daughter">Daughter</option>
+          <option data-i18n="rel_father">Father</option><option data-i18n="rel_mother">Mother</option>
+          <option data-i18n="rel_brother">Brother</option><option data-i18n="rel_sister">Sister</option>
+          <option data-i18n="rel_friend">Friend</option><option data-i18n="rel_neighbour">Neighbour</option>
+          <option data-i18n="rel_doctor">Doctor</option><option data-i18n="rel_other">Other</option>
+        </select>
+      </div>
+      <div class="field-group"><label data-i18n="label_contact_priority">Priority</label>
+        <select id="c-priority">
+          <option value="1" data-i18n="priority_1">1 — Primary</option>
+          <option value="2" data-i18n="priority_2">2 — Secondary</option>
+          <option value="3" data-i18n="priority_3">3 — Tertiary</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-group"><label data-i18n="label_contact_phone">Phone Number</label><input type="tel" id="c-phone" placeholder="+91 XXXXX XXXXX"/></div>
+    <div class="btn-row">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-contact')" data-i18n="btn_cancel">Cancel</button>
+      <button class="btn btn-red btn-sm" onclick="saveContact()">💾 <span data-i18n="btn_save_contact">Save Contact</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: FIRST AID -->
+<div class="modal-overlay" id="modal-firstaid">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="fa-modal-title">First Aid Guide</div><button class="modal-close" onclick="closeModal('modal-firstaid')">✕</button></div>
+    <div id="fa-modal-icon" style="font-size:3rem;text-align:center;margin-bottom:14px;"></div>
+    <div id="fa-modal-warning" style="background:#fff5f5;border-left:4px solid var(--red);border-radius:0 12px 12px 0;padding:10px 14px;font-size:.8rem;color:var(--red-dark);font-weight:600;margin-bottom:20px;"></div>
+    <ol class="fa-modal-steps" id="fa-modal-steps"></ol>
+    <div class="btn-row" style="margin-top:20px;"><a class="btn btn-red" href="tel:108" style="text-decoration:none;">📞 <span data-i18n="call_ambulance_btn">Call Ambulance 108</span></a></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════
+//  TRANSLATIONS
+// ════════════════════════════════════════════════════════
+const TRANSLATIONS = {
+  en: {
+    back: 'Back',
+    page_title: 'Emergency Help — Swasthya Setu',
+    nav_label: 'Navigation',
+    nav_home: 'Home', nav_symptom: 'Symptom Checker', nav_doctor: 'Doctor Appointment',
+    nav_medicine: 'Medicine Reminders', nav_records: 'Health Records',
+    nav_prescription: 'Prescription Scanner', nav_emergency: 'Emergency Help',
+    hero_badge: 'Emergency Services Active',
+    hero_title: 'Emergency Help',
+    hero_sub: 'One tap to reach ambulance, police, fire brigade and your family in a crisis.',
+    sos_label: 'TAP SOS',
+    chip_ambulance: 'Ambulance: 108', chip_police: 'Police: 100', chip_fire: 'Fire: 101', chip_women: 'Women: 1091',
+    section_numbers: 'Emergency Numbers',
+    card_ambulance_name: 'Ambulance', card_ambulance_desc: 'Free ambulance service across India',
+    card_police_name: 'Police', card_police_desc: 'Law enforcement emergency response',
+    card_fire_name: 'Fire Brigade', card_fire_desc: 'Fire emergency & rescue operations',
+    card_women_name: 'Women Helpline', card_women_desc: 'Women distress & safety helpline',
+    card_mental_name: 'Mental Health', card_mental_desc: 'Psychological support & counselling',
+    tap_call: 'Tap to call',
+    section_hospitals: 'Nearby Hospitals',
+    add_hospital_btn: 'Add a Hospital / Clinic',
+    section_contacts: 'My Emergency Contacts',
+    add_contact_btn: 'Add Contact',
+    section_firstaid: 'First Aid Quick Guide',
+    fa_heart_title: 'Heart Attack', fa_heart_preview: 'Keep calm, call 108, loosen clothing…',
+    fa_stroke_title: 'Stroke (Brain Attack)', fa_stroke_preview: 'FAST method — Face, Arms, Speech…',
+    fa_snake_title: 'Snake Bite', fa_snake_preview: 'Keep still, immobilize, rush to hospital…',
+    fa_burn_title: 'Severe Burns', fa_burn_preview: 'Cool with water, cover loosely…',
+    fa_choke_title: 'Choking', fa_choke_preview: '5 back blows, Heimlich maneuver…',
+    fa_bleed_title: 'Severe Bleeding', fa_bleed_preview: 'Apply pressure, elevate the limb…',
+    read_more: 'Read more →',
+    sos_modal_title: 'Emergency SOS',
+    sos_who: 'Who do you need?',
+    sos_sub: 'Select the emergency service. The call will be placed immediately.',
+    sos_family: 'Family', sos_emergency: 'Emergency',
+    modal_add_hospital: 'Add Hospital / Clinic',
+    label_hosp_name: 'Hospital / Clinic Name', placeholder_hosp_name: 'e.g. City Medical Centre',
+    label_hosp_addr: 'Address', placeholder_hosp_addr: 'e.g. Station Road, Gadag',
+    label_hosp_dist: 'Distance', placeholder_hosp_dist: 'e.g. 2.3 km',
+    label_hosp_time: 'Est. Travel Time', placeholder_hosp_time: 'e.g. ~9 min',
+    label_hosp_phone: 'Phone', label_hosp_type: 'Type', label_hosp_avail: 'Availability',
+    hosp_type_govt: 'Government', hosp_type_pvt: 'Private', hosp_type_phc: 'Primary Health',
+    hosp_type_spec: 'Specialty', hosp_type_clinic: 'Clinic',
+    avail_247: 'Open 24/7', avail_day: 'Day only (8am-8pm)', avail_emerg: 'Emergency Only',
+    modal_add_contact: 'Add Emergency Contact',
+    label_contact_name: 'Full Name', placeholder_contact_name: "Contact's full name",
+    label_contact_rel: 'Relationship', label_contact_priority: 'Priority', label_contact_phone: 'Phone Number',
+    rel_wife:'Wife', rel_husband:'Husband', rel_son:'Son', rel_daughter:'Daughter',
+    rel_father:'Father', rel_mother:'Mother', rel_brother:'Brother', rel_sister:'Sister',
+    rel_friend:'Friend', rel_neighbour:'Neighbour', rel_doctor:'Doctor', rel_other:'Other',
+    priority_1: '1 — Primary', priority_2: '2 — Secondary', priority_3: '3 — Tertiary',
+    btn_cancel: 'Cancel', btn_save_hospital: 'Save Hospital', btn_save_contact: 'Save Contact',
+    call_ambulance_btn: 'Call Ambulance 108',
+    hosp_away: 'away', hosp_directions: '📍 Get directions',
+    toast_hospital_added: '✅ Hospital added!', toast_contact_added_pre: '✅', toast_contact_added_suf: 'added as emergency contact!',
+    toast_contact_updated_pre: '✅', toast_contact_updated_suf: 'updated!',
+    toast_contact_removed: '🗑️ Contact removed', toast_required: '⚠️ Name and Phone are required',
+    toast_contact_required: '⚠️ Name and phone are required', toast_contact_empty: '⚠️ Name and phone cannot be empty',
+    confirm_remove_pre: 'Remove', confirm_remove_suf: 'from emergency contacts?',
+    toast_calling_pre: '📞 Calling', toast_no_primary: '⚠️ No primary contact set. Add one first.',
+    toast_calling_service_pre: '📞 Calling',
+    fa_data: {
+      heart:{ icon:'❤️', title:'Heart Attack — First Aid', warning:'⚠️ Call 108 immediately. Do NOT give food or water.',
+        steps:['Make the person sit or lie down in a comfortable position. Loosen tight clothing around neck and chest.','If the person is conscious and not allergic, give one aspirin (325mg) to chew slowly.','Call 108 ambulance immediately — do not delay.','If the person becomes unconscious and stops breathing, start CPR — 30 chest compressions, then 2 rescue breaths.','Keep them calm and warm until the ambulance arrives. Do not leave them alone.']},
+      stroke:{ icon:'🧠', title:'Stroke — FAST Method', warning:'⚠️ Time is critical. Every minute counts. Call 108 NOW.',
+        steps:['F — FACE: Ask person to smile. Is one side drooping?','A — ARMS: Ask them to raise both arms. Does one drift down?','S — SPEECH: Ask them to repeat a simple sentence. Is it slurred?','T — TIME: If any signs are present, call 108 immediately.','Do NOT give food, water, or medication. Lay person on their side to prevent choking.']},
+      snake:{ icon:'🐍', title:'Snake Bite — First Aid', warning:'⚠️ Do NOT cut the wound, suck venom, or apply tourniquet. Rush to hospital.',
+        steps:['Keep the person calm and still — movement spreads venom faster.','Immobilize the bitten limb and keep it below heart level.','Remove rings, watches, and tight clothing near the bite.','Note the snake\'s appearance (color, pattern) for anti-venom identification.','Call 108 and rush to the nearest hospital with anti-venom stock immediately.']},
+      burn:{ icon:'🔥', title:'Severe Burns — First Aid', warning:'⚠️ Do NOT apply butter, toothpaste, or ice. Do NOT break blisters.',
+        steps:['Remove the person from the source of heat. Cool the burn with cool (not cold) running water for 20 minutes.','Remove jewelry or clothing near the burn area — unless stuck to skin.','Cover loosely with a clean, non-fluffy bandage or clean cloth.','Do NOT apply any creams, oils, or home remedies to the burn.','For burns on face/hands/genitals or covering large areas — call 108 immediately.']},
+      choke:{ icon:'😮‍💨', title:'Choking — First Aid', warning:'⚠️ If the person cannot cough, speak, or breathe — act immediately.',
+        steps:['Encourage the person to cough forcefully if they can.','Give 5 firm back blows between the shoulder blades with the heel of your hand.','If back blows fail, perform 5 abdominal thrusts (Heimlich maneuver) — stand behind, thrust inward and upward below the ribcage.','Alternate 5 back blows and 5 abdominal thrusts until the object is dislodged.','If the person becomes unconscious, start CPR and call 108 immediately.']},
+      bleed:{ icon:'🩸', title:'Severe Bleeding — First Aid', warning:'⚠️ Heavy blood loss is life-threatening. Call 108 immediately for deep wounds.',
+        steps:['Apply firm, direct pressure on the wound using a clean cloth or bandage.','If cloth becomes soaked, add more cloth on top — do NOT remove the first one.','Elevate the injured limb above heart level if possible.','For a limb wound with uncontrollable bleeding, apply a tourniquet 5–7 cm above the wound. Note the time applied.','Keep applying pressure until medical help arrives. Keep the person calm and lying down.']}
+    }
+  },
+  hi: {
+    back: 'वापस',
+    page_title: 'आपातकालीन सहायता — स्वास्थ्य सेतु',
+    nav_label: 'नेविगेशन',
+    nav_home: 'होम', nav_symptom: 'लक्षण जाँचकर्ता', nav_doctor: 'डॉक्टर अपॉइंटमेंट',
+    nav_medicine: 'दवा अनुस्मारक', nav_records: 'स्वास्थ्य रिकॉर्ड',
+    nav_prescription: 'पर्चा स्कैनर', nav_emergency: 'आपातकालीन सहायता',
+    hero_badge: 'आपातकालीन सेवाएं सक्रिय',
+    hero_title: 'आपातकालीन सहायता',
+    hero_sub: 'संकट में एम्बुलेंस, पुलिस, फायर ब्रिगेड और अपने परिवार तक एक टैप में पहुंचें।',
+    sos_label: 'SOS दबाएं',
+    chip_ambulance: 'एम्बुलेंस: 108', chip_police: 'पुलिस: 100', chip_fire: 'अग्निशमन: 101', chip_women: 'महिला: 1091',
+    section_numbers: 'आपातकालीन नंबर',
+    card_ambulance_name: 'एम्बुलेंस', card_ambulance_desc: 'पूरे भारत में मुफ्त एम्बुलेंस सेवा',
+    card_police_name: 'पुलिस', card_police_desc: 'कानून प्रवर्तन आपातकालीन प्रतिक्रिया',
+    card_fire_name: 'फायर ब्रिगेड', card_fire_desc: 'अग्नि आपात एवं बचाव अभियान',
+    card_women_name: 'महिला हेल्पलाइन', card_women_desc: 'महिला संकट एवं सुरक्षा हेल्पलाइन',
+    card_mental_name: 'मानसिक स्वास्थ्य', card_mental_desc: 'मनोवैज्ञानिक सहायता और परामर्श',
+    tap_call: 'कॉल करने के लिए टैप करें',
+    section_hospitals: 'नजदीकी अस्पताल',
+    add_hospital_btn: 'अस्पताल / क्लिनिक जोड़ें',
+    section_contacts: 'मेरे आपातकालीन संपर्क',
+    add_contact_btn: 'संपर्क जोड़ें',
+    section_firstaid: 'प्राथमिक चिकित्सा त्वरित मार्गदर्शिका',
+    fa_heart_title: 'दिल का दौरा', fa_heart_preview: 'शांत रहें, 108 कॉल करें, कपड़े ढीले करें…',
+    fa_stroke_title: 'स्ट्रोक (मस्तिष्क आघात)', fa_stroke_preview: 'FAST विधि — चेहरा, हाथ, वाणी…',
+    fa_snake_title: 'सांप का काटना', fa_snake_preview: 'स्थिर रहें, स्थिर करें, अस्पताल दौड़ें…',
+    fa_burn_title: 'गंभीर जलन', fa_burn_preview: 'पानी से ठंडा करें, ढककर रखें…',
+    fa_choke_title: 'दम घुटना', fa_choke_preview: '5 पीठ पर प्रहार, हेम्लिच पैंतरेबाज़ी…',
+    fa_bleed_title: 'गंभीर रक्तस्राव', fa_bleed_preview: 'दबाव डालें, अंग ऊपर उठाएं…',
+    read_more: 'और पढ़ें →',
+    sos_modal_title: 'आपातकालीन SOS',
+    sos_who: 'आपको किसकी जरूरत है?',
+    sos_sub: 'आपातकालीन सेवा चुनें। कॉल तुरंत की जाएगी।',
+    sos_family: 'परिवार', sos_emergency: 'आपातकाल',
+    modal_add_hospital: 'अस्पताल / क्लिनिक जोड़ें',
+    label_hosp_name: 'अस्पताल / क्लिनिक का नाम', placeholder_hosp_name: 'जैसे: सिटी मेडिकल सेंटर',
+    label_hosp_addr: 'पता', placeholder_hosp_addr: 'जैसे: स्टेशन रोड, गदग',
+    label_hosp_dist: 'दूरी', placeholder_hosp_dist: 'जैसे: 2.3 किमी',
+    label_hosp_time: 'अनुमानित यात्रा समय', placeholder_hosp_time: 'जैसे: ~9 मिनट',
+    label_hosp_phone: 'फोन', label_hosp_type: 'प्रकार', label_hosp_avail: 'उपलब्धता',
+    hosp_type_govt: 'सरकारी', hosp_type_pvt: 'निजी', hosp_type_phc: 'प्राथमिक स्वास्थ्य',
+    hosp_type_spec: 'विशेष', hosp_type_clinic: 'क्लिनिक',
+    avail_247: '24/7 खुला', avail_day: 'केवल दिन (8 बजे-8 बजे)', avail_emerg: 'केवल आपातकाल',
+    modal_add_contact: 'आपातकालीन संपर्क जोड़ें',
+    label_contact_name: 'पूरा नाम', placeholder_contact_name: 'संपर्क का पूरा नाम',
+    label_contact_rel: 'संबंध', label_contact_priority: 'प्राथमिकता', label_contact_phone: 'फोन नंबर',
+    rel_wife:'पत्नी', rel_husband:'पति', rel_son:'बेटा', rel_daughter:'बेटी',
+    rel_father:'पिता', rel_mother:'माता', rel_brother:'भाई', rel_sister:'बहन',
+    rel_friend:'मित्र', rel_neighbour:'पड़ोसी', rel_doctor:'डॉक्टर', rel_other:'अन्य',
+    priority_1: '1 — प्राथमिक', priority_2: '2 — द्वितीयक', priority_3: '3 — तृतीयक',
+    btn_cancel: 'रद्द करें', btn_save_hospital: 'अस्पताल सहेजें', btn_save_contact: 'संपर्क सहेजें',
+    call_ambulance_btn: 'एम्बुलेंस 108 कॉल करें',
+    hosp_away: 'दूर', hosp_directions: '📍 दिशा-निर्देश',
+    toast_hospital_added: '✅ अस्पताल जोड़ा गया!', toast_contact_added_pre: '✅', toast_contact_added_suf: 'आपातकालीन संपर्क के रूप में जोड़ा गया!',
+    toast_contact_updated_pre: '✅', toast_contact_updated_suf: 'अपडेट किया गया!',
+    toast_contact_removed: '🗑️ संपर्क हटाया गया', toast_required: '⚠️ नाम और फोन आवश्यक हैं',
+    toast_contact_required: '⚠️ नाम और फोन आवश्यक हैं', toast_contact_empty: '⚠️ नाम और फोन खाली नहीं हो सकते',
+    confirm_remove_pre: 'हटाएं', confirm_remove_suf: 'आपातकालीन संपर्क से?',
+    toast_calling_pre: '📞 कॉल हो रही है', toast_no_primary: '⚠️ कोई प्राथमिक संपर्क नहीं। पहले जोड़ें।',
+    toast_calling_service_pre: '📞 कॉल हो रही है',
+    fa_data: {
+      heart:{ icon:'❤️', title:'दिल का दौरा — प्राथमिक चिकित्सा', warning:'⚠️ तुरंत 108 कॉल करें। खाना या पानी न दें।',
+        steps:['व्यक्ति को आरामदायक स्थिति में बैठाएं या लिटाएं। गर्दन और छाती के पास कपड़े ढीले करें।','यदि व्यक्ति होश में है और एलर्जी नहीं है, तो एक एस्पिरिन (325mg) धीरे-धीरे चबाने को दें।','तुरंत 108 एम्बुलेंस बुलाएं — देरी न करें।','यदि व्यक्ति बेहोश हो जाए और सांस रुक जाए, CPR शुरू करें — 30 छाती की दबाव, फिर 2 बचाव सांसें।','एम्बुलेंस आने तक उन्हें शांत और गर्म रखें। उन्हें अकेला न छोड़ें।']},
+      stroke:{ icon:'🧠', title:'स्ट्रोक — FAST विधि', warning:'⚠️ समय बहुत महत्वपूर्ण है। हर मिनट मायने रखता है। अभी 108 कॉल करें।',
+        steps:['F — चेहरा: व्यक्ति को मुस्कुराने को कहें। क्या एक तरफ झुक रहा है?','A — हाथ: दोनों हाथ उठाने को कहें। क्या एक हाथ नीचे गिर रहा है?','S — बोली: एक सरल वाक्य दोहराने को कहें। क्या बोली अटपटी है?','T — समय: यदि कोई भी संकेत हो, तुरंत 108 कॉल करें।','खाना, पानी या दवा न दें। उल्टी से बचाने के लिए व्यक्ति को करवट लिटाएं।']},
+      snake:{ icon:'🐍', title:'सांप का काटना — प्राथमिक चिकित्सा', warning:'⚠️ घाव न काटें, जहर न चूसें, टूर्निकेट न लगाएं। अस्पताल दौड़ें।',
+        steps:['व्यक्ति को शांत और स्थिर रखें — हिलने से जहर तेजी से फैलता है।','काटे गए अंग को स्थिर करें और दिल के स्तर से नीचे रखें।','काटने के पास की अंगूठियां, घड़ी और कसे कपड़े हटाएं।','एंटी-वेनम पहचान के लिए सांप का रूप (रंग, पैटर्न) नोट करें।','108 कॉल करें और तुरंत एंटी-वेनम स्टॉक वाले नजदीकी अस्पताल जाएं।']},
+      burn:{ icon:'🔥', title:'गंभीर जलन — प्राथमिक चिकित्सा', warning:'⚠️ मक्खन, टूथपेस्ट या बर्फ न लगाएं। छाले न फोड़ें।',
+        steps:['व्यक्ति को गर्मी के स्रोत से दूर करें। जलन को 20 मिनट तक ठंडे (बर्फीले नहीं) बहते पानी से ठंडा करें।','जलन क्षेत्र के पास के आभूषण या कपड़े हटाएं — जब तक त्वचा से चिपके न हों।','साफ, गैर-रेशेदार पट्टी या साफ कपड़े से ढीला ढकें।','जलन पर कोई क्रीम, तेल या घरेलू उपाय न लगाएं।','चेहरे/हाथ/जननांगों पर या बड़े क्षेत्र की जलन के लिए — तुरंत 108 कॉल करें।']},
+      choke:{ icon:'😮‍💨', title:'दम घुटना — प्राथमिक चिकित्सा', warning:'⚠️ यदि व्यक्ति खांस, बोल या सांस नहीं ले सकता — तुरंत कार्य करें।',
+        steps:['यदि व्यक्ति खांस सकता है तो जोर से खांसने के लिए प्रोत्साहित करें।','हथेली की एड़ी से कंधे की हड्डियों के बीच 5 पीठ पर जोरदार वार करें।','यदि पीठ पर वार काम न करे, 5 पेट पर धक्का (हेम्लिच) दें — पीछे खड़े हों, पसलियों के नीचे अंदर और ऊपर धक्का दें।','वस्तु निकलने तक 5 पीठ पर वार और 5 पेट पर धक्का बारी-बारी दोहराएं।','यदि व्यक्ति बेहोश हो जाए, CPR शुरू करें और तुरंत 108 कॉल करें।']},
+      bleed:{ icon:'🩸', title:'गंभीर रक्तस्राव — प्राथमिक चिकित्सा', warning:'⚠️ भारी रक्त हानि जीवन के लिए खतरनाक है। गहरे घावों के लिए तुरंत 108 कॉल करें।',
+        steps:['साफ कपड़े या पट्टी से घाव पर मजबूत, सीधा दबाव डालें।','यदि कपड़ा भीग जाए, ऊपर और कपड़ा डालें — पहला कपड़ा न हटाएं।','यदि संभव हो, घायल अंग को दिल के स्तर से ऊपर उठाएं।','अनियंत्रित रक्तस्राव वाले अंग के घाव के लिए, घाव से 5-7 सेमी ऊपर टूर्निकेट लगाएं। समय नोट करें।','चिकित्सा सहायता आने तक दबाव डालते रहें। व्यक्ति को शांत और लेटे हुए रखें.']}
+    }
+  },
+  kn: {
+    back: 'ಹಿಂದೆ',
+    page_title: 'ತುರ್ತು ಸಹಾಯ — ಸ್ವಾಸ್ಥ್ಯ ಸೇತು',
+    nav_label: 'ನ್ಯಾವಿಗೇಶನ್',
+    nav_home: 'ಮುಖಪುಟ', nav_symptom: 'ರೋಗಲಕ್ಷಣ ಪರೀಕ್ಷಕ', nav_doctor: 'ಡಾಕ್ಟರ್ ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್',
+    nav_medicine: 'ಔಷಧ ಜ್ಞಾಪನೆಗಳು', nav_records: 'ಆರೋಗ್ಯ ದಾಖಲೆಗಳು',
+    nav_prescription: 'ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ಸ್ಕ್ಯಾನರ್', nav_emergency: 'ತುರ್ತು ಸಹಾಯ',
+    hero_badge: 'ತುರ್ತು ಸೇವೆಗಳು ಸಕ್ರಿಯ',
+    hero_title: 'ತುರ್ತು ಸಹಾಯ',
+    hero_sub: 'ಬಿಕ್ಕಟ್ಟಿನಲ್ಲಿ ಆಂಬ್ಯುಲೆನ್ಸ್, ಪೊಲೀಸ್, ಅಗ್ನಿಶಾಮಕ ಮತ್ತು ಕುಟುಂಬವನ್ನು ಒಂದೇ ಟ್ಯಾಪ್‌ನಲ್ಲಿ ತಲುಪಿ.',
+    sos_label: 'SOS ಒತ್ತಿ',
+    chip_ambulance: 'ಆಂಬ್ಯುಲೆನ್ಸ್: 108', chip_police: 'ಪೊಲೀಸ್: 100', chip_fire: 'ಅಗ್ನಿ: 101', chip_women: 'ಮಹಿಳಾ: 1091',
+    section_numbers: 'ತುರ್ತು ಸಂಖ್ಯೆಗಳು',
+    card_ambulance_name: 'ಆಂಬ್ಯುಲೆನ್ಸ್', card_ambulance_desc: 'ಭಾರತದಾದ್ಯಂತ ಉಚಿತ ಆಂಬ್ಯುಲೆನ್ಸ್ ಸೇವೆ',
+    card_police_name: 'ಪೊಲೀಸ್', card_police_desc: 'ಕಾನೂನು ಜಾರಿ ತುರ್ತು ಪ್ರತಿಕ್ರಿಯೆ',
+    card_fire_name: 'ಅಗ್ನಿಶಾಮಕ ದಳ', card_fire_desc: 'ಅಗ್ನಿ ತುರ್ತು ಮತ್ತು ರಕ್ಷಣಾ ಕಾರ್ಯಾಚರಣೆ',
+    card_women_name: 'ಮಹಿಳಾ ಸಹಾಯವಾಣಿ', card_women_desc: 'ಮಹಿಳಾ ಸಂಕಷ್ಟ ಮತ್ತು ಸುರಕ್ಷತಾ ಸಹಾಯವಾಣಿ',
+    card_mental_name: 'ಮಾನಸಿಕ ಆರೋಗ್ಯ', card_mental_desc: 'ಮಾನಸಿಕ ಬೆಂಬಲ ಮತ್ತು ಸಲಹೆ',
+    tap_call: 'ಕರೆ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ',
+    section_hospitals: 'ಹತ್ತಿರದ ಆಸ್ಪತ್ರೆಗಳು',
+    add_hospital_btn: 'ಆಸ್ಪತ್ರೆ / ಕ್ಲಿನಿಕ್ ಸೇರಿಸಿ',
+    section_contacts: 'ನನ್ನ ತುರ್ತು ಸಂಪರ್ಕಗಳು',
+    add_contact_btn: 'ಸಂಪರ್ಕ ಸೇರಿಸಿ',
+    section_firstaid: 'ಪ್ರಥಮ ಚಿಕಿತ್ಸೆ ತ್ವರಿತ ಮಾರ್ಗದರ್ಶಿ',
+    fa_heart_title: 'ಹೃದಯಾಘಾತ', fa_heart_preview: 'ಶಾಂತವಾಗಿರಿ, 108 ಕರೆ ಮಾಡಿ, ಬಟ್ಟೆ ಸಡಿಲಿಸಿ…',
+    fa_stroke_title: 'ಪಾರ್ಶ್ವವಾಯು', fa_stroke_preview: 'FAST ವಿಧಾನ — ಮುಖ, ತೋಳು, ಮಾತು…',
+    fa_snake_title: 'ಹಾವು ಕಡಿತ', fa_snake_preview: 'ಸ್ಥಿರವಾಗಿರಿ, ಸ್ಥಿರಗೊಳಿಸಿ, ಆಸ್ಪತ್ರೆಗೆ ಓಡಿ…',
+    fa_burn_title: 'ತೀವ್ರ ಸುಟ್ಟಗಾಯ', fa_burn_preview: 'ನೀರಿನಿಂದ ತಂಪು ಮಾಡಿ, ಸಡಿಲವಾಗಿ ಮುಚ್ಚಿ…',
+    fa_choke_title: 'ಉಸಿರುಗಟ್ಟುವಿಕೆ', fa_choke_preview: '5 ಬೆನ್ನಿನ ಹೊಡೆತ, ಹೀಮ್ಲಿಕ್ ತಂತ್ರ…',
+    fa_bleed_title: 'ತೀವ್ರ ರಕ್ತಸ್ರಾವ', fa_bleed_preview: 'ಒತ್ತಡ ಹಾಕಿ, ಅಂಗ ಎತ್ತಿ ಹಿಡಿಯಿರಿ…',
+    read_more: 'ಇನ್ನಷ್ಟು ಓದಿ →',
+    sos_modal_title: 'ತುರ್ತು SOS',
+    sos_who: 'ನಿಮಗೆ ಯಾರು ಬೇಕು?',
+    sos_sub: 'ತುರ್ತು ಸೇವೆ ಆಯ್ಕೆ ಮಾಡಿ. ಕರೆ ತಕ್ಷಣ ಮಾಡಲಾಗುತ್ತದೆ.',
+    sos_family: 'ಕುಟುಂಬ', sos_emergency: 'ತುರ್ತು',
+    modal_add_hospital: 'ಆಸ್ಪತ್ರೆ / ಕ್ಲಿನಿಕ್ ಸೇರಿಸಿ',
+    label_hosp_name: 'ಆಸ್ಪತ್ರೆ / ಕ್ಲಿನಿಕ್ ಹೆಸರು', placeholder_hosp_name: 'ಉದಾ. ಸಿಟಿ ಮೆಡಿಕಲ್ ಸೆಂಟರ್',
+    label_hosp_addr: 'ವಿಳಾಸ', placeholder_hosp_addr: 'ಉದಾ. ಸ್ಟೇಷನ್ ರಸ್ತೆ, ಗದಗ',
+    label_hosp_dist: 'ದೂರ', placeholder_hosp_dist: 'ಉದಾ. 2.3 ಕಿಮಿ',
+    label_hosp_time: 'ಅಂದಾಜು ಪ್ರಯಾಣ ಸಮಯ', placeholder_hosp_time: 'ಉದಾ. ~9 ನಿಮಿಷ',
+    label_hosp_phone: 'ಫೋನ್', label_hosp_type: 'ಪ್ರಕಾರ', label_hosp_avail: 'ಲಭ್ಯತೆ',
+    hosp_type_govt: 'ಸರ್ಕಾರಿ', hosp_type_pvt: 'ಖಾಸಗಿ', hosp_type_phc: 'ಪ್ರಾಥಮಿಕ ಆರೋಗ್ಯ',
+    hosp_type_spec: 'ವಿಶೇಷ', hosp_type_clinic: 'ಕ್ಲಿನಿಕ್',
+    avail_247: '24/7 ತೆರೆದಿದೆ', avail_day: 'ಹಗಲು ಮಾತ್ರ (8ರಿಂದ-8ರವರೆಗೆ)', avail_emerg: 'ತುರ್ತು ಮಾತ್ರ',
+    modal_add_contact: 'ತುರ್ತು ಸಂಪರ್ಕ ಸೇರಿಸಿ',
+    label_contact_name: 'ಪೂರ್ಣ ಹೆಸರು', placeholder_contact_name: 'ಸಂಪರ್ಕದ ಪೂರ್ಣ ಹೆಸರು',
+    label_contact_rel: 'ಸಂಬಂಧ', label_contact_priority: 'ಆದ್ಯತೆ', label_contact_phone: 'ಫೋನ್ ಸಂಖ್ಯೆ',
+    rel_wife:'ಹೆಂಡತಿ', rel_husband:'ಗಂಡ', rel_son:'ಮಗ', rel_daughter:'ಮಗಳು',
+    rel_father:'ತಂದೆ', rel_mother:'ತಾಯಿ', rel_brother:'ಅಣ್ಣ/ತಮ್ಮ', rel_sister:'ಅಕ್ಕ/ತಂಗಿ',
+    rel_friend:'ಮಿತ್ರ', rel_neighbour:'ನೆರೆಹೊರೆಯವರು', rel_doctor:'ಡಾಕ್ಟರ್', rel_other:'ಇತರ',
+    priority_1: '1 — ಪ್ರಾಥಮಿಕ', priority_2: '2 — ದ್ವಿತೀಯ', priority_3: '3 — ತೃತೀಯ',
+    btn_cancel: 'ರದ್ದು', btn_save_hospital: 'ಆಸ್ಪತ್ರೆ ಉಳಿಸಿ', btn_save_contact: 'ಸಂಪರ್ಕ ಉಳಿಸಿ',
+    call_ambulance_btn: 'ಆಂಬ್ಯುಲೆನ್ಸ್ 108 ಕರೆ ಮಾಡಿ',
+    hosp_away: 'ದೂರ', hosp_directions: '📍 ದಿಕ್ಕುಗಳು',
+    toast_hospital_added: '✅ ಆಸ್ಪತ್ರೆ ಸೇರಿಸಲಾಗಿದೆ!', toast_contact_added_pre: '✅', toast_contact_added_suf: 'ತುರ್ತು ಸಂಪರ್ಕವಾಗಿ ಸೇರಿಸಲಾಗಿದೆ!',
+    toast_contact_updated_pre: '✅', toast_contact_updated_suf: 'ನವೀಕರಿಸಲಾಗಿದೆ!',
+    toast_contact_removed: '🗑️ ಸಂಪರ್ಕ ತೆಗೆದುಹಾಕಲಾಗಿದೆ', toast_required: '⚠️ ಹೆಸರು ಮತ್ತು ಫೋನ್ ಅಗತ್ಯ',
+    toast_contact_required: '⚠️ ಹೆಸರು ಮತ್ತು ಫೋನ್ ಅಗತ್ಯ', toast_contact_empty: '⚠️ ಹೆಸರು ಮತ್ತು ಫೋನ್ ಖಾಲಿ ಇರಬಾರದು',
+    confirm_remove_pre: 'ತೆಗೆದುಹಾಕಲೇ', confirm_remove_suf: 'ತುರ್ತು ಸಂಪರ್ಕಗಳಿಂದ?',
+    toast_calling_pre: '📞 ಕರೆ ಮಾಡಲಾಗುತ್ತಿದೆ', toast_no_primary: '⚠️ ಪ್ರಾಥಮಿಕ ಸಂಪರ್ಕ ಇಲ್ಲ. ಮೊದಲು ಸೇರಿಸಿ.',
+    toast_calling_service_pre: '📞 ಕರೆ ಮಾಡಲಾಗುತ್ತಿದೆ',
+    fa_data: {
+      heart:{ icon:'❤️', title:'ಹೃದಯಾಘಾತ — ಪ್ರಥಮ ಚಿಕಿತ್ಸೆ', warning:'⚠️ ತಕ್ಷಣ 108 ಕರೆ ಮಾಡಿ. ಆಹಾರ ಅಥವಾ ನೀರು ಕೊಡಬೇಡಿ.',
+        steps:['ವ್ಯಕ್ತಿಯನ್ನು ಆರಾಮದಾಯಕ ಸ್ಥಾನದಲ್ಲಿ ಕೂರಿಸಿ ಅಥವಾ ಮಲಗಿಸಿ. ಕುತ್ತಿಗೆ ಮತ್ತು ಎದೆಯ ಸುತ್ತ ಬಿಗಿ ಬಟ್ಟೆ ಸಡಿಲಿಸಿ.','ವ್ಯಕ್ತಿ ಪ್ರಜ್ಞಾವಂತರಾಗಿದ್ದರೆ ಮತ್ತು ಅಲರ್ಜಿ ಇಲ್ಲದಿದ್ದರೆ, ಒಂದು ಆಸ್ಪಿರಿನ್ (325mg) ನಿಧಾನವಾಗಿ ಅಗಿಯಲು ಕೊಡಿ.','ತಕ್ಷಣ 108 ಆಂಬ್ಯುಲೆನ್ಸ್ ಕರೆ ಮಾಡಿ — ತಡ ಮಾಡಬೇಡಿ.','ವ್ಯಕ್ತಿ ಮೂರ್ಛೆ ಹೋಗಿ ಉಸಿರು ನಿಂತರೆ, CPR ಪ್ರಾರಂಭಿಸಿ — 30 ಎದೆ ಒತ್ತಡ, ನಂತರ 2 ಉಸಿರು ಊದಿ.','ಆಂಬ್ಯುಲೆನ್ಸ್ ಬರುವವರೆಗೂ ಅವರನ್ನು ಶಾಂತ ಮತ್ತು ಬೆಚ್ಚಗಿರಿಸಿ. ಒಂಟಿಯಾಗಿ ಬಿಡಬೇಡಿ.']},
+      stroke:{ icon:'🧠', title:'ಪಾರ್ಶ್ವವಾಯು — FAST ವಿಧಾನ', warning:'⚠️ ಸಮಯ ಬಹಳ ಮುಖ್ಯ. ಪ್ರತಿ ನಿಮಿಷ ಮುಖ್ಯ. ಈಗಲೇ 108 ಕರೆ ಮಾಡಿ.',
+        steps:['F — ಮುಖ: ನಗಲು ಹೇಳಿ. ಒಂದು ಬದಿ ಜೋಲಿ ಬಿದ್ದಿದೆಯೇ?','A — ತೋಳು: ಎರಡೂ ತೋಳು ಎತ್ತಲು ಹೇಳಿ. ಒಂದು ಕೆಳಗೆ ಬೀಳುತ್ತಿದೆಯೇ?','S — ಮಾತು: ಸರಳ ವಾಕ್ಯ ಪುನರಾವರ್ತಿಸಲು ಹೇಳಿ. ಮಾತು ಅಸ್ಪಷ್ಟವಾಗಿದೆಯೇ?','T — ಸಮಯ: ಯಾವುದಾದರೂ ಚಿಹ್ನೆ ಇದ್ದರೆ, ತಕ್ಷಣ 108 ಕರೆ ಮಾಡಿ.','ಆಹಾರ, ನೀರು ಅಥವಾ ಔಷಧ ಕೊಡಬೇಡಿ. ಉಸಿರುಗಟ್ಟುವಿಕೆ ತಡೆಯಲು ವ್ಯಕ್ತಿಯನ್ನು ಪಕ್ಕಕ್ಕೆ ಮಲಗಿಸಿ.']},
+      snake:{ icon:'🐍', title:'ಹಾವು ಕಡಿತ — ಪ್ರಥಮ ಚಿಕಿತ್ಸೆ', warning:'⚠️ ಗಾಯ ಕತ್ತರಿಸಬೇಡಿ, ವಿಷ ಹೀರಬೇಡಿ, ಟೂರ್ನಿಕೆಟ್ ಹಾಕಬೇಡಿ. ಆಸ್ಪತ್ರೆಗೆ ಓಡಿ.',
+        steps:['ವ್ಯಕ್ತಿಯನ್ನು ಶಾಂತ ಮತ್ತು ಸ್ಥಿರವಾಗಿರಿಸಿ — ಚಲನೆಯಿಂದ ವಿಷ ವೇಗವಾಗಿ ಹರಡುತ್ತದೆ.','ಕಡಿದ ಅಂಗ ಸ್ಥಿರಗೊಳಿಸಿ ಮತ್ತು ಹೃದಯ ಮಟ್ಟಕ್ಕಿಂತ ಕೆಳಗೆ ಇರಿಸಿ.','ಕಡಿತದ ಹತ್ತಿರದ ಉಂಗುರ, ಗಡಿಯಾರ ಮತ್ತು ಬಿಗಿ ಬಟ್ಟೆ ತೆಗೆಯಿರಿ.','ಆ್ಯಂಟಿ-ವೆನಮ್ ಗುರುತಿಸಲು ಹಾವಿನ ರೂಪ (ಬಣ್ಣ, ಮಾದರಿ) ಗಮನಿಸಿ.','108 ಕರೆ ಮಾಡಿ ಮತ್ತು ತಕ್ಷಣ ಆ್ಯಂಟಿ-ವೆನಮ್ ಇರುವ ಹತ್ತಿರದ ಆಸ್ಪತ್ರೆಗೆ ಓಡಿ.']},
+      burn:{ icon:'🔥', title:'ತೀವ್ರ ಸುಟ್ಟಗಾಯ — ಪ್ರಥಮ ಚಿಕಿತ್ಸೆ', warning:'⚠️ ಬೆಣ್ಣೆ, ಟೂತ್‌ಪೇಸ್ಟ್ ಅಥವಾ ಮಂಜುಗಡ್ಡೆ ಹಾಕಬೇಡಿ. ಗುಳ್ಳೆ ಒಡೆಯಬೇಡಿ.',
+        steps:['ವ್ಯಕ್ತಿಯನ್ನು ಶಾಖದ ಮೂಲದಿಂದ ದೂರ ಮಾಡಿ. 20 ನಿಮಿಷ ತಂಪಾದ (ತಣ್ಣನೆ ಅಲ್ಲ) ಹರಿಯುವ ನೀರಿನಿಂದ ತಂಪು ಮಾಡಿ.','ಸುಟ್ಟ ಪ್ರದೇಶದ ಹತ್ತಿರದ ಆಭರಣ ಅಥವಾ ಬಟ್ಟೆ ತೆಗೆಯಿರಿ — ಚರ್ಮಕ್ಕೆ ಅಂಟಿದ್ದರೆ ಬಿಡಿ.','ಸ್ವಚ್ಛ, ರೋಮ ರಹಿತ ಬ್ಯಾಂಡೇಜ್ ಅಥವಾ ಸ್ವಚ್ಛ ಬಟ್ಟೆಯಿಂದ ಸಡಿಲವಾಗಿ ಮುಚ್ಚಿ.','ಸುಟ್ಟ ಭಾಗಕ್ಕೆ ಯಾವುದೇ ಕ್ರೀಮ್, ಎಣ್ಣೆ ಅಥವಾ ಮನೆ ಔಷಧ ಹಾಕಬೇಡಿ.','ಮುಖ/ಕೈ/ಜನನಾಂಗದ ಮೇಲಿನ ಅಥವಾ ದೊಡ್ಡ ಪ್ರದೇಶದ ಸುಟ್ಟಗಾಯಕ್ಕೆ — ತಕ್ಷಣ 108 ಕರೆ ಮಾಡಿ.']},
+      choke:{ icon:'😮‍💨', title:'ಉಸಿರುಗಟ್ಟುವಿಕೆ — ಪ್ರಥಮ ಚಿಕಿತ್ಸೆ', warning:'⚠️ ವ್ಯಕ್ತಿ ಕೆಮ್ಮಲು, ಮಾತಾಡಲು ಅಥವಾ ಉಸಿರಾಡಲು ಸಾಧ್ಯವಾಗದಿದ್ದರೆ — ತಕ್ಷಣ ಕಾರ್ಯ ಮಾಡಿ.',
+        steps:['ವ್ಯಕ್ತಿ ಮಾಡಬಹುದಾದರೆ ಜೋರಾಗಿ ಕೆಮ್ಮಲು ಪ್ರೋತ್ಸಾಹಿಸಿ.','ಕೈ ಹಿಮ್ಮಡಿಯಿಂದ ಭುಜದ ಎಲುಬುಗಳ ನಡುವೆ 5 ಗಟ್ಟಿ ಬೆನ್ನಿನ ಹೊಡೆತ ಕೊಡಿ.','ಬೆನ್ನಿನ ಹೊಡೆತ ಕೆಲಸ ಮಾಡದಿದ್ದರೆ, 5 ಹೊಟ್ಟೆ ಒತ್ತು (ಹೀಮ್ಲಿಕ್) ಕೊಡಿ — ಹಿಂದೆ ನಿಂತು, ಪಕ್ಕೆಲುಬಿನ ಕೆಳಗೆ ಒಳಗೆ ಮತ್ತು ಮೇಲೆ ತಳ್ಳಿ.','ವಸ್ತು ಹೊರಬರುವವರೆಗೂ 5 ಬೆನ್ನಿನ ಹೊಡೆತ ಮತ್ತು 5 ಹೊಟ್ಟೆ ಒತ್ತು ಬದಲಿಸಿ ಮಾಡಿ.','ವ್ಯಕ್ತಿ ಮೂರ್ಛೆ ಹೋದರೆ, CPR ಪ್ರಾರಂಭಿಸಿ ಮತ್ತು ತಕ್ಷಣ 108 ಕರೆ ಮಾಡಿ.']},
+      bleed:{ icon:'🩸', title:'ತೀವ್ರ ರಕ್ತಸ್ರಾವ — ಪ್ರಥಮ ಚಿಕಿತ್ಸೆ', warning:'⚠️ ಭಾರಿ ರಕ್ತ ನಷ್ಟ ಜೀವಕ್ಕೆ ಅಪಾಯ. ಆಳವಾದ ಗಾಯಕ್ಕೆ ತಕ್ಷಣ 108 ಕರೆ ಮಾಡಿ.',
+        steps:['ಸ್ವಚ್ಛ ಬಟ್ಟೆ ಅಥವಾ ಬ್ಯಾಂಡೇಜ್‌ನಿಂದ ಗಾಯದ ಮೇಲೆ ಗಟ್ಟಿ, ನೇರ ಒತ್ತಡ ಹಾಕಿ.','ಬಟ್ಟೆ ನೆನೆದರೆ, ಮೇಲೆ ಇನ್ನೊಂದು ಬಟ್ಟೆ ಸೇರಿಸಿ — ಮೊದಲ ಬಟ್ಟೆ ತೆಗೆಯಬೇಡಿ.','ಸಾಧ್ಯವಾದರೆ, ಗಾಯಾಳು ಅಂಗ ಹೃದಯ ಮಟ್ಟಕ್ಕಿಂತ ಮೇಲೆ ಎತ್ತಿ ಹಿಡಿಯಿರಿ.','ನಿಯಂತ್ರಣ ಸಾಧ್ಯವಿಲ್ಲದ ಅಂಗ ರಕ್ತಸ್ರಾವಕ್ಕೆ, ಗಾಯದಿಂದ 5-7 ಸೆಂಮಿ ಮೇಲೆ ಟೂರ್ನಿಕೆಟ್ ಹಾಕಿ. ಸಮಯ ಗಮನಿಸಿ.','ವೈದ್ಯಕೀಯ ಸಹಾಯ ಬರುವವರೆಗೂ ಒತ್ತಡ ಮುಂದುವರಿಸಿ. ವ್ಯಕ್ತಿಯನ್ನು ಶಾಂತ ಮತ್ತು ಮಲಗಿರಿಸಿ.']}
+    }
+  },
+  te: {
+    back: 'వెనకకు', page_title: 'అత్యవసర సహాయం — స్వాస్థ్య సేతు',
+    nav_label: 'నావిగేషన్',
+    nav_home: 'హోమ్', nav_symptom: 'లక్షణ పరీక్షకుడు', nav_doctor: 'డాక్టర్ అపాయింట్‌మెంట్',
+    nav_medicine: 'మందు రిమైండర్లు', nav_records: 'ఆరోగ్య రికార్డులు',
+    nav_prescription: 'ప్రిస్క్రిప్షన్ స్కానర్', nav_emergency: 'అత్యవసర సహాయం',
+    hero_badge: 'అత్యవసర సేవలు సక్రియంగా ఉన్నాయి',
+    hero_title: 'అత్యవసర సహాయం',
+    hero_sub: 'సంక్షోభంలో అంబులెన్స్, పోలీసు, అగ్నిమాపక దళం మరియు మీ కుటుంబాన్ని ఒక్క ట్యాప్‌లో చేరుకోండి.',
+    sos_label: 'SOS నొక్కండి',
+    chip_ambulance: 'అంబులెన్స్: 108', chip_police: 'పోలీసు: 100', chip_fire: 'అగ్ని: 101', chip_women: 'మహిళా: 1091',
+    section_numbers: 'అత్యవసర నంబర్లు',
+    card_ambulance_name: 'అంబులెన్స్', card_ambulance_desc: 'భారతదేశమంతటా ఉచిత అంబులెన్స్ సేవ',
+    card_police_name: 'పోలీసు', card_police_desc: 'చట్ట అమలు అత్యవసర స్పందన',
+    card_fire_name: 'అగ్నిమాపక దళం', card_fire_desc: 'అగ్ని అత్యవసర & రెస్క్యూ ఆపరేషన్లు',
+    card_women_name: 'మహిళా హెల్ప్‌లైన్', card_women_desc: 'మహిళా సంకట & భద్రత హెల్ప్‌లైన్',
+    card_mental_name: 'మానసిక ఆరోగ్యం', card_mental_desc: 'మనస్తత్వ మద్దతు & కౌన్సెలింగ్',
+    tap_call: 'కాల్ చేయడానికి ట్యాప్ చేయండి',
+    section_hospitals: 'సమీప ఆసుపత్రులు',
+    add_hospital_btn: 'ఆసుపత్రి / క్లినిక్ జోడించండి',
+    section_contacts: 'నా అత్యవసర సంప్రదింపులు',
+    add_contact_btn: 'సంప్రదింపు జోడించండి',
+    section_firstaid: 'ప్రాథమిక చికిత్స త్వరిత మార్గదర్శి',
+    fa_heart_title: 'గుండె పోటు', fa_heart_preview: 'శాంతంగా ఉండండి, 108 కాల్ చేయండి, బట్టలు వదులు చేయండి…',
+    fa_stroke_title: 'స్ట్రోక్ (మెదడు దాడి)', fa_stroke_preview: 'FAST పద్ధతి — ముఖం, చేతులు, మాట…',
+    fa_snake_title: 'పాము కాటు', fa_snake_preview: 'స్థిరంగా ఉండండి, స్థిరీకరించండి, ఆసుపత్రికి వెళ్ళండి…',
+    fa_burn_title: 'తీవ్రమైన కాలిన గాయాలు', fa_burn_preview: 'నీటితో చల్లబరచండి, వదులుగా కప్పండి…',
+    fa_choke_title: 'గొంతు నిరోధం', fa_choke_preview: '5 వీపు దెబ్బలు, హీమ్లిచ్ మానువర్…',
+    fa_bleed_title: 'తీవ్రమైన రక్తస్రావం', fa_bleed_preview: 'ఒత్తిడి వేయండి, అవయవం పైకి ఎత్తండి…',
+    read_more: 'మరింత చదవండి →',
+    sos_modal_title: 'అత్యవసర SOS', sos_who: 'మీకు ఎవరు కావాలి?',
+    sos_sub: 'అత్యవసర సేవను ఎంచుకోండి. కాల్ వెంటనే చేయబడుతుంది.',
+    sos_family: 'కుటుంబం', sos_emergency: 'అత్యవసరం',
+    modal_add_hospital: 'ఆసుపత్రి / క్లినిక్ జోడించండి',
+    label_hosp_name: 'ఆసుపత్రి / క్లినిక్ పేరు', placeholder_hosp_name: 'ఉదా. సిటీ మెడికల్ సెంటర్',
+    label_hosp_addr: 'చిరునామా', placeholder_hosp_addr: 'ఉదా. స్టేషన్ రోడ్, గదగ',
+    label_hosp_dist: 'దూరం', placeholder_hosp_dist: 'ఉదా. 2.3 కిమీ',
+    label_hosp_time: 'అంచనా ప్రయాణ సమయం', placeholder_hosp_time: 'ఉదా. ~9 నిమిషాలు',
+    label_hosp_phone: 'ఫోన్', label_hosp_type: 'రకం', label_hosp_avail: 'అందుబాటు',
+    hosp_type_govt: 'ప్రభుత్వ', hosp_type_pvt: 'ప్రైవేట్', hosp_type_phc: 'ప్రాథమిక ఆరోగ్యం',
+    hosp_type_spec: 'స్పెషాలిటీ', hosp_type_clinic: 'క్లినిక్',
+    avail_247: '24/7 తెరిచి ఉంది', avail_day: 'పగటి మాత్రమే (8am-8pm)', avail_emerg: 'అత్యవసరం మాత్రమే',
+    modal_add_contact: 'అత్యవసర సంప్రదింపు జోడించండి',
+    label_contact_name: 'పూర్తి పేరు', placeholder_contact_name: 'సంప్రదింపు పూర్తి పేరు',
+    label_contact_rel: 'సంబంధం', label_contact_priority: 'ప్రాధాన్యత', label_contact_phone: 'ఫోన్ నంబర్',
+    rel_wife:'భార్య', rel_husband:'భర్త', rel_son:'కొడుకు', rel_daughter:'కూతురు',
+    rel_father:'తండ్రి', rel_mother:'తల్లి', rel_brother:'అన్న/తమ్ముడు', rel_sister:'అక్క/చెల్లి',
+    rel_friend:'మిత్రుడు', rel_neighbour:'పొరుగువారు', rel_doctor:'డాక్టర్', rel_other:'ఇతర',
+    priority_1: '1 — ప్రాథమిక', priority_2: '2 — ద్వితీయ', priority_3: '3 — తృతీయ',
+    btn_cancel: 'రద్దు', btn_save_hospital: 'ఆసుపత్రి సేవ్ చేయండి', btn_save_contact: 'సంప్రదింపు సేవ్ చేయండి',
+    call_ambulance_btn: 'అంబులెన్స్ 108 కాల్ చేయండి',
+    hosp_away: 'దూరంలో', hosp_directions: '📍 దిశలు',
+    toast_hospital_added: '✅ ఆసుపత్రి జోడించబడింది!', toast_contact_added_pre: '✅', toast_contact_added_suf: 'అత్యవసర సంప్రదింపుగా జోడించబడింది!',
+    toast_contact_updated_pre: '✅', toast_contact_updated_suf: 'నవీకరించబడింది!',
+    toast_contact_removed: '🗑️ సంప్రదింపు తీసివేయబడింది', toast_required: '⚠️ పేరు మరియు ఫోన్ అవసరం',
+    toast_contact_required: '⚠️ పేరు మరియు ఫోన్ అవసరం', toast_contact_empty: '⚠️ పేరు మరియు ఫోన్ ఖాళీగా ఉండకూడదు',
+    confirm_remove_pre: 'తీసివేయాలా', confirm_remove_suf: 'అత్యవసర సంప్రదింపుల నుండి?',
+    toast_calling_pre: '📞 కాల్ చేస్తున్నాం', toast_no_primary: '⚠️ ప్రాథమిక సంప్రదింపు లేదు. మొదట జోడించండి.',
+    toast_calling_service_pre: '📞 కాల్ చేస్తున్నాం',
+    fa_data: {
+      heart:{ icon:'❤️', title:'గుండె పోటు — ప్రాథమిక చికిత్స', warning:'⚠️ వెంటనే 108 కాల్ చేయండి. ఆహారం లేదా నీరు ఇవ్వకండి.',
+        steps:['వ్యక్తిని సౌకర్యవంతమైన స్థితిలో కూర్చోబెట్టండి లేదా పడుకోబెట్టండి. మెడ మరియు ఛాతీ చుట్టూ బిగుతు బట్టలు వదులు చేయండి.','వ్యక్తి స్పృహలో ఉన్నారు మరియు అలెర్జీ లేకుంటే, ఒక ఆస్పిరిన్ (325mg) నెమ్మదిగా నమలడానికి ఇవ్వండి.','వెంటనే 108 అంబులెన్స్ కాల్ చేయండి — ఆలస్యం చేయకండి.','వ్యక్తి స్పృహ కోల్పోయి శ్వాస ఆగిపోతే, CPR ప్రారంభించండి — 30 ఛాతీ ఒత్తిడులు, తర్వాత 2 రక్షణ శ్వాసలు.','అంబులెన్స్ వచ్చే వరకు వారిని శాంతంగా మరియు వెచ్చగా ఉంచండి. వారిని ఒంటరిగా వదలకండి.']},
+      stroke:{ icon:'🧠', title:'స్ట్రోక్ — FAST పద్ధతి', warning:'⚠️ సమయం చాలా కీలకం. ప్రతి నిమిషం ముఖ్యం. ఇప్పుడే 108 కాల్ చేయండి.',
+        steps:['F — ముఖం: నవ్వమని అడగండి. ఒక వైపు వంగిందా?','A — చేతులు: రెండు చేతులూ పైకి ఎత్తమని అడగండి. ఒకటి క్రిందకు పడుతుందా?','S — మాట: ఒక సాధారణ వాక్యం పునరావృత్తి చేయమని అడగండి. అస్పష్టంగా ఉందా?','T — సమయం: ఏదైనా చిహ్నం ఉంటే, వెంటనే 108 కాల్ చేయండి.','ఆహారం, నీరు లేదా మందులు ఇవ్వకండి. శ్వాస నిరోధాన్ని నివారించడానికి వ్యక్తిని పక్కకు పడుకోబెట్టండి.']},
+      snake:{ icon:'🐍', title:'పాము కాటు — ప్రాథమిక చికిత్స', warning:'⚠️ గాయాన్ని కత్తిరించకండి, విషం పీల్చకండి, టూర్నికెట్ వేయకండి. ఆసుపత్రికి పరుగెత్తండి.',
+        steps:['వ్యక్తిని శాంతంగా మరియు స్థిరంగా ఉంచండి — కదలికతో విషం వేగంగా వ్యాపిస్తుంది.','కాట్టిన అవయవాన్ని స్థిరీకరించి గుండె స్థాయి కంటే తక్కువగా ఉంచండి.','కాటు దగ్గర ఉన్న ఉంగరాలు, గడియారాలు మరియు బిగుతు బట్టలు తీసివేయండి.','యాంటీ-వెనమ్ గుర్తింపు కోసం పాము రూపాన్ని (రంగు, నమూనా) గమనించండి.','108 కాల్ చేసి వెంటనే యాంటీ-వెనమ్ నిల్వ ఉన్న సమీప ఆసుపత్రికి వెళ్ళండి.']},
+      burn:{ icon:'🔥', title:'తీవ్రమైన కాలిన గాయాలు — ప్రాథమిక చికిత్స', warning:'⚠️ వెన్న, టూత్‌పేస్ట్ లేదా మంచు వేయకండి. బొబ్బలు పగులగొట్టకండి.',
+        steps:['వ్యక్తిని వేడి మూలం నుండి దూరం చేయండి. 20 నిమిషాల పాటు చల్లటి (మంచినీళ్ళు కాదు) ప్రవహించే నీటితో చల్లబరచండి.','కాలిన ప్రాంతం దగ్గర ఉన్న ఆభరణాలు లేదా బట్టలు తీసివేయండి — చర్మానికి అంటుకుపోతే వదలండి.','శుభ్రమైన, ఫ్లఫ్‌గా లేని పట్టీ లేదా శుభ్రమైన వస్త్రంతో వదులుగా కప్పండి.','కాలిన భాగంపై ఎటువంటి క్రీములు, నూనెలు లేదా ఇంటి నివారణలు వేయకండి.','ముఖం/చేతులు/జననేంద్రియాలపై లేదా పెద్ద ప్రాంతాల కాలిన గాయాలకు — వెంటనే 108 కాల్ చేయండి.']},
+      choke:{ icon:'😮‍💨', title:'గొంతు నిరోధం — ప్రాథమిక చికిత్స', warning:'⚠️ వ్యక్తి దగ్గు, మాట లేదా శ్వాస తీసుకోలేకపోతే — వెంటనే చర్య తీసుకోండి.',
+        steps:['వ్యక్తి చేయగలిగితే గట్టిగా దగ్గమని ప్రోత్సహించండి.','అరచేతి మడమతో భుజపు ఎముకల మధ్య 5 గట్టి వీపు దెబ్బలు వేయండి.','వీపు దెబ్బలు పని చేయకపోతే, 5 పొట్ట ఒత్తులు (హీమ్లిచ్ మానువర్) ఇవ్వండి — వెనక నిలబడి, పక్కటెముకల కింద లోపలికి మరియు పైకి నెట్టండి.','వస్తువు బయటకు వచ్చే వరకు 5 వీపు దెబ్బలు మరియు 5 పొట్ట ఒత్తులు మార్చి మార్చి చేయండి.','వ్యక్తి స్పృహ కోల్పోతే, CPR ప్రారంభించి వెంటనే 108 కాల్ చేయండి.']},
+      bleed:{ icon:'🩸', title:'తీవ్రమైన రక్తస్రావం — ప్రాథమిక చికిత్స', warning:'⚠️ భారీ రక్త నష్టం ప్రాణాంతకం. లోతైన గాయాలకు వెంటనే 108 కాల్ చేయండి.',
+        steps:['శుభ్రమైన వస్త్రం లేదా పట్టీతో గాయంపై గట్టి, నేరుగా ఒత్తిడి వేయండి.','వస్త్రం తడిసిపోతే, పైన మరో వస్త్రం జోడించండి — మొదటి వస్త్రం తీయకండి.','సాధ్యమైతే, గాయపడిన అవయవాన్ని గుండె స్థాయి కంటే పైకి ఎత్తండి.','నియంత్రించలేని రక్తస్రావం ఉన్న అవయవ గాయానికి, గాయానికి 5-7 సెంమీ పైన టూర్నికెట్ వేయండి. సమయం నమోదు చేయండి.','వైద్య సహాయం వచ్చే వరకు ఒత్తిడి కొనసాగించండి. వ్యక్తిని శాంతంగా మరియు పడుకున్న స్థితిలో ఉంచండి.']}
+    }
+  },
+  ta: {
+    back: 'பின்செல்', page_title: 'அவசர உதவி — ஸ்வாஸ்த்ய சேது',
+    nav_label: 'வழிசெலுத்தல்',
+    nav_home: 'முகப்பு', nav_symptom: 'அறிகுறி சோதனையாளர்', nav_doctor: 'மருத்துவர் சந்திப்பு',
+    nav_medicine: 'மருந்து நினைவூட்டல்கள்', nav_records: 'சுகாதார பதிவுகள்',
+    nav_prescription: 'மருந்துச்சீட்டு ஸ்கேனர்', nav_emergency: 'அவசர உதவி',
+    hero_badge: 'அவசர சேவைகள் செயலில் உள்ளன',
+    hero_title: 'அவசர உதவி',
+    hero_sub: 'நெருக்கடியில் ஆம்புலன்ஸ், போலீஸ், தீயணைப்பு மற்றும் உங்கள் குடும்பத்தை ஒரே தட்டில் அடையுங்கள்.',
+    sos_label: 'SOS அழுத்துங்கள்',
+    chip_ambulance: 'ஆம்புலன்ஸ்: 108', chip_police: 'போலீஸ்: 100', chip_fire: 'தீயணைப்பு: 101', chip_women: 'மகளிர்: 1091',
+    section_numbers: 'அவசர எண்கள்',
+    card_ambulance_name: 'ஆம்புலன்ஸ்', card_ambulance_desc: 'இந்தியா முழுவதும் இலவச ஆம்புலன்ஸ் சேவை',
+    card_police_name: 'போலீஸ்', card_police_desc: 'சட்ட அமலாக்க அவசர பதில்',
+    card_fire_name: 'தீயணைப்பு படை', card_fire_desc: 'தீ அவசரம் & மீட்பு நடவடிக்கைகள்',
+    card_women_name: 'மகளிர் உதவி எண்', card_women_desc: 'மகளிர் துயர் & பாதுகாப்பு உதவி எண்',
+    card_mental_name: 'மன நலம்', card_mental_desc: 'உளவியல் ஆதரவு & ஆலோசனை',
+    tap_call: 'அழைக்க தட்டுங்கள்',
+    section_hospitals: 'அருகிலுள்ள மருத்துவமனைகள்',
+    add_hospital_btn: 'மருத்துவமனை / கிளினிக் சேர்க்கவும்',
+    section_contacts: 'என் அவசர தொடர்புகள்',
+    add_contact_btn: 'தொடர்பு சேர்க்கவும்',
+    section_firstaid: 'முதலுதவி விரைவு வழிகாட்டி',
+    fa_heart_title: 'மாரடைப்பு', fa_heart_preview: 'அமைதியாக இருங்கள், 108 அழைக்கவும், ஆடைகளை தளர்த்தவும்…',
+    fa_stroke_title: 'பக்கவாதம்', fa_stroke_preview: 'FAST முறை — முகம், கைகள், பேச்சு…',
+    fa_snake_title: 'பாம்பு கடி', fa_snake_preview: 'அசைக்காமல் இருங்கள், நிலைப்படுத்தவும், மருத்துவமனைக்கு ஓடவும்…',
+    fa_burn_title: 'கடுமையான தீக்காயங்கள்', fa_burn_preview: 'தண்ணீரால் குளிர்விக்கவும், தளர்வாக மூடவும்…',
+    fa_choke_title: 'தொண்டை அடைப்பு', fa_choke_preview: '5 முதுகு அடிகள், ஹெய்ம்லிக் கையாளல்…',
+    fa_bleed_title: 'கடுமையான இரத்தப்போக்கு', fa_bleed_preview: 'அழுத்தம் கொடுங்கள், உறுப்பை உயர்த்தவும்…',
+    read_more: 'மேலும் படிக்க →',
+    sos_modal_title: 'அவசர SOS', sos_who: 'உங்களுக்கு யார் வேண்டும்?',
+    sos_sub: 'அவசர சேவையைத் தேர்ந்தெடுக்கவும். அழைப்பு உடனடியாக வைக்கப்படும்.',
+    sos_family: 'குடும்பம்', sos_emergency: 'அவசரம்',
+    modal_add_hospital: 'மருத்துவமனை / கிளினிக் சேர்க்கவும்',
+    label_hosp_name: 'மருத்துவமனை / கிளினிக் பெயர்', placeholder_hosp_name: 'உதா. சிட்டி மெடிக்கல் சென்டர்',
+    label_hosp_addr: 'முகவரி', placeholder_hosp_addr: 'உதா. ஸ்டேஷன் ரோடு, கடக்',
+    label_hosp_dist: 'தூரம்', placeholder_hosp_dist: 'உதா. 2.3 கிமீ',
+    label_hosp_time: 'மதிப்பிட்ட பயண நேரம்', placeholder_hosp_time: 'உதா. ~9 நிமிடம்',
+    label_hosp_phone: 'தொலைபேசி', label_hosp_type: 'வகை', label_hosp_avail: 'கிடைக்கும் தன்மை',
+    hosp_type_govt: 'அரசு', hosp_type_pvt: 'தனியார்', hosp_type_phc: 'ஆரம்ப சுகாதாரம்',
+    hosp_type_spec: 'சிறப்பு', hosp_type_clinic: 'கிளினிக்',
+    avail_247: '24/7 திறந்திருக்கும்', avail_day: 'பகல் மட்டும் (8am-8pm)', avail_emerg: 'அவசரம் மட்டும்',
+    modal_add_contact: 'அவசர தொடர்பு சேர்க்கவும்',
+    label_contact_name: 'முழு பெயர்', placeholder_contact_name: 'தொடர்பின் முழு பெயர்',
+    label_contact_rel: 'உறவு', label_contact_priority: 'முன்னுரிமை', label_contact_phone: 'தொலைபேசி எண்',
+    rel_wife:'மனைவி', rel_husband:'கணவர்', rel_son:'மகன்', rel_daughter:'மகள்',
+    rel_father:'தந்தை', rel_mother:'தாய்', rel_brother:'அண்ணன்/தம்பி', rel_sister:'அக்கா/தங்கை',
+    rel_friend:'நண்பர்', rel_neighbour:'அண்டை வீட்டார்', rel_doctor:'மருத்துவர்', rel_other:'மற்றவர்',
+    priority_1: '1 — முதன்மை', priority_2: '2 — இரண்டாம்', priority_3: '3 — மூன்றாம்',
+    btn_cancel: 'ரத்துசெய்', btn_save_hospital: 'மருத்துவமனை சேமிக்கவும்', btn_save_contact: 'தொடர்பு சேமிக்கவும்',
+    call_ambulance_btn: 'ஆம்புலன்ஸ் 108 அழைக்கவும்',
+    hosp_away: 'தொலைவில்', hosp_directions: '📍 வழிகாட்டுதல்கள்',
+    toast_hospital_added: '✅ மருத்துவமனை சேர்க்கப்பட்டது!', toast_contact_added_pre: '✅', toast_contact_added_suf: 'அவசர தொடர்பாக சேர்க்கப்பட்டது!',
+    toast_contact_updated_pre: '✅', toast_contact_updated_suf: 'புதுப்பிக்கப்பட்டது!',
+    toast_contact_removed: '🗑️ தொடர்பு நீக்கப்பட்டது', toast_required: '⚠️ பெயர் மற்றும் தொலைபேசி தேவை',
+    toast_contact_required: '⚠️ பெயர் மற்றும் தொலைபேசி தேவை', toast_contact_empty: '⚠️ பெயர் மற்றும் தொலைபேசி காலியாக இருக்கக்கூடாது',
+    confirm_remove_pre: 'நீக்கவா', confirm_remove_suf: 'அவசர தொடர்புகளில் இருந்து?',
+    toast_calling_pre: '📞 அழைக்கிறோம்', toast_no_primary: '⚠️ முதன்மை தொடர்பு இல்லை. முதலில் சேர்க்கவும்.',
+    toast_calling_service_pre: '📞 அழைக்கிறோம்',
+    fa_data: {
+      heart:{ icon:'❤️', title:'மாரடைப்பு — முதலுதவி', warning:'⚠️ உடனே 108 அழைக்கவும். உணவு அல்லது தண்ணீர் கொடுக்கவேண்டாம்.',
+        steps:['நபரை வசதியான நிலையில் உட்கார வைக்கவும் அல்லது படுக்க வைக்கவும். கழுத்து மற்றும் மார்பு சுற்றில் இறுக்கமான ஆடைகளை தளர்த்தவும்.','நபர் உணர்வில் இருந்தால் மற்றும் ஒவ்வாமை இல்லாவிட்டால் ஒரு ஆஸ்பிரின் (325mg) மெதுவாக மெல்ல கொடுக்கவும்.','உடனே 108 ஆம்புலன்ஸ் அழைக்கவும் — தாமதிக்காதீர்கள்.','நபர் மயங்கி சுவாசிக்காவிட்டால், CPR தொடங்கவும் — 30 மார்பு அழுத்தங்கள், பிறகு 2 மீட்பு மூச்சுகள்.','ஆம்புலன்ஸ் வரும் வரை அவர்களை அமைதியாகவும் சூடாகவும் வைக்கவும். தனியே விடாதீர்கள்.']},
+      stroke:{ icon:'🧠', title:'பக்கவாதம் — FAST முறை', warning:'⚠️ நேரம் மிக முக்கியம். ஒவ்வொரு நிமிடமும் முக்கியம். இப்போதே 108 அழைக்கவும்.',
+        steps:['F — முகம்: சிரிக்கச் சொல்லுங்கள். ஒரு பக்கம் தொங்குகிறதா?','A — கைகள்: இரு கைகளையும் தூக்கச் சொல்லுங்கள். ஒன்று கீழே விழுகிறதா?','S — பேச்சு: ஒரு எளிய வாக்கியத்தை மீண்டும் சொல்லச் சொல்லுங்கள். தெளிவற்றதா?','T — நேரம்: ஏதாவது அறிகுறி இருந்தால் உடனே 108 அழைக்கவும்.','உணவு, தண்ணீர் அல்லது மருந்து கொடுக்காதீர்கள். மூச்சடைப்பைத் தடுக்க நபரை பக்கவாட்டில் படுக்க வைக்கவும்.']},
+      snake:{ icon:'🐍', title:'பாம்பு கடி — முதலுதவி', warning:'⚠️ காயத்தை வெட்டாதீர்கள், விஷத்தை உறிஞ்சாதீர்கள், டூர்னிக்கெட் போடாதீர்கள். மருத்துவமனைக்கு ஓடுங்கள்.',
+        steps:['நபரை அமைதியாகவும் அசைக்காமலும் வைக்கவும் — அசைவால் விஷம் வேகமாக பரவும்.','கடிக்கப்பட்ட உறுப்பை நிலைப்படுத்தி இதயத்தின் மட்டத்திற்கு கீழே வைக்கவும்.','கடிக்கு அருகிலுள்ள மோதிரங்கள், கடிகாரங்கள் மற்றும் இறுக்கமான ஆடைகளை அகற்றவும்.','நடு-விஷ அடையாளத்திற்காக பாம்பின் தோற்றத்தை (நிறம், வடிவமைப்பு) குறித்துக்கொள்ளுங்கள்.','108 அழைத்து உடனே நடு-விஷம் கையிருப்பு உள்ள அருகிலுள்ள மருத்துவமனைக்கு செல்லுங்கள்.']},
+      burn:{ icon:'🔥', title:'கடுமையான தீக்காயங்கள் — முதலுதவி', warning:'⚠️ வெண்ணெய், பற்பசை அல்லது பனி போடாதீர்கள். கொப்புளங்களை உடைக்காதீர்கள்.',
+        steps:['நபரை வெப்ப மூலத்திலிருந்து அகற்றவும். 20 நிமிடங்கள் குளிர்ந்த (ஐஸ் அல்ல) ஓடும் நீரால் குளிர்விக்கவும்.','தீக்காய ப்பகுதிக்கு அருகிலுள்ள நகைகள் அல்லது ஆடைகளை அகற்றவும் — தோலில் ஒட்டிக்கொண்டிருந்தால் விடுங்கள்.','சுத்தமான, பஞ்சு இல்லாத கட்டு அல்லது சுத்தமான துணியால் தளர்வாக மூடவும்.','தீக்காயத்தில் எந்த கிரீம்கள், எண்ணெய்கள் அல்லது வீட்டு வைத்தியங்களையும் போடாதீர்கள்.','முகம்/கைகள்/பிறப்புறுப்பில் அல்லது பெரிய பகுதிகளில் தீக்காயங்களுக்கு — உடனே 108 அழைக்கவும்.']},
+      choke:{ icon:'😮‍💨', title:'தொண்டை அடைப்பு — முதலுதவி', warning:'⚠️ நபர் இருமல், பேச்சு அல்லது சுவாசிக்க இயலாவிட்டால் — உடனே செயல்படுங்கள்.',
+        steps:['நபரால் முடிந்தால் வலுவாக இருமுமாறு ஊக்குவிக்கவும்.','உள்ளங்கையின் குதிகாலால் தோள்பட்டை எலும்புகளுக்கு இடையில் 5 உறுதியான முதுகு அடிகளை கொடுக்கவும்.','முதுகு அடிகள் தோல்வியடைந்தால், 5 வயிற்று அழுத்தங்கள் (ஹெய்ம்லிக்) செய்யுங்கள் — பின்னால் நிற்று, விலா எலும்புக்கு கீழே உள்ளே மற்றும் மேலே தள்ளுங்கள்.','பொருள் வெளியேரும் வரை 5 முதுகு அடிகள் மற்றும் 5 வயிற்று அழுத்தங்களை மாறி மாறி செய்யுங்கள்.','நபர் மயங்கினால், CPR தொடங்கி உடனே 108 அழைக்கவும்.']},
+      bleed:{ icon:'🩸', title:'கடுமையான இரத்தப்போக்கு — முதலுதவி', warning:'⚠️ அதிகமான இரத்த இழப்பு உயிருக்கு ஆபத்தானது. ஆழமான காயங்களுக்கு உடனே 108 அழைக்கவும்.',
+        steps:['சுத்தமான துணி அல்லது கட்டுப்பட்டியால் காயத்தில் உறுதியான, நேரடி அழுத்தத்தை கொடுக்கவும்.','துணி நனைந்தால், மேலே மேலும் துணி சேர்க்கவும் — முதல் துணியை அகற்றாதீர்கள்.','முடிந்தால், காயப்பட்ட உறுப்பை இதயத்தின் மட்டத்திற்கு மேலே உயர்த்தவும்.','கட்டுப்படுத்த முடியாத இரத்தப்போக்கு உள்ள உறுப்பு காயத்திற்கு, காயத்திற்கு 5-7 செமீ மேலே டூர்னிக்கெட் போடவும். நேரத்தை குறித்துக்கொள்ளுங்கள்.','மருத்துவ உதவி வரும் வரை அழுத்தத்தை தொடருங்கள். நபரை அமைதியாகவும் படுக்கையிலும் வைக்கவும்.']}
+    }
+  },
+  mr: {
+    back: 'मागे', page_title: 'आपत्कालीन मदत — स्वास्थ्य सेतू',
+    nav_label: 'नेव्हिगेशन',
+    nav_home: 'मुखपृष्ठ', nav_symptom: 'लक्षण तपासक', nav_doctor: 'डॉक्टर अपॉइंटमेंट',
+    nav_medicine: 'औषध स्मरणपत्रे', nav_records: 'आरोग्य नोंदी',
+    nav_prescription: 'प्रिस्क्रिप्शन स्कॅनर', nav_emergency: 'आपत्कालीन मदत',
+    hero_badge: 'आपत्कालीन सेवा सक्रिय',
+    hero_title: 'आपत्कालीन मदत',
+    hero_sub: 'संकटात रुग्णवाहिका, पोलिस, अग्निशमन आणि तुमच्या कुटुंबापर्यंत एका टॅपमध्ये पोहोचा.',
+    sos_label: 'SOS दाबा',
+    chip_ambulance: 'रुग्णवाहिका: 108', chip_police: 'पोलिस: 100', chip_fire: 'अग्निशमन: 101', chip_women: 'महिला: 1091',
+    section_numbers: 'आपत्कालीन क्रमांक',
+    card_ambulance_name: 'रुग्णवाहिका', card_ambulance_desc: 'संपूर्ण भारतात मोफत रुग्णवाहिका सेवा',
+    card_police_name: 'पोलिस', card_police_desc: 'कायदा अंमलबजावणी आपत्कालीन प्रतिसाद',
+    card_fire_name: 'अग्निशमन दल', card_fire_desc: 'आग आपत्काल व बचाव कार्य',
+    card_women_name: 'महिला हेल्पलाइन', card_women_desc: 'महिला संकट व सुरक्षा हेल्पलाइन',
+    card_mental_name: 'मानसिक आरोग्य', card_mental_desc: 'मनोवैज्ञानिक आधार व समुपदेशन',
+    tap_call: 'कॉल करण्यासाठी टॅप करा',
+    section_hospitals: 'जवळील रुग्णालये',
+    add_hospital_btn: 'रुग्णालय / क्लिनिक जोडा',
+    section_contacts: 'माझे आपत्कालीन संपर्क',
+    add_contact_btn: 'संपर्क जोडा',
+    section_firstaid: 'प्रथमोपचार त्वरित मार्गदर्शिका',
+    fa_heart_title: 'हृदयविकाराचा झटका', fa_heart_preview: 'शांत राहा, 108 कॉल करा, कपडे सैल करा…',
+    fa_stroke_title: 'पक्षाघात', fa_stroke_preview: 'FAST पद्धत — चेहरा, हात, बोलणे…',
+    fa_snake_title: 'सापाचा दंश', fa_snake_preview: 'स्थिर राहा, स्थिर करा, रुग्णालयात धावा…',
+    fa_burn_title: 'तीव्र भाजणे', fa_burn_preview: 'पाण्याने थंड करा, सैलपणे झाका…',
+    fa_choke_title: 'श्वास अडकणे', fa_choke_preview: '5 पाठ ठोकणे, हेम्लिक युक्ती…',
+    fa_bleed_title: 'तीव्र रक्तस्राव', fa_bleed_preview: 'दाब द्या, अंग वर उचला…',
+    read_more: 'अधिक वाचा →',
+    sos_modal_title: 'आपत्कालीन SOS', sos_who: 'तुम्हाला कोण हवे आहे?',
+    sos_sub: 'आपत्कालीन सेवा निवडा. कॉल लगेच केला जाईल.',
+    sos_family: 'कुटुंब', sos_emergency: 'आपत्काल',
+    modal_add_hospital: 'रुग्णालय / क्लिनिक जोडा',
+    label_hosp_name: 'रुग्णालय / क्लिनिक नाव', placeholder_hosp_name: 'उदा. सिटी मेडिकल सेंटर',
+    label_hosp_addr: 'पत्ता', placeholder_hosp_addr: 'उदा. स्टेशन रोड, गदग',
+    label_hosp_dist: 'अंतर', placeholder_hosp_dist: 'उदा. 2.3 किमी',
+    label_hosp_time: 'अंदाजित प्रवास वेळ', placeholder_hosp_time: 'उदा. ~9 मिनिटे',
+    label_hosp_phone: 'फोन', label_hosp_type: 'प्रकार', label_hosp_avail: 'उपलब्धता',
+    hosp_type_govt: 'सरकारी', hosp_type_pvt: 'खाजगी', hosp_type_phc: 'प्राथमिक आरोग्य',
+    hosp_type_spec: 'विशेष', hosp_type_clinic: 'क्लिनिक',
+    avail_247: '24/7 उघडे', avail_day: 'दिवसा फक्त (8am-8pm)', avail_emerg: 'आपत्काल फक्त',
+    modal_add_contact: 'आपत्कालीन संपर्क जोडा',
+    label_contact_name: 'पूर्ण नाव', placeholder_contact_name: 'संपर्काचे पूर्ण नाव',
+    label_contact_rel: 'नाते', label_contact_priority: 'प्राधान्य', label_contact_phone: 'फोन नंबर',
+    rel_wife:'पत्नी', rel_husband:'पती', rel_son:'मुलगा', rel_daughter:'मुलगी',
+    rel_father:'वडील', rel_mother:'आई', rel_brother:'भाऊ', rel_sister:'बहीण',
+    rel_friend:'मित्र', rel_neighbour:'शेजारी', rel_doctor:'डॉक्टर', rel_other:'इतर',
+    priority_1: '1 — प्राथमिक', priority_2: '2 — द्वितीय', priority_3: '3 — तृतीय',
+    btn_cancel: 'रद्द करा', btn_save_hospital: 'रुग्णालय जतन करा', btn_save_contact: 'संपर्क जतन करा',
+    call_ambulance_btn: 'रुग्णवाहिका 108 कॉल करा',
+    hosp_away: 'दूर', hosp_directions: '📍 दिशानिर्देश',
+    toast_hospital_added: '✅ रुग्णालय जोडले!', toast_contact_added_pre: '✅', toast_contact_added_suf: 'आपत्कालीन संपर्क म्हणून जोडले!',
+    toast_contact_updated_pre: '✅', toast_contact_updated_suf: 'अद्यतनित केले!',
+    toast_contact_removed: '🗑️ संपर्क काढला', toast_required: '⚠️ नाव आणि फोन आवश्यक आहेत',
+    toast_contact_required: '⚠️ नाव आणि फोन आवश्यक आहेत', toast_contact_empty: '⚠️ नाव आणि फोन रिकामे असू शकत नाहीत',
+    confirm_remove_pre: 'काढायचे का', confirm_remove_suf: 'आपत्कालीन संपर्कांमधून?',
+    toast_calling_pre: '📞 कॉल होत आहे', toast_no_primary: '⚠️ प्राथमिक संपर्क नाही. आधी जोडा.',
+    toast_calling_service_pre: '📞 कॉल होत आहे',
+    fa_data: {
+      heart:{ icon:'❤️', title:'हृदयविकाराचा झटका — प्रथमोपचार', warning:'⚠️ लगेच 108 कॉल करा. अन्न किंवा पाणी देऊ नका.',
+        steps:['व्यक्तीला आरामदायक स्थितीत बसवा किंवा झोपवा. मान आणि छातीजवळचे घट्ट कपडे सैल करा.','व्यक्ती शुद्धीत असल्यास आणि ऍलर्जी नसल्यास एक ऍस्पिरिन (325mg) हळूहळू चघळण्यास द्या.','लगेच 108 रुग्णवाहिका बोलवा — उशीर करू नका.','व्यक्ती बेशुद्ध होऊन श्वास थांबल्यास CPR सुरू करा — 30 छातीवर दाब, नंतर 2 बचाव श्वास.','रुग्णवाहिका येईपर्यंत त्यांना शांत आणि उबदार ठेवा. एकट्याने सोडू नका.']},
+      stroke:{ icon:'🧠', title:'पक्षाघात — FAST पद्धत', warning:'⚠️ वेळ अत्यंत महत्त्वाचा आहे. प्रत्येक मिनिट महत्त्वाचा. आत्ताच 108 कॉल करा.',
+        steps:['F — चेहरा: हसायला सांगा. एक बाजू झुकत आहे का?','A — हात: दोन्ही हात वर करायला सांगा. एक खाली येत आहे का?','S — बोलणे: एक साधे वाक्य पुनरावृत्ती करायला सांगा. बोलणे अस्पष्ट आहे का?','T — वेळ: कोणतीही चिन्हे असल्यास लगेच 108 कॉल करा.','अन्न, पाणी किंवा औषध देऊ नका. उलटी टाळण्यासाठी व्यक्तीला कुशीवर झोपवा.']},
+      snake:{ icon:'🐍', title:'सापाचा दंश — प्रथमोपचार', warning:'⚠️ जखम कापू नका, विष चोखू नका, टॉर्निकेट लावू नका. रुग्णालयात धावा.',
+        steps:['व्यक्तीला शांत आणि स्थिर ठेवा — हालचालीने विष वेगाने पसरते.','दंशलेला अवयव स्थिर करा आणि हृदयाच्या पातळीपेक्षा खाली ठेवा.','दंशाजवळील अंगठ्या, घड्याळे आणि घट्ट कपडे काढा.','अँटी-व्हेनम ओळखीसाठी सापाचे स्वरूप (रंग, नमुना) नोंदवा.','108 कॉल करा आणि लगेच अँटी-व्हेनम साठा असलेल्या जवळील रुग्णालयात जा.']},
+      burn:{ icon:'🔥', title:'तीव्र भाजणे — प्रथमोपचार', warning:'⚠️ लोणी, टूथपेस्ट किंवा बर्फ लावू नका. फोड फोडू नका.',
+        steps:['व्यक्तीला उष्णतेच्या स्त्रोतापासून दूर करा. 20 मिनिटे थंड (बर्फाळ नाही) वाहत्या पाण्याने थंड करा.','भाजलेल्या भागाजवळील दागिने किंवा कपडे काढा — त्वचेला चिकटलेले असल्यास सोडा.','स्वच्छ, फ्लफी नसलेल्या पट्टीने किंवा स्वच्छ कापडाने सैलपणे झाका.','भाजलेल्या भागावर कोणतेही क्रीम, तेल किंवा घरगुती उपाय लावू नका.','चेहरा/हात/जननेंद्रिय किंवा मोठ्या भागावर भाजल्यास — लगेच 108 कॉल करा.']},
+      choke:{ icon:'😮‍💨', title:'श्वास अडकणे — प्रथमोपचार', warning:'⚠️ व्यक्ती खोकणे, बोलणे किंवा श्वास घेऊ शकत नसल्यास — लगेच कार्य करा.',
+        steps:['व्यक्ती करू शकत असल्यास जोरात खोकण्यास प्रोत्साहित करा.','तळहाताच्या टाचेने खांद्याच्या हाडांमध्ये 5 ठोसे मारा.','पाठीचे ठोसे काम न केल्यास, 5 ओटीपोट दाब (हेम्लिक युक्ती) द्या — मागे उभे राहून, बरगड्यांच्या खाली आत आणि वर ढकला.','वस्तू निघेपर्यंत 5 पाठ ठोसे आणि 5 ओटीपोट दाब बदलून द्या.','व्यक्ती बेशुद्ध झाल्यास CPR सुरू करा आणि लगेच 108 कॉल करा.']},
+      bleed:{ icon:'🩸', title:'तीव्र रक्तस्राव — प्रथमोपचार', warning:'⚠️ जास्त रक्त गमावणे जीवघेणे आहे. खोल जखमांसाठी लगेच 108 कॉल करा.',
+        steps:['स्वच्छ कापड किंवा पट्टीने जखमेवर घट्ट, थेट दाब द्या.','कापड भिजल्यास वर आणखी कापड घाला — पहिले कापड काढू नका.','शक्य असल्यास जखमी अवयव हृदयाच्या पातळीपेक्षा वर उचला.','अनियंत्रित रक्तस्राव असलेल्या अवयव जखमेसाठी जखमेपासून 5-7 सेमी वर टॉर्निकेट लावा. वेळ नोंदवा.','वैद्यकीय मदत येईपर्यंत दाब सुरू ठेवा. व्यक्तीला शांत आणि झोपलेले ठेवा.']}
+    }
+  }
+};
+
+// ════════════════════════════════════════════════════════
+//  I18N CORE
+// ════════════════════════════════════════════════════════
+let currentLang = localStorage.getItem('ss_lang') || 'en';
+
+function t(key) {
+  return (TRANSLATIONS[currentLang] || TRANSLATIONS.en)[key] || key;
+}
+
+function applyTranslations() {
+  // Text content
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const val = t(el.getAttribute('data-i18n'));
+    if (val) el.textContent = val;
+  });
+  // Placeholders
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const val = t(el.getAttribute('data-i18n-placeholder'));
+    if (val) el.placeholder = val;
+  });
+  // Active lang button
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.getAttribute('onclick') === "setLang('" + currentLang + "')") {
+      btn.classList.add('active');
+    }
+  });
+  // Re-render dynamic content that uses t() 
+  renderHospitals();
+  renderContacts();
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('ss_lang', lang);
+  applyTranslations();
+}
+
+// ════════════════════════════════════════════════════════
+//  DATA — mirrors the SQL database
+// ════════════════════════════════════════════════════════
+const HOSPITALS_DB = [
+  { id:1, name:'District Government Hospital',  address:'Main Road, Gadag',          dist:'2.1 km', mins:'~8 min',  phone:'08372-234567', type:'Government',    avail:'Open 24/7', icu:true,  blood:true },
+  { id:2, name:'Srinivasa Medical Centre',       address:'Station Road, Gadag',       dist:'3.4 km', mins:'~12 min', phone:'08372-223344', type:'Private',       avail:'Open 24/7', icu:true,  blood:false },
+  { id:3, name:'PHC Betageri',                   address:'Betageri Main Road, Gadag', dist:'1.2 km', mins:'~5 min',  phone:'08372-245678', type:'Primary Health', avail:'Open 24/7', icu:false, blood:false },
+  { id:4, name:'KLE Dr. Prabhakar Kore Hospital',address:'MG Road, Gadag',            dist:'2.8 km', mins:'~10 min', phone:'08372-251100', type:'Specialty',     avail:'Open 24/7', icu:true,  blood:true },
+  { id:5, name:'City Nursing Home',              address:'Laxmeshwar Road, Gadag',    dist:'1.7 km', mins:'~7 min',  phone:'08372-261122', type:'Private',       avail:'Open 24/7', icu:false, blood:false },
+];
+
+let CONTACTS_DB = [
+  { id:1, name:'Sunita Kumar', rel:'Wife', phone:'+91 98765 43210', priority:1 },
+  { id:2, name:'Raju Kumar',   rel:'Son',  phone:'+91 87654 32109', priority:2 },
+];
+let nextContactId = 3;
+
+// ════════════════════════════════════════════════════════
+//  MODAL HELPERS
+// ════════════════════════════════════════════════════════
+function openModal(id)  { document.getElementById(id).classList.add('open');    document.body.style.overflow='hidden'; }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+document.querySelectorAll('.modal-overlay').forEach(o =>
+  o.addEventListener('click', e => { if(e.target===o) closeModal(o.id); })
+);
+
+// ════════════════════════════════════════════════════════
+//  HOSPITALS — RENDER
+// ════════════════════════════════════════════════════════
+function renderHospitals() {
+  const list = document.getElementById('hospital-list');
+  list.innerHTML = '';
+  HOSPITALS_DB.forEach(h => {
+    const el = document.createElement('div');
+    el.className = 'hospital-item';
+    el.innerHTML = `
+      <div class="hosp-icon">🏥</div>
+      <div class="hosp-info">
+        <div class="hosp-name">${h.name}</div>
+        <div class="hosp-addr">📍 ${h.address} — ${h.dist} ${t('hosp_away')}</div>
+        <div class="hosp-meta">
+          <span class="hosp-tag open">✅ ${h.avail}</span>
+          <span class="hosp-tag dist">🕐 ${h.mins}</span>
+          <span class="hosp-tag type">${h.type}</span>
+          ${h.icu   ? '<span class="hosp-tag" style="background:#dbeafe;color:#1d4ed8;">🏥 ICU</span>' : ''}
+          ${h.blood ? '<span class="hosp-tag" style="background:#fee2e2;color:#b91c1c;">🩸 Blood Bank</span>' : ''}
+        </div>
+      </div>
+      <div class="hosp-right">
+        <div class="hosp-phone">${h.phone}</div>
+        <div class="hosp-dir">${t('hosp_directions')}</div>
+      </div>`;
+    list.appendChild(el);
+  });
+}
+
+function openAddHospital() { openModal('modal-hospital'); }
+function saveHospital() {
+  const name  = document.getElementById('h-name').value.trim();
+  const addr  = document.getElementById('h-addr').value.trim();
+  const dist  = document.getElementById('h-dist').value.trim();
+  const time  = document.getElementById('h-time').value.trim();
+  const phone = document.getElementById('h-phone').value.trim();
+  const type  = document.getElementById('h-type').value;
+  const avail = document.getElementById('h-avail').value;
+  if (!name || !phone) { showToast(t('toast_required')); return; }
+
+  HOSPITALS_DB.push({ id: Date.now(), name, address: addr, dist: dist||'—', mins: time||'—', phone, type, avail, icu:false, blood:false });
+  renderHospitals();
+  ['h-name','h-addr','h-dist','h-time','h-phone'].forEach(id => document.getElementById(id).value='');
+  closeModal('modal-hospital');
+  showToast(t('toast_hospital_added'));
+}
+
+// ════════════════════════════════════════════════════════
+//  CONTACTS — RENDER (VIEW MODE)
+// ════════════════════════════════════════════════════════
+function getPriorityLabel(p) { return t('priority_' + p); }
+const PRIORITY_CLASSES = { 1:'p1', 2:'p2', 3:'p3' };
+const REL_KEYS = ['rel_wife','rel_husband','rel_son','rel_daughter','rel_father','rel_mother','rel_brother','rel_sister','rel_friend','rel_neighbour','rel_doctor','rel_other'];
+const REL_EN   = ['Wife','Husband','Son','Daughter','Father','Mother','Brother','Sister','Friend','Neighbour','Doctor','Other'];
+
+function renderContacts() {
+  const list = document.getElementById('contact-list');
+  list.innerHTML = '';
+  [...CONTACTS_DB].sort((a,b)=>a.priority-b.priority).forEach(c => {
+    list.appendChild(buildContactViewEl(c));
+  });
+}
+
+function buildContactViewEl(c) {
+  const el = document.createElement('div');
+  el.className = 'contact-item';
+  el.dataset.id = c.id;
+  el.innerHTML = `
+    <div class="contact-avatar">${c.name[0].toUpperCase()}</div>
+    <div class="contact-info">
+      <div class="contact-name">${escHtml(c.name)}</div>
+      <div class="contact-rel">${escHtml(c.rel)} &nbsp;<span class="priority-badge ${PRIORITY_CLASSES[c.priority]}">${getPriorityLabel(c.priority)}</span></div>
+    </div>
+    <div class="contact-phone-display">${escHtml(c.phone)}</div>
+    <div class="contact-actions">
+      <button class="icon-btn call"     title="Call"   onclick="callContact(${c.id})">📞</button>
+      <button class="icon-btn edit-btn" title="Edit"   onclick="enterEditMode(${c.id})">✏️</button>
+      <button class="icon-btn"          title="Delete" onclick="deleteContact(${c.id})">🗑️</button>
+    </div>`;
+  return el;
+}
+
+// ════════════════════════════════════════════════════════
+//  CONTACTS — INLINE EDIT MODE
+// ════════════════════════════════════════════════════════
+function enterEditMode(id) {
+  const c  = CONTACTS_DB.find(x => x.id === id);
+  if (!c) return;
+  const el = document.querySelector(`.contact-item[data-id="${id}"]`);
+  if (!el) return;
+
+  const relOpts = REL_KEYS.map((key, i) => {
+    const engVal = REL_EN[i];
+    return `<option value="${engVal}"${engVal===c.rel?' selected':''}>${t(key)}</option>`;
+  }).join('');
+  const priOpts = [1,2,3].map(p => `<option value="${p}"${p===c.priority?' selected':''}>${getPriorityLabel(p)}</option>`).join('');
+
+  el.classList.add('editing');
+  el.innerHTML = `
+    <div class="contact-avatar">${c.name[0].toUpperCase()}</div>
+    <div class="edit-fields">
+      <input class="edit-field f-name"  type="text" value="${escHtml(c.name)}"  placeholder="${t('label_contact_name')}"   id="ef-name-${id}"/>
+      <select class="edit-select" id="ef-rel-${id}">${relOpts}</select>
+      <input class="edit-field f-phone" type="tel"  value="${escHtml(c.phone)}" placeholder="+91 XXXXX XXXXX" id="ef-phone-${id}"/>
+      <select class="edit-select" id="ef-pri-${id}">${priOpts}</select>
+    </div>
+    <div class="contact-actions">
+      <button class="icon-btn save-btn"   onclick="saveEditContact(${id})">✅ ${t('btn_save_contact')}</button>
+      <button class="icon-btn cancel-btn" onclick="cancelEditContact(${id})">✕</button>
+    </div>`;
+
+  document.getElementById(`ef-name-${id}`).focus();
+  el.querySelectorAll('input').forEach(inp =>
+    inp.addEventListener('keydown', e => { if(e.key==='Enter') saveEditContact(id); if(e.key==='Escape') cancelEditContact(id); })
+  );
+}
+
+function saveEditContact(id) {
+  const newName  = document.getElementById(`ef-name-${id}`).value.trim();
+  const newRel   = document.getElementById(`ef-rel-${id}`).value;
+  const newPhone = document.getElementById(`ef-phone-${id}`).value.trim();
+  const newPri   = parseInt(document.getElementById(`ef-pri-${id}`).value);
+
+  if (!newName || !newPhone) { showToast(t('toast_contact_empty')); return; }
+
+  const idx = CONTACTS_DB.findIndex(x => x.id === id);
+  CONTACTS_DB[idx] = { id, name: newName, rel: newRel, phone: newPhone, priority: newPri };
+
+  renderContacts();
+  showToast(`${t('toast_contact_updated_pre')} ${newName} ${t('toast_contact_updated_suf')}`);
+}
+
+function cancelEditContact(id) {
+  const c  = CONTACTS_DB.find(x => x.id === id);
+  const el = document.querySelector(`.contact-item[data-id="${id}"]`);
+  if (!c || !el) return;
+  el.replaceWith(buildContactViewEl(c));
+}
+
+// ════════════════════════════════════════════════════════
+//  CONTACTS — ADD / DELETE / CALL
+// ════════════════════════════════════════════════════════
+function openAddContact() { openModal('modal-contact'); }
+function saveContact() {
+  const name     = document.getElementById('c-name').value.trim();
+  const rel      = document.getElementById('c-rel').value;
+  const priority = parseInt(document.getElementById('c-priority').value);
+  const phone    = document.getElementById('c-phone').value.trim();
+  if (!name || !phone) { showToast(t('toast_contact_required')); return; }
+
+  CONTACTS_DB.push({ id: nextContactId++, name, rel, phone, priority });
+  renderContacts();
+  ['c-name','c-phone'].forEach(id => document.getElementById(id).value='');
+  closeModal('modal-contact');
+  showToast(`${t('toast_contact_added_pre')} ${name} ${t('toast_contact_added_suf')}`);
+}
+
+function deleteContact(id) {
+  const c = CONTACTS_DB.find(x => x.id === id);
+  if (!c) return;
+  if (confirm(`${t('confirm_remove_pre')} ${c.name} ${t('confirm_remove_suf')}`)) {
+    CONTACTS_DB = CONTACTS_DB.filter(x => x.id !== id);
+    renderContacts();
+    showToast(t('toast_contact_removed'));
+  }
+}
+
+function callContact(id) {
+  const c = CONTACTS_DB.find(x => x.id === id);
+  if (!c) return;
+  showToast(`${t('toast_calling_pre')} ${c.name}…`);
+  setTimeout(() => window.location.href = `tel:${c.phone.replace(/\s/g,'')}`, 600);
+}
+
+function callPrimaryContact() {
+  const primary = CONTACTS_DB.filter(x=>x.priority===1).sort((a,b)=>a.id-b.id)[0];
+  closeModal('modal-sos');
+  if (primary) {
+    showToast(`${t('toast_calling_pre')} ${primary.name}…`);
+    setTimeout(() => window.location.href = `tel:${primary.phone.replace(/\s/g,'')}`, 700);
+  } else {
+    showToast(t('toast_no_primary'));
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  SOS
+// ════════════════════════════════════════════════════════
+function openSOS() { openModal('modal-sos'); }
+function sosCall(service, number) {
+  closeModal('modal-sos');
+  showToast(`${t('toast_calling_service_pre')} ${service} — ${number}…`);
+  if (number) setTimeout(() => window.location.href = `tel:${number}`, 600);
+}
+
+// ════════════════════════════════════════════════════════
+//  FIRST AID — uses translated fa_data
+// ════════════════════════════════════════════════════════
+function openFirstAid(type) {
+  const langData = (TRANSLATIONS[currentLang] || TRANSLATIONS.en).fa_data;
+  const data = langData ? langData[type] : null;
+  // Fallback to English if not translated
+  const d = data || TRANSLATIONS.en.fa_data[type];
+  if (!d) return;
+
+  document.getElementById('fa-modal-title').textContent   = d.title;
+  document.getElementById('fa-modal-icon').textContent    = d.icon;
+  document.getElementById('fa-modal-warning').textContent = d.warning;
+  const stepsEl = document.getElementById('fa-modal-steps');
+  stepsEl.innerHTML = '';
+  d.steps.forEach((step,i) => stepsEl.innerHTML += `<li><div class="step-num">${i+1}</div><div>${step}</div></li>`);
+  openModal('modal-firstaid');
+}
+
+// ════════════════════════════════════════════════════════
+//  TOAST + UTILS
+// ════════════════════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════
+applyTranslations();
+</script>
+</div><!-- /.page-main -->
+</div><!-- /.page-layout -->
+</body>
+</html>

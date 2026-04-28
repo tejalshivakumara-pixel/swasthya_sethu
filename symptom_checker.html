@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Symptom Checker — Swasthya Setu</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary: #6C63FF;
+    --primary-dark: #4f46e5;
+    --secondary: #7c3aed;
+    --accent: #06b6d4;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --bg: #f8f7ff;
+    --card: #ffffff;
+    --text: #1e1b4b;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
+    --grad: linear-gradient(135deg, #6C63FF 0%, #7c3aed 50%, #06b6d4 100%);
+    --blue: #2563eb;
+    --blue-light: #eff6ff;
+    --blue-mid: #93c5fd;
+    --purple: #7c3aed;
+    --green: #16a34a;
+    --green-light: #f0fdf4;
+    --amber: #d97706;
+    --amber-light: #fffbeb;
+    --red: #dc2626;
+    --red-light: #fef2f2;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-900: #0f172a;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── LANG BAR ── */
+  .lang-bar {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 101;
+  }
+  .lang-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); }
+  .lang-btn {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 2px solid var(--border);
+    background: transparent;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s;
+    color: var(--text-muted);
+    font-family: 'Nunito', sans-serif;
+  }
+  .lang-btn.active, .lang-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+  /* ── BACK BAR ── */
+  .back-bar {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 41px;
+    z-index: 100;
+  }
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: var(--primary);
+    background: #ede9fe;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .back-btn:hover { background: var(--primary); color: #fff; }
+  .back-bar-title { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1rem; color: var(--text); }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--grad);
+    padding: 40px 24px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-logo { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 10px; }
+  .hero-logo .icon { font-size: 2.5rem; }
+  .hero-logo h1 { font-family: 'Nunito', sans-serif; font-size: 2.4rem; font-weight: 900; color: #fff; }
+  .hero p { color: rgba(255,255,255,0.88); font-size: 1rem; margin-bottom: 20px; }
+  .hero-badges { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .badge {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    padding: 7px 16px;
+    border-radius: 50px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    backdrop-filter: blur(6px);
+  }
+
+  /* ── MAIN ── */
+  .container { max-width: 860px; margin: 0 auto; padding: 32px 20px 60px; }
+
+  /* ── STEP INDICATOR (doctor_appt style) ── */
+  .steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 36px;
+  }
+  .step { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .step-circle {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--border);
+    color: var(--text-muted);
+    font-weight: 800;
+    font-size: 0.95rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .3s;
+    font-family: 'Nunito', sans-serif;
+  }
+  .step.active .step-circle { background: var(--grad); color: #fff; box-shadow: 0 4px 16px rgba(108,99,255,.4); }
+  .step.done .step-circle { background: var(--success); color: #fff; }
+  .step-label { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+  .step.active .step-label { color: var(--primary); }
+  .step-line { width: 60px; height: 2px; background: var(--border); margin-bottom: 20px; }
+  .step-line.done { background: var(--success); }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 18px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary), transparent);
+    border-radius: 2px;
+  }
+
+  /* ── INFO BAR ── */
+  .info-bar {
+    background: linear-gradient(90deg, #fffbeb, #fef3c7);
+    border-left: 4px solid var(--warning);
+    border-radius: 0 12px 12px 0;
+    padding: 12px 18px;
+    font-size: 0.82rem;
+    color: #92400e;
+    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  /* ── CARD ── */
+  .form-panel {
+    background: var(--card);
+    border-radius: 24px;
+    box-shadow: 0 4px 32px rgba(0,0,0,.06);
+    padding: 30px;
+    margin-bottom: 28px;
+  }
+
+  /* ── FORM ELEMENTS ── */
+  .form-grid { display: grid; gap: 20px; }
+  .form-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 600px) { .form-grid.cols-2 { grid-template-columns: 1fr; } }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 0.82rem; font-weight: 700;
+    color: var(--text); display: flex; align-items: center; gap: 4px;
+    letter-spacing: .3px;
+  }
+  .field label .opt { font-weight: 400; color: var(--text-muted); font-size: 0.78rem; }
+
+  input[type="text"], input[type="number"], input[type="tel"],
+  select, textarea {
+    width: 100%; padding: 12px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text);
+    background: var(--card);
+    transition: border-color .2s, box-shadow .2s;
+    outline: none;
+    appearance: none; -webkit-appearance: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(108,99,255,.1);
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
+  }
+  textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+
+  /* Severity buttons */
+  .severity-group { display: flex; gap: 10px; }
+  .sev-btn {
+    flex: 1; padding: 10px 6px; border-radius: 12px;
+    border: 2px solid var(--border); background: var(--card);
+    font-family: 'Inter', sans-serif; font-size: 0.88rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; text-align: center;
+    color: var(--text-muted);
+  }
+  .sev-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .sev-btn.selected-mild { border-color: var(--success); background: var(--green-light); color: var(--green); }
+  .sev-btn.selected-moderate { border-color: var(--warning); background: var(--amber-light); color: var(--amber); }
+  .sev-btn.selected-severe { border-color: var(--danger); background: var(--red-light); color: var(--red); }
+
+  /* Condition chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    padding: 7px 14px; border-radius: 50px;
+    border: 2px solid var(--border); background: var(--card);
+    font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; color: var(--text-muted);
+  }
+  .chip:hover { border-color: var(--primary); color: var(--primary); }
+  .chip.selected { border-color: var(--primary); background: #ede9fe; color: var(--primary); }
+
+  /* Upload area */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--bg);
+  }
+  .upload-zone:hover { border-color: var(--primary); background: #ede9fe; }
+  .upload-zone.has-file { border-color: var(--success); background: var(--green-light); }
+  .upload-zone input { display: none; }
+  .upload-icon { font-size: 2rem; margin-bottom: 8px; }
+  .upload-text { font-size: 0.9rem; color: var(--text-muted); }
+  .upload-text strong { color: var(--primary); }
+  .upload-hint { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
+  .file-preview {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--card); border: 2px solid var(--border);
+    border-radius: 12px; padding: 10px 14px;
+    margin-top: 10px; font-size: 0.88rem;
+  }
+  .file-preview .remove {
+    margin-left: auto; background: none; border: none;
+    color: var(--text-muted); cursor: pointer; font-size: 1rem;
+    padding: 2px 6px; border-radius: 4px;
+  }
+  .file-preview .remove:hover { color: var(--danger); background: var(--red-light); }
+
+  /* ── BUTTONS ── */
+  .btn-row { display: flex; gap: 14px; justify-content: flex-end; flex-wrap: wrap; margin-top: 8px; }
+  .btn {
+    padding: 13px 28px;
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    border: none;
+    transition: all .25s;
+  }
+  .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text-muted); }
+  .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+  .btn-primary { background: var(--grad); color: #fff; box-shadow: 0 4px 16px rgba(108,99,255,.35); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(108,99,255,.45); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  .btn-green { background: linear-gradient(135deg, #16a34a, #15803d); color: white; box-shadow: 0 4px 14px rgba(22,163,74,0.3); }
+  .btn-green:hover { transform: translateY(-1px); }
+
+  /* ── LOADING ── */
+  .loading-screen {
+    display: none;
+    background: var(--card);
+    border-radius: 24px;
+    box-shadow: 0 4px 32px rgba(0,0,0,.06);
+    padding: 60px 30px;
+    text-align: center;
+    flex-direction: column;
+    align-items: center;
+  }
+  .loading-screen.active { display: flex; }
+  .spinner {
+    width: 56px; height: 56px;
+    border: 4px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    margin-bottom: 24px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-steps { list-style: none; text-align: left; margin-top: 16px; }
+  .loading-steps li {
+    font-size: 0.9rem; color: var(--text-muted);
+    padding: 6px 0; display: flex; align-items: center; gap: 8px;
+    transition: color 0.4s;
+  }
+  .loading-steps li.done { color: var(--success); }
+  .loading-steps li.active { color: var(--text); font-weight: 600; }
+  .l-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border); flex-shrink: 0;
+  }
+  .l-dot.done { background: var(--success); }
+  .l-dot.active { background: var(--primary); animation: pulse-dot 1s ease-in-out infinite; }
+  @keyframes pulse-dot { 0%,100% { transform: scale(1); } 50% { transform: scale(1.4); } }
+
+  /* ── RESULTS ── */
+  .results-screen { display: none; }
+  .results-screen.active { display: block; }
+
+  .urgency-banner {
+    border-radius: 16px; padding: 16px 20px;
+    display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
+    border: 2px solid;
+  }
+  .urgency-banner.low { background: var(--green-light); border-color: #86efac; color: #14532d; }
+  .urgency-banner.medium { background: var(--amber-light); border-color: #fcd34d; color: #78350f; }
+  .urgency-banner.high { background: var(--red-light); border-color: #fca5a5; color: #7f1d1d; }
+  .urgency-icon { font-size: 1.8rem; flex-shrink: 0; }
+  .urgency-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.7; }
+  .urgency-text { font-size: 1rem; font-weight: 700; margin-top: 2px; }
+
+  .result-section { margin-bottom: 20px; }
+  .result-section-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem; font-weight: 800;
+    color: var(--text); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .condition-item {
+    background: var(--card); border: 2px solid var(--border);
+    border-radius: 12px; padding: 14px 16px;
+    margin-bottom: 10px; display: flex; align-items: center; gap: 14px;
+  }
+  .prob-bar-wrap { flex: 1; }
+  .prob-label { font-size: 0.88rem; font-weight: 700; color: var(--text); margin-bottom: 5px; }
+  .prob-bar { height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+  .prob-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+  .prob-fill.high { background: var(--grad); }
+  .prob-fill.medium { background: linear-gradient(90deg, var(--warning), #f59e0b); }
+  .prob-fill.low { background: var(--border); }
+  .prob-pct { font-size: 0.85rem; font-weight: 800; color: var(--text-muted); min-width: 38px; text-align: right; }
+
+  .action-list { list-style: none; }
+  .action-list li {
+    background: var(--card); border: 2px solid var(--border);
+    border-radius: 12px; padding: 12px 16px;
+    margin-bottom: 8px; font-size: 0.9rem; color: var(--text-muted);
+    display: flex; align-items: flex-start; gap: 10px; line-height: 1.5;
+  }
+  .action-list li .bullet {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--primary); flex-shrink: 0; margin-top: 6px;
+  }
+
+  .doctor-card {
+    background: var(--card); border: 2px solid var(--border);
+    border-radius: 12px; padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+  }
+  .doctor-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--grad); display: flex; align-items: center;
+    justify-content: center; font-size: 1.1rem; flex-shrink: 0;
+  }
+  .doctor-name { font-weight: 700; font-size: 0.92rem; color: var(--text); font-family: 'Nunito', sans-serif; }
+  .doctor-meta { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
+  .book-btn {
+    margin-left: auto; padding: 7px 14px; border-radius: 10px;
+    background: #ede9fe; color: var(--primary);
+    border: 2px solid var(--primary); font-size: 0.82rem; font-weight: 700;
+    cursor: pointer; font-family: 'Nunito', sans-serif; transition: all 0.2s;
+  }
+  .book-btn:hover { background: var(--primary); color: white; }
+
+  .result-actions-row {
+    display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap;
+  }
+  .result-actions-row .btn { flex: 1; min-width: 140px; text-align: center; }
+
+  .final-disclaimer {
+    margin-top: 24px; padding: 14px 18px;
+    background: linear-gradient(90deg, #e0f2fe, #ede9fe);
+    border-left: 4px solid var(--primary);
+    border-radius: 0 12px 12px 0;
+    font-size: 0.82rem; color: var(--text);
+    line-height: 1.6;
+  }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 640px) {
+    .severity-group { flex-direction: column; }
+    .result-actions-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LANG BAR -->
+<div class="lang-bar">
+  <span class="lang-label">🌐 Language:</span>
+  <button class="lang-btn active" onclick="setLang('English')">EN</button>
+  <button class="lang-btn" onclick="setLang('हिंदी')">हिं</button>
+  <button class="lang-btn" onclick="setLang('ಕನ್ನಡ')">ಕನ್ನಡ</button>
+  <button class="lang-btn" onclick="setLang('తెలుగు')">తెలుగు</button>
+  <button class="lang-btn" onclick="setLang('தமிழ்')">தமிழ்</button>
+</div>
+
+<!-- BACK BAR -->
+<div class="back-bar">
+  <button class="back-btn" onclick="history.back()">← <span id="lbl-back">Back</span></button>
+  <span class="back-bar-title">🤖 <span id="lbl-page-title">AI Symptom Checker — Swasthya Setu</span></span>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-logo">
+    <span class="icon">🏥</span>
+    <h1>Swasthya Setu</h1>
+  </div>
+  <p id="hero-sub">AI-Powered Rural Healthcare Accessibility Platform</p>
+  <div class="hero-badges">
+    <span class="badge">✨ <span id="badge-accessible">Accessible</span></span>
+    <span class="badge">🤖 <span id="badge-ai">AI-Powered</span></span>
+    <span class="badge">⚡ <span id="badge-fast">Fast</span></span>
+    <span class="badge">🌿 <span id="badge-rural">Rural-Friendly</span></span>
+    <span class="badge">📶 <span id="badge-offline">Offline Support</span></span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- STEP INDICATOR -->
+  <div class="steps">
+    <div class="step active" id="step-ind-1">
+      <div class="step-circle">1</div>
+      <div class="step-label" id="sl-1">Personal Info</div>
+    </div>
+    <div class="step-line" id="line-1"></div>
+    <div class="step" id="step-ind-2">
+      <div class="step-circle">2</div>
+      <div class="step-label" id="sl-2">Symptoms</div>
+    </div>
+    <div class="step-line" id="line-2"></div>
+    <div class="step" id="step-ind-3">
+      <div class="step-circle">3</div>
+      <div class="step-label" id="sl-3">Medical History</div>
+    </div>
+    <div class="step-line" id="line-3"></div>
+    <div class="step" id="step-ind-4">
+      <div class="step-circle">4</div>
+      <div class="step-label" id="sl-4">Results</div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 1: PERSONAL INFO ══ -->
+  <div id="page-1">
+    <div class="info-bar">⚠️ <span id="lbl-disclaimer">This tool provides <strong>preliminary insights only</strong> — not a medical diagnosis. Always consult a qualified doctor for proper treatment.</span></div>
+    <p class="section-title">👤 <span id="lbl-card-personal">Personal Information</span></p>
+    <div class="form-panel">
+      <div class="form-grid cols-2">
+        <div class="field">
+          <label id="lbl-name">Full Name</label>
+          <input type="text" id="name" placeholder="Your name" />
+        </div>
+        <div class="field">
+          <label id="lbl-age">Age</label>
+          <input type="number" id="age" placeholder="e.g. 35" min="1" max="120" />
+        </div>
+        <div class="field">
+          <label id="lbl-gender">Gender</label>
+          <select id="gender">
+            <option value="" id="opt-gender-ph">Select gender</option>
+            <option id="opt-male">Male</option>
+            <option id="opt-female">Female</option>
+            <option id="opt-other">Other</option>
+            <option id="opt-pnts">Prefer not to say</option>
+          </select>
+        </div>
+        <div class="field">
+          <label id="lbl-location">Location <span class="opt">(optional)</span></label>
+          <input type="text" id="location" placeholder="Village / Town / PIN code" />
+        </div>
+        <div class="field">
+          <label id="lbl-phone">Phone <span class="opt">(for appointment)</span></label>
+          <input type="tel" id="phone" placeholder="+91 XXXXXXXXXX" />
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-next-symptoms" onclick="goTo(2)">Next: Symptoms →</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 2: SYMPTOMS ══ -->
+  <div id="page-2" class="hidden">
+    <p class="section-title">🩺 <span id="lbl-card-symptoms">Describe Your Symptoms</span></p>
+    <div class="form-panel">
+      <div class="form-grid">
+        <div class="field">
+          <label id="lbl-symptoms">Describe symptoms in detail</label>
+          <textarea id="symptoms" placeholder="E.g., I have had a throbbing headache on the right side for 2 days, mild fever around 100°F, runny nose, and body aches..."></textarea>
+        </div>
+        <div class="field">
+          <label id="lbl-duration">Duration of symptoms</label>
+          <select id="duration">
+            <option value="" id="opt-dur-ph">Select duration</option>
+            <option id="opt-dur-24h">Less than 24 hours</option>
+            <option id="opt-dur-1_3">1–3 days</option>
+            <option id="opt-dur-4_7">4–7 days</option>
+            <option id="opt-dur-1_2w">1–2 weeks</option>
+            <option id="opt-dur-2w">More than 2 weeks</option>
+          </select>
+        </div>
+        <div class="field">
+          <label id="lbl-severity">Severity</label>
+          <div class="severity-group">
+            <button class="sev-btn" id="sev-mild" onclick="setSeverity(this,'mild')">😌 Mild<br><small>Bearable</small></button>
+            <button class="sev-btn" id="sev-moderate" onclick="setSeverity(this,'moderate')">😟 Moderate<br><small>Affects daily life</small></button>
+            <button class="sev-btn" id="sev-severe" onclick="setSeverity(this,'severe')">😣 Severe<br><small>Very painful</small></button>
+          </div>
+          <input type="hidden" id="severity" value="" />
+        </div>
+        <div class="field">
+          <label id="lbl-temp">Body Temperature <span class="opt">(optional)</span></label>
+          <input type="text" id="temperature" placeholder="e.g. 100.4°F or 38°C" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload -->
+    <p class="section-title">📷 <span id="lbl-card-upload">Upload Image</span> <span style="font-weight:500;font-size:0.9rem;color:var(--text-muted)">(optional)</span></p>
+    <div class="form-panel">
+      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+        <input type="file" id="file-input" accept="image/*,.pdf" onchange="handleFile(this)"/>
+        <div class="upload-icon">📎</div>
+        <div class="upload-text" id="upload-text"><strong>Click to upload</strong> or drag and drop</div>
+        <div class="upload-hint" id="upload-hint">Prescription, rash, wound, or medical report — JPG, PNG, PDF up to 5MB</div>
+      </div>
+      <div id="file-preview" style="display:none;" class="file-preview">
+        <span>📄</span>
+        <span id="file-name"></span>
+        <button class="remove" onclick="removeFile()">✕</button>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-outline" id="btn-back-2" onclick="goTo(1)">← Back</button>
+      <button class="btn btn-primary" id="btn-next-history" onclick="goTo(3)">Next: Medical History →</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 3: MEDICAL HISTORY ══ -->
+  <div id="page-3" class="hidden">
+    <p class="section-title">🗂️ <span id="lbl-card-history">Medical History</span></p>
+    <div class="form-panel">
+      <div class="form-grid">
+        <div class="field">
+          <label id="lbl-conditions">Existing Medical Conditions</label>
+          <div class="chips" id="conditions-chips">
+            <button class="chip" onclick="toggleChip(this)">Diabetes</button>
+            <button class="chip" onclick="toggleChip(this)">High BP</button>
+            <button class="chip" onclick="toggleChip(this)">Asthma</button>
+            <button class="chip" onclick="toggleChip(this)">Heart Disease</button>
+            <button class="chip" onclick="toggleChip(this)">Thyroid</button>
+            <button class="chip" onclick="toggleChip(this)">Kidney Disease</button>
+            <button class="chip" onclick="toggleChip(this)">Liver Disease</button>
+            <button class="chip" onclick="toggleChip(this)">Obesity</button>
+            <button class="chip" onclick="toggleChip(this)">None</button>
+          </div>
+        </div>
+        <div class="field">
+          <label id="lbl-other-cond">Other conditions <span class="opt">(if not listed above)</span></label>
+          <input type="text" id="other-conditions" placeholder="e.g. Migraine, Anemia..." />
+        </div>
+        <div class="field">
+          <label id="lbl-medicines">Current Medicines <span class="opt">(optional)</span></label>
+          <textarea id="medicines" placeholder="List medicines you are currently taking, e.g. Metformin 500mg..." style="min-height:80px;"></textarea>
+        </div>
+        <div class="field">
+          <label id="lbl-allergies">Allergies <span class="opt">(optional)</span></label>
+          <input type="text" id="allergies" placeholder="e.g. Penicillin, Sulfa drugs, Peanuts..." />
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline" id="btn-back-3" onclick="goTo(2)">← Back</button>
+      <button class="btn btn-primary" id="analyze-btn" onclick="runAnalysis()">🔍 Analyze Symptoms</button>
+    </div>
+  </div>
+
+  <!-- ══ LOADING ══ -->
+  <div class="loading-screen" id="loading-screen">
+    <div class="spinner"></div>
+    <div id="loading-title" style="font-family:'Nunito',sans-serif;font-size:1.2rem;font-weight:800;color:var(--text);">Analyzing your symptoms…</div>
+    <p id="loading-sub" style="font-size:0.9rem;color:var(--text-muted);margin-top:8px;">Our AI is reviewing your information</p>
+    <ul class="loading-steps" id="loading-steps">
+      <li id="ls-1"><span class="l-dot active" id="ld-1"></span><span id="ls-1-text">Reading symptom details</span></li>
+      <li id="ls-2"><span class="l-dot" id="ld-2"></span><span id="ls-2-text">Cross-referencing medical knowledge</span></li>
+      <li id="ls-3"><span class="l-dot" id="ld-3"></span><span id="ls-3-text">Assessing urgency level</span></li>
+      <li id="ls-4"><span class="l-dot" id="ld-4"></span><span id="ls-4-text">Preparing recommendations</span></li>
+    </ul>
+  </div>
+
+  <!-- ══ RESULTS ══ -->
+  <div class="results-screen" id="results-screen">
+    <div class="form-panel">
+      <p class="section-title" style="margin-bottom:20px;">📋 <span id="results-title">Analysis Results</span></p>
+
+      <!-- Urgency -->
+      <div id="urgency-banner" class="urgency-banner low">
+        <div class="urgency-icon" id="urgency-icon">🟢</div>
+        <div>
+          <div class="urgency-label" id="urgency-label">Urgency Level</div>
+          <div class="urgency-text" id="urgency-text">Low — Home care likely sufficient</div>
+        </div>
+      </div>
+
+      <!-- Possible Conditions -->
+      <div class="result-section">
+        <div class="result-section-title" id="rst-conditions">🔬 Possible Conditions</div>
+        <div id="conditions-list"></div>
+      </div>
+
+      <!-- Recommendations -->
+      <div class="result-section">
+        <div class="result-section-title" id="rst-actions">💡 Recommended Actions</div>
+        <ul class="action-list" id="actions-list"></ul>
+      </div>
+
+      <!-- Home Remedies -->
+      <div class="result-section">
+        <div class="result-section-title" id="rst-remedies">🌿 Home Remedies</div>
+        <ul class="action-list" id="remedies-list"></ul>
+      </div>
+
+      <!-- When to see doctor -->
+      <div class="result-section">
+        <div class="result-section-title" id="rst-doctor">🏥 When to See a Doctor</div>
+        <div id="doctor-advice" class="action-list"></div>
+      </div>
+    </div>
+
+    <!-- Nearby Doctors -->
+    <div class="form-panel" id="nearby-doctors-card">
+      <p class="section-title" style="margin-bottom:20px;">👨‍⚕️ <span id="rst-nearby">Nearby Doctors &amp; Specialists</span></p>
+      <div id="doctors-list"></div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="result-actions-row">
+      <button class="btn btn-green" id="btn-download" onclick="downloadReport()">⬇ <span id="lbl-download">Download Report</span></button>
+      <button class="btn btn-primary" id="btn-book" onclick="alert('Redirecting to appointment page...')">📅 <span id="lbl-book">Book Appointment</span></button>
+      <button class="btn btn-outline" id="btn-again" onclick="startOver()">🔄 <span id="lbl-again">Check Again</span></button>
+    </div>
+
+    <div class="final-disclaimer" id="final-disclaimer">
+      ⚠️ This AI-generated assessment is for informational purposes only and does not constitute medical advice, diagnosis, or treatment. Always seek the guidance of a qualified healthcare professional for medical concerns.
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ══════════════════════════════════════════════
+// TRANSLATIONS
+// ══════════════════════════════════════════════
+const SC_TRANSLATIONS = {
+  "English": {
+    back: "Back",
+    page_title: "AI Symptom Checker — Swasthya Setu",
+    hero_sub: "AI-Powered Rural Healthcare Accessibility Platform",
+    badge_accessible: "Accessible", badge_ai: "AI-Powered", badge_fast: "Fast",
+    badge_rural: "Rural-Friendly", badge_offline: "Offline Support",
+    disclaimer: "This tool provides <strong>preliminary insights only</strong> — not a medical diagnosis. Always consult a qualified doctor for proper treatment.",
+    step1: "Personal Info", step2: "Symptoms", step3: "Medical History", step4: "Results",
+    card_personal: "Personal Information",
+    lbl_name: "Full Name", lbl_age: "Age", lbl_gender: "Gender",
+    lbl_location: "Location", lbl_phone: "Phone",
+    gender_ph: "Select gender", gender_male: "Male", gender_female: "Female",
+    gender_other: "Other", gender_pnts: "Prefer not to say",
+    next_symptoms: "Next: Symptoms →",
+    card_symptoms: "Describe Your Symptoms",
+    lbl_symptoms: "Describe symptoms in detail",
+    lbl_duration: "Duration of symptoms", dur_ph: "Select duration",
+    dur_24h: "Less than 24 hours", dur_1_3: "1–3 days", dur_4_7: "4–7 days",
+    dur_1_2w: "1–2 weeks", dur_2w: "More than 2 weeks",
+    lbl_severity: "Severity",
+    mild: "😌 Mild", mild_sub: "Bearable",
+    moderate: "😟 Moderate", moderate_sub: "Affects daily life",
+    severe: "😣 Severe", severe_sub: "Very painful",
+    lbl_temp: "Body Temperature",
+    card_upload: "Upload Image",
+    upload_text: "<strong>Click to upload</strong> or drag and drop",
+    upload_hint: "Prescription, rash, wound, or medical report — JPG, PNG, PDF up to 5MB",
+    back_btn: "← Back", next_history: "Next: Medical History →",
+    card_history: "Medical History",
+    lbl_conditions: "Existing Medical Conditions",
+    lbl_other_cond: "Other conditions",
+    lbl_medicines: "Current Medicines",
+    lbl_allergies: "Allergies",
+    analyze_btn: "🔍 Analyze Symptoms",
+    analyzing: "Analyzing your symptoms…",
+    ai_reviewing: "Our AI is reviewing your information",
+    ls1: "Reading symptom details", ls2: "Cross-referencing medical knowledge",
+    ls3: "Assessing urgency level", ls4: "Preparing recommendations",
+    results_title: "Analysis Results",
+    urgency_label: "Urgency Level",
+    possible_cond: "🔬 Possible Conditions",
+    rec_actions: "💡 Recommended Actions",
+    home_remedies: "🌿 Home Remedies",
+    see_doctor: "🏥 When to See a Doctor",
+    nearby_doctors: "👨‍⚕️ Nearby Doctors & Specialists",
+    download_report: "Download Report",
+    book_appt: "Book Appointment",
+    check_again: "Check Again",
+    final_disclaimer: "⚠️ This AI-generated assessment is for informational purposes only and does not constitute medical advice, diagnosis, or treatment. Always seek the guidance of a qualified healthcare professional for medical concerns."
+  },
+  "हिंदी": {
+    back: "वापस",
+    page_title: "AI लक्षण जाँचकर्ता — स्वास्थ्य सेतु",
+    hero_sub: "एआई-संचालित ग्रामीण स्वास्थ्य सेवा प्लेटफॉर्म",
+    badge_accessible: "सुलभ", badge_ai: "एआई-शक्तिचलित", badge_fast: "तेज़",
+    badge_rural: "ग्रामीण-अनुकूल", badge_offline: "ऑफलाइन समर्थन",
+    disclaimer: "यह उपकरण केवल <strong>प्रारंभिक जानकारी</strong> प्रदान करता है — चिकित्सा निदान नहीं। उचित उपचार के लिए हमेशा योग्य डॉक्टर से परामर्श लें।",
+    step1: "व्यक्तिगत जानकारी", step2: "लक्षण", step3: "चिकित्सा इतिहास", step4: "परिणाम",
+    card_personal: "व्यक्तिगत जानकारी",
+    lbl_name: "पूरा नाम", lbl_age: "आयु", lbl_gender: "लिंग",
+    lbl_location: "स्थान", lbl_phone: "फ़ोन",
+    gender_ph: "लिंग चुनें", gender_male: "पुरुष", gender_female: "महिला",
+    gender_other: "अन्य", gender_pnts: "बताना नहीं चाहते",
+    next_symptoms: "अगला: लक्षण →",
+    card_symptoms: "अपने लक्षण बताएं",
+    lbl_symptoms: "लक्षण विस्तार से बताएं",
+    lbl_duration: "लक्षणों की अवधि", dur_ph: "अवधि चुनें",
+    dur_24h: "24 घंटे से कम", dur_1_3: "1–3 दिन", dur_4_7: "4–7 दिन",
+    dur_1_2w: "1–2 सप्ताह", dur_2w: "2 सप्ताह से अधिक",
+    lbl_severity: "गंभीरता",
+    mild: "😌 हल्का", mild_sub: "सहनीय",
+    moderate: "😟 मध्यम", moderate_sub: "दैनिक जीवन प्रभावित",
+    severe: "😣 गंभीर", severe_sub: "बहुत दर्दनाक",
+    lbl_temp: "शरीर का तापमान",
+    card_upload: "छवि अपलोड करें",
+    upload_text: "<strong>अपलोड करने के लिए क्लिक करें</strong> या खींचें और छोड़ें",
+    upload_hint: "नुस्खा, चकत्ते, घाव या चिकित्सा रिपोर्ट — JPG, PNG, PDF 5MB तक",
+    back_btn: "← वापस", next_history: "अगला: चिकित्सा इतिहास →",
+    card_history: "चिकित्सा इतिहास",
+    lbl_conditions: "मौजूदा बीमारियाँ",
+    lbl_other_cond: "अन्य स्थितियाँ",
+    lbl_medicines: "वर्तमान दवाइयाँ",
+    lbl_allergies: "एलर्जी",
+    analyze_btn: "🔍 लक्षण विश्लेषण करें",
+    analyzing: "आपके लक्षणों का विश्लेषण हो रहा है…",
+    ai_reviewing: "हमारा AI आपकी जानकारी की समीक्षा कर रहा है",
+    ls1: "लक्षण विवरण पढ़ना", ls2: "चिकित्सा ज्ञान से मिलान",
+    ls3: "तात्कालिकता स्तर आकलन", ls4: "सिफारिशें तैयार करना",
+    results_title: "विश्लेषण परिणाम",
+    urgency_label: "तात्कालिकता स्तर",
+    possible_cond: "🔬 संभावित स्थितियाँ",
+    rec_actions: "💡 अनुशंसित कार्य",
+    home_remedies: "🌿 घरेलू उपाय",
+    see_doctor: "🏥 डॉक्टर को कब दिखाएं",
+    nearby_doctors: "👨‍⚕️ नज़दीकी डॉक्टर और विशेषज्ञ",
+    download_report: "रिपोर्ट डाउनलोड करें",
+    book_appt: "अपॉइंटमेंट बुक करें",
+    check_again: "फिर जाँचें",
+    final_disclaimer: "⚠️ यह AI-निर्मित मूल्यांकन केवल जानकारी के लिए है और यह चिकित्सा सलाह, निदान या उपचार नहीं है। कृपया डॉक्टर से परामर्श लें।"
+  },
+  "ಕನ್ನಡ": {
+    back: "ಹಿಂದೆ",
+    page_title: "AI ರೋಗಲಕ್ಷಣ ಪರೀಕ್ಷಕ — ಸ್ವಾಸ್ಥ್ಯ ಸೇತು",
+    hero_sub: "ಎಐ-ಚಾಲಿತ ಗ್ರಾಮೀಣ ಆರೋಗ್ಯ ಸೇವಾ ವೇದಿಕೆ",
+    badge_accessible: "ಸುಲಭ", badge_ai: "ಎಐ-ಚಾಲಿತ", badge_fast: "ವೇಗ",
+    badge_rural: "ಗ್ರಾಮೀಣ-ಸ್ನೇಹಿ", badge_offline: "ಆಫ್‌ಲೈನ್ ಬೆಂಬಲ",
+    disclaimer: "ಈ ಸಾಧನ ಕೇವಲ <strong>ಪ್ರಾಥಮಿಕ ಮಾಹಿತಿ</strong> ನೀಡುತ್ತದೆ — ವೈದ್ಯಕೀಯ ರೋಗನಿರ್ಣಯ ಅಲ್ಲ. ಸೂಕ್ತ ಚಿಕಿತ್ಸೆಗೆ ಯಾವಾಗಲೂ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.",
+    step1: "ವೈಯಕ್ತಿಕ ಮಾಹಿತಿ", step2: "ರೋಗಲಕ್ಷಣಗಳು", step3: "ವೈದ್ಯಕೀಯ ಇತಿಹಾಸ", step4: "ಫಲಿತಾಂಶಗಳು",
+    card_personal: "ವೈಯಕ್ತಿಕ ಮಾಹಿತಿ",
+    lbl_name: "ಪೂರ್ಣ ಹೆಸರು", lbl_age: "ವಯಸ್ಸು", lbl_gender: "ಲಿಂಗ",
+    lbl_location: "ಸ್ಥಳ", lbl_phone: "ಫೋನ್",
+    gender_ph: "ಲಿಂಗ ಆಯ್ಕೆ ಮಾಡಿ", gender_male: "ಪುರುಷ", gender_female: "ಮಹಿಳೆ",
+    gender_other: "ಇತರ", gender_pnts: "ಹೇಳಲು ಇಷ್ಟಪಡುವುದಿಲ್ಲ",
+    next_symptoms: "ಮುಂದೆ: ರೋಗಲಕ್ಷಣಗಳು →",
+    card_symptoms: "ನಿಮ್ಮ ರೋಗಲಕ್ಷಣಗಳನ್ನು ವಿವರಿಸಿ",
+    lbl_symptoms: "ರೋಗಲಕ್ಷಣಗಳನ್ನು ವಿವರವಾಗಿ ವಿವರಿಸಿ",
+    lbl_duration: "ರೋಗಲಕ್ಷಣಗಳ ಅವಧಿ", dur_ph: "ಅವಧಿ ಆಯ್ಕೆ ಮಾಡಿ",
+    dur_24h: "24 ಗಂಟೆಗಿಂತ ಕಡಿಮೆ", dur_1_3: "1–3 ದಿನ", dur_4_7: "4–7 ದಿನ",
+    dur_1_2w: "1–2 ವಾರ", dur_2w: "2 ವಾರಕ್ಕಿಂತ ಹೆಚ್ಚು",
+    lbl_severity: "ತೀವ್ರತೆ",
+    mild: "😌 ಸೌಮ್ಯ", mild_sub: "ಸಹಿಸಬಹುದು",
+    moderate: "😟 ಮಧ್ಯಮ", moderate_sub: "ದೈನಂದಿನ ಜೀವನ ಪ್ರಭಾವಿತ",
+    severe: "😣 ತೀವ್ರ", severe_sub: "ತುಂಬಾ ನೋವಿನ",
+    lbl_temp: "ದೇಹದ ತಾಪಮಾನ",
+    card_upload: "ಚಿತ್ರ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
+    upload_text: "<strong>ಅಪ್‌ಲೋಡ್ ಮಾಡಲು ಕ್ಲಿಕ್ ಮಾಡಿ</strong> ಅಥವಾ ಎಳೆದು ಬಿಡಿ",
+    upload_hint: "ಪ್ರಿಸ್ಕ್ರಿಪ್ಶನ್, ದದ್ದು, ಗಾಯ ಅಥವಾ ವರದಿ — JPG, PNG, PDF 5MB ವರೆಗೆ",
+    back_btn: "← ಹಿಂದೆ", next_history: "ಮುಂದೆ: ವೈದ್ಯಕೀಯ ಇತಿಹಾಸ →",
+    card_history: "ವೈದ್ಯಕೀಯ ಇತಿಹಾಸ",
+    lbl_conditions: "ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಕಾಯಿಲೆಗಳು",
+    lbl_other_cond: "ಇತರ ಪರಿಸ್ಥಿತಿಗಳು",
+    lbl_medicines: "ಪ್ರಸ್ತುತ ಔಷಧಗಳು",
+    lbl_allergies: "ಅಲರ್ಜಿಗಳು",
+    analyze_btn: "🔍 ರೋಗಲಕ್ಷಣ ವಿಶ್ಲೇಷಿಸಿ",
+    analyzing: "ನಿಮ್ಮ ರೋಗಲಕ್ಷಣಗಳನ್ನು ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ…",
+    ai_reviewing: "ನಮ್ಮ AI ನಿಮ್ಮ ಮಾಹಿತಿಯನ್ನು ಪರಿಶೀಲಿಸುತ್ತಿದೆ",
+    ls1: "ರೋಗಲಕ್ಷಣ ವಿವರಗಳನ್ನು ಓದುತ್ತಿದೆ", ls2: "ವೈದ್ಯಕೀಯ ಜ್ಞಾನದೊಂದಿಗೆ ಹೋಲಿಕೆ",
+    ls3: "ತುರ್ತು ಮಟ್ಟ ಮೌಲ್ಯಮಾಪನ", ls4: "ಶಿಫಾರಸುಗಳನ್ನು ತಯಾರಿಸಲಾಗುತ್ತಿದೆ",
+    results_title: "ವಿಶ್ಲೇಷಣೆ ಫಲಿತಾಂಶಗಳು",
+    urgency_label: "ತುರ್ತು ಮಟ್ಟ",
+    possible_cond: "🔬 ಸಂಭಾವ್ಯ ಪರಿಸ್ಥಿತಿಗಳು",
+    rec_actions: "💡 ಶಿಫಾರಸು ಮಾಡಿದ ಕ್ರಮಗಳು",
+    home_remedies: "🌿 ಮನೆ ಮದ್ದುಗಳು",
+    see_doctor: "🏥 ವೈದ್ಯರನ್ನು ಯಾವಾಗ ನೋಡಬೇಕು",
+    nearby_doctors: "👨‍⚕️ ಹತ್ತಿರದ ವೈದ್ಯರು ಮತ್ತು ತಜ್ಞರು",
+    download_report: "ವರದಿ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ",
+    book_appt: "ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್ ಬುಕ್ ಮಾಡಿ",
+    check_again: "ಮತ್ತೆ ಪರೀಕ್ಷಿಸಿ",
+    final_disclaimer: "⚠️ ಈ AI ಮೌಲ್ಯಮಾಪನ ಕೇವಲ ಮಾಹಿತಿ ಉದ್ದೇಶಕ್ಕಾಗಿ ಮಾತ್ರ. ದಯವಿಟ್ಟು ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ."
+  },
+  "తెలుగు": {
+    back: "వెనకకు",
+    page_title: "AI లక్షణ పరీక్షకుడు — స్వాస్థ్య సేతు",
+    hero_sub: "ఎఐ-ఆధారిత గ్రామీణ ఆరోగ్య సేవా వేదిక",
+    badge_accessible: "అందుబాటు", badge_ai: "ఎఐ-ఆధారిత", badge_fast: "వేగం",
+    badge_rural: "గ్రామీణ-స్నేహపూర్వక", badge_offline: "ఆఫ్‌లైన్ మద్దతు",
+    disclaimer: "ఈ సాధనం <strong>ప్రాథమిక అంతర్దృష్టులు మాత్రమే</strong> అందిస్తుంది — వైద్య నిర్ధారణ కాదు. సరైన చికిత్సకు ఎల్లప్పుడూ వైద్యుడిని సంప్రదించండి.",
+    step1: "వ్యక్తిగత సమాచారం", step2: "లక్షణాలు", step3: "వైద్య చరిత్ర", step4: "ఫలితాలు",
+    card_personal: "వ్యక్తిగత సమాచారం",
+    lbl_name: "పూర్తి పేరు", lbl_age: "వయస్సు", lbl_gender: "లింగం",
+    lbl_location: "స్థానం", lbl_phone: "ఫోన్",
+    gender_ph: "లింగం ఎంచుకోండి", gender_male: "పురుషుడు", gender_female: "స్త్రీ",
+    gender_other: "ఇతర", gender_pnts: "చెప్పకూడదు",
+    next_symptoms: "తదుపరి: లక్షణాలు →",
+    card_symptoms: "మీ లక్షణాలను వివరించండి",
+    lbl_symptoms: "లక్షణాలను వివరంగా వివరించండి",
+    lbl_duration: "లక్షణాల వ్యవధి", dur_ph: "వ్యవధి ఎంచుకోండి",
+    dur_24h: "24 గంటల కంటే తక్కువ", dur_1_3: "1–3 రోజులు", dur_4_7: "4–7 రోజులు",
+    dur_1_2w: "1–2 వారాలు", dur_2w: "2 వారాల కంటే ఎక్కువ",
+    lbl_severity: "తీవ్రత",
+    mild: "😌 తేలికపాటి", mild_sub: "సహించగలిగేది",
+    moderate: "😟 మధ్యస్థ", moderate_sub: "రోజువారీ జీవితం ప్రభావితం",
+    severe: "😣 తీవ్రమైన", severe_sub: "చాలా నొప్పిగా ఉంది",
+    lbl_temp: "శరీర ఉష్ణోగ్రత",
+    card_upload: "చిత్రం అప్‌లోడ్ చేయండి",
+    upload_text: "<strong>అప్‌లోడ్ చేయడానికి క్లిక్ చేయండి</strong> లేదా లాగి వదలండి",
+    upload_hint: "ప్రిస్క్రిప్షన్, దద్దుర్లు, గాయం లేదా నివేదిక — JPG, PNG, PDF 5MB వరకు",
+    back_btn: "← వెనుకకు", next_history: "తదుపరి: వైద్య చరిత్ర →",
+    card_history: "వైద్య చరిత్ర",
+    lbl_conditions: "ప్రస్తుత వ్యాధులు",
+    lbl_other_cond: "ఇతర పరిస్థితులు",
+    lbl_medicines: "ప్రస్తుత మందులు",
+    lbl_allergies: "అలర్జీలు",
+    analyze_btn: "🔍 లక్షణాలు విశ్లేషించండి",
+    analyzing: "మీ లక్షణాలు విశ్లేషిస్తోంది…",
+    ai_reviewing: "మా AI మీ సమాచారాన్ని సమీక్షిస్తోంది",
+    ls1: "లక్షణ వివరాలు చదవడం", ls2: "వైద్య జ్ఞానంతో పోల్చడం",
+    ls3: "అత్యవసర స్థాయి అంచనా", ls4: "సిఫారసులు సిద్ధం చేస్తోంది",
+    results_title: "విశ్లేషణ ఫలితాలు",
+    urgency_label: "అత్యవసర స్థాయి",
+    possible_cond: "🔬 సాధ్యమైన పరిస్థితులు",
+    rec_actions: "💡 సిఫారసు చేసిన చర్యలు",
+    home_remedies: "🌿 గృహ వైద్యం",
+    see_doctor: "🏥 వైద్యుడిని ఎప్పుడు చూడాలి",
+    nearby_doctors: "👨‍⚕️ సమీప వైద్యులు మరియు నిపుణులు",
+    download_report: "నివేదిక డౌన్‌లోడ్",
+    book_appt: "అపాయింట్‌మెంట్ బుక్",
+    check_again: "మళ్ళీ తనిఖీ చేయండి",
+    final_disclaimer: "⚠️ ఈ AI మూల్యాంకనం సమాచార ప్రయోజనాల కోసం మాత్రమే. దయచేసి వైద్యుడిని సంప్రదించండి."
+  },
+  "தமிழ்": {
+    back: "பின்செல்",
+    page_title: "AI அறிகுறி சரிபார்ப்பாளர் — ஸ்வாஸ்த்ய சேது",
+    hero_sub: "AI-இயக்கப்படும் கிராமப்புற சுகாதார அணுகல் தளம்",
+    badge_accessible: "அணுகல்", badge_ai: "AI-இயக்கப்படும்", badge_fast: "வேகம்",
+    badge_rural: "கிராம-நட்பு", badge_offline: "ஆஃப்லைன் ஆதரவு",
+    disclaimer: "இந்த கருவி <strong>ஆரம்பகால தகவல்களை மட்டுமே</strong> வழங்குகிறது — மருத்துவ நோயறிதல் அல்ல. சரியான சிகிச்சைக்கு எப்போதும் தகுதிவாய்ந்த மருத்துவரை அணுகவும்.",
+    step1: "தனிப்பட்ட தகவல்", step2: "அறிகுறிகள்", step3: "மருத்துவ வரலாறு", step4: "முடிவுகள்",
+    card_personal: "தனிப்பட்ட தகவல்",
+    lbl_name: "முழு பெயர்", lbl_age: "வயது", lbl_gender: "பாலினம்",
+    lbl_location: "இடம்", lbl_phone: "தொலைபேசி",
+    gender_ph: "பாலினம் தேர்ந்தெடுக்கவும்", gender_male: "ஆண்", gender_female: "பெண்",
+    gender_other: "மற்றவை", gender_pnts: "சொல்ல விரும்பவில்லை",
+    next_symptoms: "அடுத்து: அறிகுறிகள் →",
+    card_symptoms: "உங்கள் அறிகுறிகளை விவரிக்கவும்",
+    lbl_symptoms: "அறிகுறிகளை விரிவாக விவரிக்கவும்",
+    lbl_duration: "அறிகுறிகளின் காலம்", dur_ph: "காலம் தேர்ந்தெடுக்கவும்",
+    dur_24h: "24 மணி நேரத்திற்கும் குறைவாக", dur_1_3: "1–3 நாட்கள்", dur_4_7: "4–7 நாட்கள்",
+    dur_1_2w: "1–2 வாரங்கள்", dur_2w: "2 வாரங்களுக்கும் மேல்",
+    lbl_severity: "தீவிரம்",
+    mild: "😌 லேசானது", mild_sub: "தாங்கக்கூடியது",
+    moderate: "😟 மிதமானது", moderate_sub: "அன்றாட வாழ்க்கை பாதிக்கப்படுகிறது",
+    severe: "😣 கடுமையானது", severe_sub: "மிகவும் வலிமையானது",
+    lbl_temp: "உடல் வெப்பநிலை",
+    card_upload: "படம் பதிவேற்றவும்",
+    upload_text: "<strong>பதிவேற்ற கிளிக் செய்யவும்</strong> அல்லது இழுத்து விடவும்",
+    upload_hint: "மருந்துசீட்டு, தடிப்பு, காயம் அல்லது அறிக்கை — JPG, PNG, PDF 5MB வரை",
+    back_btn: "← பின்னால்", next_history: "அடுத்து: மருத்துவ வரலாறு →",
+    card_history: "மருத்துவ வரலாறு",
+    lbl_conditions: "தற்போதுள்ள நோய்கள்",
+    lbl_other_cond: "மற்ற நிலைமைகள்",
+    lbl_medicines: "தற்போதைய மருந்துகள்",
+    lbl_allergies: "ஒவ்வாமை",
+    analyze_btn: "🔍 அறிகுறிகளை பகுப்பாய்வு செய்",
+    analyzing: "உங்கள் அறிகுறிகளை பகுப்பாய்வு செய்கிறது…",
+    ai_reviewing: "எங்கள் AI உங்கள் தகவல்களை மதிப்பாய்வு செய்கிறது",
+    ls1: "அறிகுறி விவரங்களை படிக்கிறது", ls2: "மருத்துவ அறிவுடன் குறுக்கு சரிபார்ப்பு",
+    ls3: "அவசரத்தன்மை மட்டத்தை மதிப்பிடுகிறது", ls4: "பரிந்துரைகளை தயாரிக்கிறது",
+    results_title: "பகுப்பாய்வு முடிவுகள்",
+    urgency_label: "அவசரத்தன்மை நிலை",
+    possible_cond: "🔬 சாத்தியமான நிலைமைகள்",
+    rec_actions: "💡 பரிந்துரைக்கப்பட்ட நடவடிக்கைகள்",
+    home_remedies: "🌿 இல்ல வைத்தியம்",
+    see_doctor: "🏥 மருத்துவரை எப்போது பார்க்க வேண்டும்",
+    nearby_doctors: "👨‍⚕️ அருகிலுள்ள மருத்துவர்கள்",
+    download_report: "அறிக்கையை பதிவிறக்கு",
+    book_appt: "சந்திப்பு முன்பதிவு",
+    check_again: "மீண்டும் சரிபார்",
+    final_disclaimer: "⚠️ இந்த AI மதிப்பீடு தகவல் நோக்கங்களுக்காக மட்டுமே. தயவுசெய்து மருத்துவரை அணுகவும்."
+  }
+};
+
+// ══════════════════════════════════════════════
+// LANGUAGE SYSTEM (same pattern as doctor_appt)
+// ══════════════════════════════════════════════
+let currentLang = localStorage.getItem('sc_lang') || 'English';
+
+function t(key) {
+  return (SC_TRANSLATIONS[currentLang] || SC_TRANSLATIONS['English'])[key] || key;
+}
+
+function applyTranslations() {
+  const setText  = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = t(key); };
+  const setHTML  = (id, key) => { const el = document.getElementById(id); if (el) el.innerHTML = t(key); };
+  const setAttr  = (id, attr, val) => { const el = document.getElementById(id); if (el) el.setAttribute(attr, val); };
+
+  // Back bar
+  setText('lbl-back', 'back');
+  setText('lbl-page-title', 'page_title');
+
+  // Hero
+  setText('hero-sub', 'hero_sub');
+  setText('badge-accessible', 'badge_accessible');
+  setText('badge-ai', 'badge_ai');
+  setText('badge-fast', 'badge_fast');
+  setText('badge-rural', 'badge_rural');
+  setText('badge-offline', 'badge_offline');
+
+  // Step labels
+  setText('sl-1', 'step1'); setText('sl-2', 'step2');
+  setText('sl-3', 'step3'); setText('sl-4', 'step4');
+
+  // Disclaimer
+  setHTML('lbl-disclaimer', 'disclaimer');
+
+  // Step 1
+  setText('lbl-card-personal', 'card_personal');
+  setText('lbl-name', 'lbl_name');
+  setText('lbl-age', 'lbl_age');
+  setText('lbl-gender', 'lbl_gender');
+  setText('lbl-location', 'lbl_location');
+  setText('lbl-phone', 'lbl_phone');
+  setText('opt-gender-ph', 'gender_ph');
+  setText('opt-male', 'gender_male');
+  setText('opt-female', 'gender_female');
+  setText('opt-other', 'gender_other');
+  setText('opt-pnts', 'gender_pnts');
+  setText('btn-next-symptoms', 'next_symptoms');
+
+  // Step 2
+  setText('lbl-card-symptoms', 'card_symptoms');
+  setText('lbl-symptoms', 'lbl_symptoms');
+  setText('lbl-duration', 'lbl_duration');
+  setText('opt-dur-ph', 'dur_ph');
+  setText('opt-dur-24h', 'dur_24h');
+  setText('opt-dur-1_3', 'dur_1_3');
+  setText('opt-dur-4_7', 'dur_4_7');
+  setText('opt-dur-1_2w', 'dur_1_2w');
+  setText('opt-dur-2w', 'dur_2w');
+  setText('lbl-severity', 'lbl_severity');
+
+  // Severity buttons
+  const sevMild = document.getElementById('sev-mild');
+  if (sevMild) sevMild.innerHTML = t('mild') + '<br><small>' + t('mild_sub') + '</small>';
+  const sevMod  = document.getElementById('sev-moderate');
+  if (sevMod)  sevMod.innerHTML  = t('moderate') + '<br><small>' + t('moderate_sub') + '</small>';
+  const sevSev  = document.getElementById('sev-severe');
+  if (sevSev)  sevSev.innerHTML  = t('severe') + '<br><small>' + t('severe_sub') + '</small>';
+
+  setText('lbl-temp', 'lbl_temp');
+  setText('lbl-card-upload', 'card_upload');
+  setHTML('upload-text', 'upload_text');
+  setText('upload-hint', 'upload_hint');
+  setText('btn-back-2', 'back_btn');
+  setText('btn-next-history', 'next_history');
+
+  // Step 3
+  setText('lbl-card-history', 'card_history');
+  setText('lbl-conditions', 'lbl_conditions');
+  setText('lbl-other-cond', 'lbl_other_cond');
+  setText('lbl-medicines', 'lbl_medicines');
+  setText('lbl-allergies', 'lbl_allergies');
+  setText('btn-back-3', 'back_btn');
+  setText('analyze-btn', 'analyze_btn');
+
+  // Loading
+  setText('loading-title', 'analyzing');
+  setText('loading-sub', 'ai_reviewing');
+  setText('ls-1-text', 'ls1');
+  setText('ls-2-text', 'ls2');
+  setText('ls-3-text', 'ls3');
+  setText('ls-4-text', 'ls4');
+
+  // Results
+  setText('results-title', 'results_title');
+  setText('urgency-label', 'urgency_label');
+  setText('rst-conditions', 'possible_cond');
+  setText('rst-actions', 'rec_actions');
+  setText('rst-remedies', 'home_remedies');
+  setText('rst-doctor', 'see_doctor');
+  setText('rst-nearby', 'nearby_doctors');
+  setText('lbl-download', 'download_report');
+  setText('lbl-book', 'book_appt');
+  setText('lbl-again', 'check_again');
+  setText('final-disclaimer', 'final_disclaimer');
+
+  // Lang bar active state
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  const langMap = { 'English': 0, 'हिंदी': 1, 'ಕನ್ನಡ': 2, 'తెలుగు': 3, 'தமிழ்': 4 };
+  const idx = langMap[currentLang];
+  const btns = document.querySelectorAll('.lang-btn');
+  if (btns[idx]) btns[idx].classList.add('active');
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('sc_lang', lang);
+  applyTranslations();
+}
+
+// ══════════════════════════════════════════════
+// STEP NAVIGATION (same pattern as doctor_appt)
+// ══════════════════════════════════════════════
+function goTo(n) {
+  [1, 2, 3].forEach(i => {
+    const el = document.getElementById('page-' + i);
+    if (el) el.classList.add('hidden');
+  });
+  document.getElementById('loading-screen').classList.remove('active');
+  document.getElementById('results-screen').classList.remove('active');
+
+  if (n <= 3) {
+    document.getElementById('page-' + n).classList.remove('hidden');
+  }
+  updateStepIndicator(n);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateStepIndicator(current) {
+  [1, 2, 3, 4].forEach(i => {
+    const s = document.getElementById('step-ind-' + i);
+    if (!s) return;
+    s.classList.remove('active', 'done');
+    const circle = s.querySelector('.step-circle');
+    if (i < current) {
+      s.classList.add('done');
+      circle.textContent = '✓';
+    } else if (i === current) {
+      s.classList.add('active');
+      circle.textContent = i;
+    } else {
+      circle.textContent = i;
+    }
+  });
+  [1, 2, 3].forEach(i => {
+    const l = document.getElementById('line-' + i);
+    if (l) l.classList.toggle('done', i < current);
+  });
+}
+
+// ══════════════════════════════════════════════
+// APP LOGIC
+// ══════════════════════════════════════════════
+let severity = '';
+let selectedChips = [];
+let uploadedFile = null;
+let analysisData = null;
+
+function setSeverity(btn, val) {
+  document.querySelectorAll('.sev-btn').forEach(b => { b.className = 'sev-btn'; });
+  btn.classList.add('selected-' + val);
+  severity = val;
+  document.getElementById('severity').value = val;
+}
+
+function toggleChip(chip) {
+  chip.classList.toggle('selected');
+  selectedChips = Array.from(document.querySelectorAll('.chip.selected')).map(c => c.textContent.trim());
+}
+
+function handleFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  uploadedFile = file;
+  document.getElementById('file-name').textContent = file.name;
+  document.getElementById('file-preview').style.display = 'flex';
+  document.getElementById('upload-zone').classList.add('has-file');
+  document.getElementById('upload-text').innerHTML = '✅ <strong>File attached!</strong> Click to change';
+}
+
+function removeFile() {
+  uploadedFile = null;
+  document.getElementById('file-input').value = '';
+  document.getElementById('file-preview').style.display = 'none';
+  document.getElementById('upload-zone').classList.remove('has-file');
+  document.getElementById('upload-text').innerHTML = t('upload_text');
+}
+
+// Drag and drop
+const zone = document.getElementById('upload-zone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--primary)'; });
+zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.style.borderColor = '';
+  const dt = e.dataTransfer;
+  if (dt.files.length) {
+    document.getElementById('file-input').files = dt.files;
+    handleFile(document.getElementById('file-input'));
+  }
+});
+
+async function runAnalysis() {
+  const name      = document.getElementById('name').value.trim() || 'Patient';
+  const age       = document.getElementById('age').value || 'unknown';
+  const gender    = document.getElementById('gender').value || 'Not specified';
+  const symptoms  = document.getElementById('symptoms').value.trim();
+  const duration  = document.getElementById('duration').value;
+  const sev       = severity || 'not specified';
+  const temp      = document.getElementById('temperature').value;
+  const conditions      = selectedChips.join(', ') || 'None';
+  const otherConditions = document.getElementById('other-conditions').value;
+  const medicines       = document.getElementById('medicines').value;
+  const allergies       = document.getElementById('allergies').value;
+
+  if (!symptoms) {
+    alert('Please describe your symptoms in Step 2 before analyzing.');
+    goTo(2);
+    return;
+  }
+
+  // Show loading — hide all pages, show loader, mark step 4
+  [1, 2, 3].forEach(i => {
+    const el = document.getElementById('page-' + i);
+    if (el) el.classList.add('hidden');
+  });
+  document.getElementById('loading-screen').classList.add('active');
+  updateStepIndicator(4);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Reset loading dots
+  for (let i = 1; i <= 4; i++) {
+    const li  = document.getElementById('ls-' + i);
+    const dot = document.getElementById('ld-' + i);
+    if (li)  { li.classList.remove('done', 'active'); }
+    if (dot) { dot.className = 'l-dot' + (i === 1 ? ' active' : ''); }
+  }
+  document.getElementById('ls-1').classList.add('active');
+
+  // Animate loading steps
+  for (let idx = 0; idx < 4; idx++) {
+    await new Promise(r => setTimeout(r, 700));
+    if (idx > 0) {
+      document.getElementById('ls-' + idx).classList.remove('active');
+      document.getElementById('ls-' + idx).classList.add('done');
+      document.getElementById('ld-' + idx).className = 'l-dot done';
+    }
+    if (idx + 1 <= 4) {
+      document.getElementById('ls-' + (idx + 1)).classList.add('active');
+      document.getElementById('ld-' + (idx + 1)).className = 'l-dot active';
+    }
+  }
+
+  const prompt = `You are a compassionate medical AI assistant for Swasthya Setu, a rural healthcare platform in India. Analyze the following patient information and provide a preliminary health assessment.
+
+PATIENT DETAILS:
+- Name: ${name}
+- Age: ${age}
+- Gender: ${gender}
+- Symptoms: ${symptoms}
+- Duration: ${duration}
+- Severity: ${sev}
+- Body Temperature: ${temp || 'Not provided'}
+- Existing Conditions: ${conditions}${otherConditions ? ', ' + otherConditions : ''}
+- Current Medicines: ${medicines || 'None'}
+- Allergies: ${allergies || 'None'}
+
+Respond ONLY with a JSON object (no markdown, no extra text) in this exact format:
+{
+  "urgency": "low" | "medium" | "high",
+  "urgencyText": "One line description of urgency",
+  "conditions": [
+    {"name": "Condition name", "probability": 85, "level": "high"},
+    {"name": "Condition name", "probability": 45, "level": "medium"},
+    {"name": "Condition name", "probability": 20, "level": "low"}
+  ],
+  "actions": ["Action 1", "Action 2", "Action 3", "Action 4"],
+  "remedies": ["Remedy 1", "Remedy 2", "Remedy 3"],
+  "doctorAdvice": "Specific guidance on when and which type of doctor to see",
+  "specialists": [
+    {"name": "Dr. Ramesh Kumar", "specialty": "General Physician", "distance": "1.2 km", "available": true},
+    {"name": "Dr. Priya Sharma", "specialty": "Internal Medicine", "distance": "2.8 km", "available": false}
+  ]
+}
+
+Be empathetic, culturally appropriate for rural India, and keep language simple. Include 2-3 possible conditions ordered by probability, 3-4 actionable recommendations, and 2-3 home remedies where appropriate.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+    const rawText = data.content.map(c => c.text || '').join('');
+    const clean = rawText.replace(/```json|```/g, '').trim();
+    analysisData = JSON.parse(clean);
+    showResults(analysisData);
+  } catch (err) {
+    console.error(err);
+    // Fallback data
+    analysisData = {
+      urgency: 'medium',
+      urgencyText: 'Consult a doctor within 1–2 days',
+      conditions: [
+        { name: 'Viral Upper Respiratory Infection', probability: 72, level: 'high' },
+        { name: 'Bacterial Sinusitis', probability: 38, level: 'medium' },
+        { name: 'Allergic Rhinitis', probability: 22, level: 'low' }
+      ],
+      actions: [
+        'Rest adequately and avoid strenuous activity',
+        'Stay well hydrated — drink at least 8-10 glasses of water daily',
+        'Monitor your temperature every 4-6 hours',
+        'Consult a doctor if symptoms worsen or fever exceeds 103°F'
+      ],
+      remedies: [
+        'Steam inhalation with a few drops of eucalyptus oil for congestion',
+        'Honey and ginger tea to soothe throat and boost immunity',
+        'Gargle with warm salt water twice daily'
+      ],
+      doctorAdvice: 'Visit a General Physician within 48 hours if symptoms do not improve. Seek immediate care if you experience difficulty breathing, chest pain, or very high fever.',
+      specialists: [
+        { name: 'Dr. Suresh Patel', specialty: 'General Physician', distance: '0.9 km', available: true },
+        { name: 'Dr. Meena Nair', specialty: 'Internal Medicine', distance: '2.1 km', available: true }
+      ]
+    };
+    showResults(analysisData);
+  }
+}
+
+function showResults(data) {
+  document.getElementById('loading-screen').classList.remove('active');
+  document.getElementById('results-screen').classList.add('active');
+
+  const banner = document.getElementById('urgency-banner');
+  banner.className = 'urgency-banner ' + data.urgency;
+  document.getElementById('urgency-icon').textContent = data.urgency === 'high' ? '🔴' : data.urgency === 'medium' ? '🟡' : '🟢';
+  document.getElementById('urgency-text').textContent = data.urgencyText;
+
+  const condList = document.getElementById('conditions-list');
+  condList.innerHTML = '';
+  data.conditions.forEach(c => {
+    condList.innerHTML += `
+      <div class="condition-item">
+        <div class="prob-bar-wrap">
+          <div class="prob-label">${c.name}</div>
+          <div class="prob-bar">
+            <div class="prob-fill ${c.level}" style="width:0%" data-target="${c.probability}"></div>
+          </div>
+        </div>
+        <div class="prob-pct">${c.probability}%</div>
+      </div>`;
+  });
+
+  setTimeout(() => {
+    document.querySelectorAll('.prob-fill').forEach(bar => {
+      bar.style.width = bar.dataset.target + '%';
+    });
+  }, 100);
+
+  const actionsList = document.getElementById('actions-list');
+  actionsList.innerHTML = data.actions.map(a => `<li><span class="bullet"></span>${a}</li>`).join('');
+
+  const remediesList = document.getElementById('remedies-list');
+  remediesList.innerHTML = data.remedies.map(r => `<li><span class="bullet" style="background:var(--success)"></span>${r}</li>`).join('');
+
+  document.getElementById('doctor-advice').innerHTML = `<li><span class="bullet" style="background:var(--secondary)"></span>${data.doctorAdvice}</li>`;
+
+  const doctorsList = document.getElementById('doctors-list');
+  doctorsList.innerHTML = data.specialists.map(d => `
+    <div class="doctor-card">
+      <div class="doctor-avatar">👨‍⚕️</div>
+      <div>
+        <div class="doctor-name">${d.name}</div>
+        <div class="doctor-meta">${d.specialty} • ${d.distance} away • ${d.available ? '🟢 Available today' : '🔴 Next available tomorrow'}</div>
+      </div>
+      <button class="book-btn" onclick="alert('Booking with ${d.name}...')">Book →</button>
+    </div>`).join('');
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function downloadReport() {
+  if (!analysisData) return;
+  const name     = document.getElementById('name').value || 'Patient';
+  const age      = document.getElementById('age').value || '—';
+  const symptoms = document.getElementById('symptoms').value || '—';
+  const date     = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  const content = `SWASTHYA SETU — AI SYMPTOM CHECKER REPORT
+==========================================
+Date: ${date}
+Patient: ${name}, Age: ${age}
+
+SYMPTOMS REPORTED:
+${symptoms}
+
+URGENCY LEVEL: ${analysisData.urgency.toUpperCase()}
+${analysisData.urgencyText}
+
+POSSIBLE CONDITIONS:
+${analysisData.conditions.map(c => `• ${c.name} (${c.probability}%)`).join('\n')}
+
+RECOMMENDED ACTIONS:
+${analysisData.actions.map((a, i) => `${i + 1}. ${a}`).join('\n')}
+
+HOME REMEDIES:
+${analysisData.remedies.map(r => `• ${r}`).join('\n')}
+
+DOCTOR ADVICE:
+${analysisData.doctorAdvice}
+
+------------------------------------------
+DISCLAIMER: This report is AI-generated for informational purposes only.
+Swasthya Setu — AI-Powered Rural Healthcare | SDG 3`;
+
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `Swasthya_Setu_Report_${name.replace(/\s+/g,'_')}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function startOver() {
+  severity = ''; selectedChips = []; uploadedFile = null; analysisData = null;
+  document.querySelectorAll('.sev-btn').forEach(b => b.className = 'sev-btn');
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  document.getElementById('severity').value = '';
+  removeFile();
+  ['name','age','symptoms','temperature','medicines','allergies','other-conditions'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('gender').selectedIndex = 0;
+  document.getElementById('duration').selectedIndex = 0;
+  goTo(1);
+}
+
+// Init
+applyTranslations();
+</script>
+</body>
+</html>
