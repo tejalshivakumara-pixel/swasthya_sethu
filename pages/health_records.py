@@ -66,6 +66,7 @@ lang = st.session_state.get("language", "English")
 # ---------------------------------------------------
 html_path = os.path.join(
     os.path.dirname(__file__),
+    "..",
     "health_records.html"
 )
 

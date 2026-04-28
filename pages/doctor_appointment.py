@@ -34,7 +34,7 @@ st.markdown("""
 
 # ── Load HTML and inject language ──
 lang = st.session_state.get("language", "English")
-html_path = os.path.join(os.path.dirname(__file__),  'doctor_appointment.html')
+html_path = os.path.join(os.path.dirname(__file__),"..",  'doctor_appointment.html')
 with open(html_path, 'r', encoding='utf-8') as f:
     html_content = f.read()
 

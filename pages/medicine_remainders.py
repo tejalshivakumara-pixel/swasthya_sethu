@@ -17,7 +17,7 @@ st.markdown("""
 </style>""", unsafe_allow_html=True)
 
 lang = st.session_state.get("language", "English")
-html_path = os.path.join(os.path.dirname(__file__),  'medicine_remainders.html')
+html_path = os.path.join(os.path.dirname(__file__),"..",  'medicine_remainders.html')
 with open(html_path, 'r', encoding='utf-8') as f:
     html_content = f.read()
 html_content = html_content.replace('</head>', f'<script>window.SWASTHYA_LANG = "{lang}";</script></head>')
