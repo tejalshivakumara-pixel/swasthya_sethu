@@ -1,0 +1,8 @@
+streamlit
+pandas
+pillow
+reportlab
+geopy
+deep-translator
+streamlit-option-menu
+google-generativeai

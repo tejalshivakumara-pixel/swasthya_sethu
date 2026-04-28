@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Medicine Reminders — Swasthya Setu</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --primary:#6C63FF;--primary-dark:#4c46cc;--primary-light:#ede9fe;
+      --green:#10b981;--green-dark:#059669;--green-light:#d1fae5;
+      --orange:#f97316;--orange-light:#fff7ed;--red:#ef4444;--red-light:#fee2e2;
+      --yellow:#f59e0b;--yellow-light:#fef3c7;--bg:#f5f3ff;--card:#ffffff;
+      --text:#0f0a2a;--text-muted:#6b7280;--border:#ddd6fe;
+      --grad-hero:linear-gradient(135deg,#6C63FF 0%,#4c46cc 60%,#2d1fa3 100%);
+      --grad-soft:linear-gradient(135deg,#10b981 0%,#059669 100%);
+      --grad-warn:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);
+      --grad-red:linear-gradient(135deg,#ef4444 0%,#b91c1c 100%);
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+    @keyframes pulse-ring{0%{transform:scale(1);opacity:0.6}100%{transform:scale(1.5);opacity:0}}
+    @keyframes pill-bounce{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-8px) rotate(-8deg)}}
+    @keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+    @keyframes checkPop{0%{transform:scale(0)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+
+    .lang-bar{background:var(--card);border-bottom:1px solid var(--border);padding:8px 24px;display:flex;align-items:center;justify-content:flex-end;gap:8px;position:sticky;top:0;z-index:101;}
+    .lang-label{font-size:0.75rem;font-weight:600;color:var(--text-muted);}
+    .lang-btn{padding:5px 12px;border-radius:20px;border:2px solid var(--border);background:transparent;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all .2s;color:var(--text-muted);font-family:'Nunito',sans-serif;}
+    .lang-btn.active,.lang-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+
+    .back-bar{background:var(--card);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:41px;z-index:100;}
+    .back-btn{display:flex;align-items:center;gap:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;color:var(--primary);background:var(--primary-light);border:none;border-radius:10px;padding:8px 16px;cursor:pointer;transition:all .2s;}
+    .back-btn:hover{background:var(--primary);color:#fff;}
+    .back-bar-title{font-family:'Nunito',sans-serif;font-weight:900;font-size:1rem;color:var(--text);}
+
+    .hero{background:var(--grad-hero);position:relative;overflow:hidden;}
+    .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 30%,rgba(255,255,255,0.08) 0%,transparent 60%);}
+    .hero-inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;padding:40px 24px 50px;text-align:center;}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);padding:6px 16px;border-radius:50px;font-size:0.78rem;font-weight:700;color:rgba(255,255,255,0.9);margin-bottom:20px;animation:fadeUp .5s ease both;}
+    .hero-badge .dot{width:7px;height:7px;border-radius:50%;background:#4ade80;animation:blink 1.2s infinite;}
+    .hero-title{font-family:'Nunito',sans-serif;font-size:2.6rem;font-weight:900;color:#fff;line-height:1.1;margin-bottom:12px;animation:fadeUp .5s .1s ease both;}
+    .hero-sub{color:rgba(255,255,255,0.82);font-size:0.95rem;max-width:500px;margin-bottom:32px;animation:fadeUp .5s .2s ease both;}
+    .hero-pill-wrap{position:relative;display:inline-flex;align-items:center;justify-content:center;margin-bottom:32px;animation:fadeUp .5s .3s ease both;}
+    .hero-pill-ring{position:absolute;width:110px;height:110px;border-radius:50%;border:3px solid rgba(255,255,255,0.4);animation:pulse-ring 2s cubic-bezier(.4,0,.6,1) infinite;}
+    .hero-pill-ring:nth-child(2){animation-delay:.7s;}
+    .hero-pill-btn{position:relative;z-index:1;width:90px;height:90px;border-radius:50%;background:#fff;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 0 0 6px rgba(255,255,255,0.2),0 12px 40px rgba(0,0,0,0.25);transition:transform .15s;}
+    .hero-pill-btn:hover{transform:scale(1.06);}
+    .hero-pill-btn .pill-icon{font-size:2.2rem;animation:pill-bounce 2.5s ease infinite;}
+    .hero-pill-btn .pill-label{font-family:'Nunito',sans-serif;font-weight:900;font-size:0.65rem;color:var(--primary);letter-spacing:.07em;}
+    .hero-chips{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;animation:fadeUp .5s .4s ease both;}
+    .hero-chip{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:6px 14px;border-radius:50px;font-size:0.78rem;font-weight:600;}
+
+    .container{max-width:1000px;margin:0 auto;padding:32px 20px 60px;}
+    .section-title{font-family:'Nunito',sans-serif;font-size:1.15rem;font-weight:900;color:var(--text);display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+    .section-title::after{content:'';flex:1;height:2px;background:linear-gradient(90deg,var(--primary),transparent);border-radius:2px;}
+
+    .today-card{background:var(--card);border-radius:24px;padding:24px;box-shadow:0 4px 24px rgba(108,99,255,.1);margin-bottom:28px;}
+    .progress-bar-wrap{background:var(--primary-light);border-radius:50px;height:10px;margin-bottom:20px;overflow:hidden;}
+    .progress-bar-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,#6C63FF,#10b981,#6C63FF);background-size:200% auto;animation:shimmer 2s linear infinite;transition:width .6s ease;}
+    .progress-label{font-size:0.78rem;color:var(--text-muted);font-weight:600;text-align:right;margin-top:4px;}
+    .medicine-list{display:flex;flex-direction:column;gap:12px;}
+    .medicine-item{display:flex;align-items:center;gap:14px;padding:16px;border-radius:16px;background:var(--bg);border:2px solid var(--border);transition:all .2s;cursor:pointer;animation:fadeUp .4s ease both;}
+    .medicine-item:hover{border-color:var(--primary);transform:translateX(3px);}
+    .medicine-item.taken{opacity:0.6;background:var(--green-light);border-color:var(--green);}
+    .medicine-item.missed{background:var(--red-light);border-color:var(--red);}
+    .medicine-item.upcoming{background:var(--yellow-light);border-color:var(--yellow);}
+    .medicine-item.taken .med-check{background:var(--green);border-color:var(--green);}
+    .medicine-item.missed .med-check{background:var(--red);border-color:var(--red);}
+    .med-check{width:38px;height:38px;border-radius:50%;border:2.5px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;cursor:pointer;transition:all .25s;}
+    .med-icon-wrap{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;}
+    .med-icon-wrap.pill{background:var(--primary-light);}
+    .med-icon-wrap.liquid{background:var(--green-light);}
+    .med-icon-wrap.tablet{background:var(--yellow-light);}
+    .med-icon-wrap.capsule{background:var(--red-light);}
+    .med-info{flex:1;}
+    .med-name{font-family:'Nunito',sans-serif;font-weight:800;font-size:0.95rem;color:var(--text);margin-bottom:2px;}
+    .med-dose{font-size:0.78rem;color:var(--text-muted);margin-bottom:5px;}
+    .med-tags{display:flex;gap:6px;flex-wrap:wrap;}
+    .med-tag{font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:20px;}
+    .med-tag.time{background:var(--primary-light);color:var(--primary);}
+    .med-tag.food{background:var(--orange-light);color:#c2410c;}
+    .med-tag.freq{background:var(--green-light);color:var(--green-dark);}
+    .med-tag.missed{background:var(--red-light);color:var(--red);}
+    .med-tag.taken{background:var(--green-light);color:var(--green-dark);}
+    .med-right{text-align:right;flex-shrink:0;}
+    .med-time{font-family:'Nunito',sans-serif;font-weight:900;font-size:1rem;color:var(--primary);}
+    .med-stock{font-size:0.7rem;color:var(--text-muted);margin-top:2px;}
+    .add-med-btn{width:100%;margin-top:14px;padding:12px;border-radius:14px;border:2px dashed var(--border);background:transparent;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;color:var(--primary);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .add-med-btn:hover{background:var(--primary-light);border-color:var(--primary);}
+
+    .schedule-card{background:var(--card);border-radius:24px;padding:24px;box-shadow:0 4px 24px rgba(108,99,255,.1);margin-bottom:28px;}
+    .schedule-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;}
+    .schedule-slot{background:var(--bg);border-radius:16px;padding:16px 14px;border:2px solid var(--border);text-align:center;cursor:pointer;transition:all .2s;animation:fadeUp .4s ease both;}
+    .schedule-slot:hover{border-color:var(--primary);background:var(--primary-light);}
+    .slot-time{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.05rem;color:var(--primary);margin-bottom:6px;}
+    .slot-label{font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:8px;}
+    .slot-meds{display:flex;flex-direction:column;gap:4px;}
+    .slot-med{font-size:0.7rem;font-weight:600;background:var(--primary-light);color:var(--primary);padding:2px 8px;border-radius:20px;}
+    .slot-med.green{background:var(--green-light);color:var(--green-dark);}
+    .slot-med.yellow{background:var(--yellow-light);color:#92400e;}
+    .slot-med.red{background:var(--red-light);color:var(--red);}
+    .slot-count{font-size:0.68rem;color:var(--text-muted);margin-top:6px;}
+
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:28px;}
+    .stat-card{border-radius:20px;padding:20px 16px;display:flex;flex-direction:column;gap:6px;animation:fadeUp .4s ease both;}
+    .stat-card.purple{background:var(--grad-hero);color:#fff;box-shadow:0 6px 24px rgba(108,99,255,.3);}
+    .stat-card.green{background:var(--grad-soft);color:#fff;box-shadow:0 6px 24px rgba(16,185,129,.3);}
+    .stat-card.yellow{background:var(--grad-warn);color:#fff;box-shadow:0 6px 24px rgba(245,158,11,.3);}
+    .stat-card.red{background:var(--grad-red);color:#fff;box-shadow:0 6px 24px rgba(239,68,68,.3);}
+    .stat-icon{font-size:1.8rem;}
+    .stat-value{font-family:'Nunito',sans-serif;font-weight:900;font-size:2rem;}
+    .stat-label{font-size:0.78rem;opacity:0.85;font-weight:600;}
+
+    .mymed-card{background:var(--card);border-radius:24px;padding:24px;box-shadow:0 4px 24px rgba(108,99,255,.1);margin-bottom:28px;}
+    .mymed-list{display:flex;flex-direction:column;gap:12px;}
+    .mymed-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;background:var(--bg);border:2px solid var(--border);transition:all .2s;}
+    .mymed-item:hover{border-color:var(--primary);}
+    .mymed-color{width:12px;height:44px;border-radius:6px;flex-shrink:0;}
+    .mymed-info{flex:1;}
+    .mymed-name{font-family:'Nunito',sans-serif;font-weight:800;font-size:0.92rem;color:var(--text);margin-bottom:2px;}
+    .mymed-detail{font-size:0.75rem;color:var(--text-muted);}
+    .mymed-stock-bar{flex-shrink:0;text-align:right;}
+    .stock-pills{font-family:'Nunito',sans-serif;font-weight:900;font-size:0.9rem;color:var(--text);}
+    .stock-sub{font-size:0.68rem;color:var(--text-muted);}
+    .mymed-actions{display:flex;gap:6px;}
+    .icon-btn{width:34px;height:34px;border-radius:10px;border:2px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .2s;}
+    .icon-btn:hover{border-color:var(--primary);background:var(--primary-light);}
+    .icon-btn.del:hover{border-color:var(--red);background:var(--red-light);}
+
+    .refill-card{background:var(--card);border-radius:24px;padding:24px;box-shadow:0 4px 24px rgba(108,99,255,.1);margin-bottom:28px;}
+    .refill-list{display:flex;flex-direction:column;gap:10px;}
+    .refill-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;border:2px solid;transition:all .2s;}
+    .refill-item.low{background:var(--red-light);border-color:var(--red);}
+    .refill-item.medium{background:var(--yellow-light);border-color:var(--yellow);}
+    .refill-icon{font-size:1.6rem;flex-shrink:0;}
+    .refill-info{flex:1;}
+    .refill-name{font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;color:var(--text);margin-bottom:2px;}
+    .refill-msg{font-size:0.75rem;color:var(--text-muted);}
+    .refill-btn{padding:7px 14px;border-radius:10px;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;transition:all .2s;}
+    .refill-item.low .refill-btn{background:var(--red);color:#fff;}
+    .refill-item.medium .refill-btn{background:var(--yellow);color:#fff;}
+    .refill-btn:hover{transform:translateY(-1px);opacity:0.9;}
+
+    .btn{padding:11px 22px;border-radius:12px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;border:none;transition:all .2s;}
+    .btn-primary{background:var(--grad-hero);color:#fff;box-shadow:0 4px 14px rgba(108,99,255,.35);}
+    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(108,99,255,.45);}
+    .btn-outline{background:transparent;border:2px solid var(--border);color:var(--text-muted);}
+    .btn-outline:hover{border-color:var(--primary);color:var(--primary);}
+    .btn-sm{padding:7px 14px;font-size:0.78rem;}
+    .btn-row{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
+
+    .field-group{margin-bottom:14px;}
+    .field-group label{display:block;font-size:0.8rem;font-weight:700;color:var(--text);margin-bottom:6px;}
+    .field-group input,.field-group select,.field-group textarea{width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:12px;font-family:'Inter',sans-serif;font-size:0.88rem;color:var(--text);background:var(--bg);outline:none;transition:border-color .2s;}
+    .field-group input:focus,.field-group select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(108,99,255,.1);background:#fff;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+    .modal-overlay{position:fixed;inset:0;background:rgba(15,10,42,0.55);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s;}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal{background:var(--card);border-radius:24px;padding:32px;width:100%;max-width:520px;box-shadow:0 24px 80px rgba(0,0,0,.2);transform:translateY(20px) scale(0.97);transition:transform .3s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto;}
+    .modal-overlay.open .modal{transform:translateY(0) scale(1);}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+    .modal-title{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.2rem;color:var(--text);}
+    .modal-close{width:36px;height:36px;border-radius:10px;border:2px solid var(--border);background:transparent;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .2s;color:var(--text-muted);}
+    .modal-close:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light);}
+    .days-picker{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+    .day-btn{width:38px;height:38px;border-radius:50%;border:2px solid var(--border);background:var(--bg);font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;color:var(--text-muted);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;}
+    .day-btn.selected{background:var(--primary);border-color:var(--primary);color:#fff;}
+    .time-slots{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+    .time-slot-btn{padding:6px 14px;border-radius:20px;border:2px solid var(--border);background:var(--bg);font-size:0.78rem;font-weight:700;color:var(--text-muted);cursor:pointer;transition:all .2s;}
+    .time-slot-btn.selected{background:var(--primary);border-color:var(--primary);color:#fff;}
+    .color-picker{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+    .color-dot{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;}
+    .color-dot.selected{border-color:var(--text);transform:scale(1.15);}
+
+    .taken-modal-body{text-align:center;padding:20px 0;}
+    .taken-icon{font-size:4rem;margin-bottom:12px;animation:checkPop .4s ease both;}
+    .taken-title{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.3rem;color:var(--green);margin-bottom:8px;}
+    .taken-sub{font-size:0.88rem;color:var(--text-muted);}
+
+    .toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:14px 22px;border-radius:14px;font-size:0.88rem;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);z-index:9999;}
+    .toast.show{transform:translateY(0);opacity:1;}
+    .hidden{display:none!important;}
+
+    .medicine-item:nth-child(1){animation-delay:.05s;}
+    .medicine-item:nth-child(2){animation-delay:.10s;}
+    .medicine-item:nth-child(3){animation-delay:.15s;}
+    .medicine-item:nth-child(4){animation-delay:.20s;}
+    .stat-card:nth-child(1){animation-delay:.05s;}
+    .stat-card:nth-child(2){animation-delay:.10s;}
+    .stat-card:nth-child(3){animation-delay:.15s;}
+    .stat-card:nth-child(4){animation-delay:.20s;}
+    .schedule-slot:nth-child(1){animation-delay:.05s;}
+    .schedule-slot:nth-child(2){animation-delay:.10s;}
+    .schedule-slot:nth-child(3){animation-delay:.15s;}
+    .schedule-slot:nth-child(4){animation-delay:.20s;}
+  </style>
+</head>
+<body>
+
+<div class="lang-bar">
+  <span class="lang-label" data-i18n="lang_label">🌐 Language:</span>
+  <button class="lang-btn active" onclick="setLang('en')">EN</button>
+  <button class="lang-btn" onclick="setLang('hi')">हिं</button>
+  <button class="lang-btn" onclick="setLang('kn')">ಕನ್ನಡ</button>
+  <button class="lang-btn" onclick="setLang('te')">తెలుగు</button>
+  <button class="lang-btn" onclick="setLang('ta')">தமிழ்</button>
+  <button class="lang-btn" onclick="setLang('mr')">मराठी</button>
+</div>
+
+<div class="back-bar">
+  <button class="back-btn" onclick="history.back()">← <span data-i18n="back">Back</span></button>
+  <span class="back-bar-title">💊 <span data-i18n="page_title">Medicine Reminders — Swasthya Setu</span></span>
+</div>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge"><span class="dot"></span> <span data-i18n="badge">Reminders Active Today</span></div>
+    <h1 class="hero-title">💊 <span data-i18n="hero_title">Medicine Reminders</span></h1>
+    <p class="hero-sub" data-i18n="hero_sub">Never miss a dose. Track, schedule and get reminded for all your medicines.</p>
+    <div class="hero-pill-wrap" onclick="openAddMedicine()">
+      <div class="hero-pill-ring"></div>
+      <div class="hero-pill-ring"></div>
+      <button class="hero-pill-btn">
+        <span class="pill-icon">💊</span>
+        <span class="pill-label" data-i18n="add_med_short">ADD MED</span>
+      </button>
+    </div>
+    <div class="hero-chips">
+      <span class="hero-chip" data-i18n="chip_morning">🌅 Morning: 3</span>
+      <span class="hero-chip" data-i18n="chip_afternoon">☀️ Afternoon: 1</span>
+      <span class="hero-chip" data-i18n="chip_night">🌙 Night: 2</span>
+      <span class="hero-chip" data-i18n="chip_taken">✅ Taken: 2</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="stats-grid">
+    <div class="stat-card purple">
+      <div class="stat-icon">🔥</div>
+      <div class="stat-value" id="streak-val">7</div>
+      <div class="stat-label" data-i18n="stat_streak">Day Streak</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon">✅</div>
+      <div class="stat-value" id="taken-val">2</div>
+      <div class="stat-label" data-i18n="stat_taken">Taken Today</div>
+    </div>
+    <div class="stat-card yellow">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-value" id="pending-val">4</div>
+      <div class="stat-label" data-i18n="stat_pending">Pending Today</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-icon">❌</div>
+      <div class="stat-value" id="missed-val">0</div>
+      <div class="stat-label" data-i18n="stat_missed">Missed Today</div>
+    </div>
+  </div>
+
+  <div class="today-card">
+    <div class="section-title">📅 <span data-i18n="today_title">Today's Schedule</span></div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-bar" style="width:33%;"></div>
+    </div>
+    <div class="progress-label" id="progress-label">2 of 6 medicines taken</div>
+
+    <div class="medicine-list" id="medicine-list">
+      <div class="medicine-item taken" data-id="1">
+        <div class="med-check" onclick="toggleTaken(this)">✅</div>
+        <div class="med-icon-wrap pill">💊</div>
+        <div class="med-info">
+          <div class="med-name">Metformin 500mg</div>
+          <div class="med-dose" data-i18n="dose_after_breakfast">1 tablet • After breakfast</div>
+          <div class="med-tags">
+            <span class="med-tag time">🌅 8:00 AM</span>
+            <span class="med-tag food" data-i18n="after_food">🍽️ After food</span>
+            <span class="med-tag taken" data-i18n="tag_taken">✅ Taken</span>
+          </div>
+        </div>
+        <div class="med-right">
+          <div class="med-time">8:00 AM</div>
+          <div class="med-stock">📦 42 <span data-i18n="left">left</span></div>
+        </div>
+      </div>
+
+      <div class="medicine-item taken" data-id="2">
+        <div class="med-check" onclick="toggleTaken(this)">✅</div>
+        <div class="med-icon-wrap tablet">🔶</div>
+        <div class="med-info">
+          <div class="med-name">Amlodipine 5mg</div>
+          <div class="med-dose" data-i18n="dose_before_breakfast">1 tablet • Before breakfast</div>
+          <div class="med-tags">
+            <span class="med-tag time">🌅 7:30 AM</span>
+            <span class="med-tag food" data-i18n="before_food">🚫 Before food</span>
+            <span class="med-tag taken" data-i18n="tag_taken">✅ Taken</span>
+          </div>
+        </div>
+        <div class="med-right">
+          <div class="med-time">7:30 AM</div>
+          <div class="med-stock">📦 28 <span data-i18n="left">left</span></div>
+        </div>
+      </div>
+
+      <div class="medicine-item upcoming" data-id="3">
+        <div class="med-check" onclick="toggleTaken(this)">⏳</div>
+        <div class="med-icon-wrap liquid">🧴</div>
+        <div class="med-info">
+          <div class="med-name">Vitamin D3 Syrup</div>
+          <div class="med-dose" data-i18n="dose_after_lunch">5 ml • After lunch</div>
+          <div class="med-tags">
+            <span class="med-tag time">☀️ 1:00 PM</span>
+            <span class="med-tag food" data-i18n="after_food">🍽️ After food</span>
+            <span class="med-tag freq" data-i18n="tag_daily">📆 Daily</span>
+          </div>
+        </div>
+        <div class="med-right">
+          <div class="med-time">1:00 PM</div>
+          <div class="med-stock">📦 180ml <span data-i18n="left">left</span></div>
+        </div>
+      </div>
+
+      <div class="medicine-item" data-id="4">
+        <div class="med-check" onclick="toggleTaken(this)">○</div>
+        <div class="med-icon-wrap capsule">🔴</div>
+        <div class="med-info">
+          <div class="med-name">Omeprazole 20mg</div>
+          <div class="med-dose" data-i18n="dose_before_dinner">1 capsule • Before dinner</div>
+          <div class="med-tags">
+            <span class="med-tag time">🌙 7:30 PM</span>
+            <span class="med-tag food" data-i18n="before_food">🚫 Before food</span>
+            <span class="med-tag freq" data-i18n="tag_daily">📆 Daily</span>
+          </div>
+        </div>
+        <div class="med-right">
+          <div class="med-time">7:30 PM</div>
+          <div class="med-stock">📦 15 <span data-i18n="left">left</span> ⚠️</div>
+        </div>
+      </div>
+
+      <div class="medicine-item" data-id="5">
+        <div class="med-check" onclick="toggleTaken(this)">○</div>
+        <div class="med-icon-wrap pill">💊</div>
+        <div class="med-info">
+          <div class="med-name">Metformin 500mg</div>
+          <div class="med-dose" data-i18n="dose_after_dinner">1 tablet • After dinner</div>
+          <div class="med-tags">
+            <span class="med-tag time">🌙 9:00 PM</span>
+            <span class="med-tag food" data-i18n="after_food">🍽️ After food</span>
+            <span class="med-tag freq" data-i18n="tag_daily">📆 Daily</span>
+          </div>
+        </div>
+        <div class="med-right">
+          <div class="med-time">9:00 PM</div>
+          <div class="med-stock">📦 42 <span data-i18n="left">left</span></div>
+        </div>
+      </div>
+
+      <div class="medicine-item" data-id="6">
+        <div class="med-check" onclick="toggleTaken(this)">○</div>
+        <div class="med-icon-wrap tablet">🔶</div>
+        <div class="med-info">
+          <div class="med-name">Atorvastatin 10mg</div>
+          <div class="med-dose" data-i18n="dose_bedtime">1 tablet • At bedtime</div>
+          <div class="med-tags">
+            <span class="med-tag time">🌙 10:00 PM</span>
+            <span class="med-tag food" data-i18n="after_food">🍽️ After food</span>
+            <span class="med-tag freq" data-i18n="tag_daily">📆 Daily</span>
+          </div>
+        </div>
+        <div class="med-right">
+          <div class="med-time">10:00 PM</div>
+          <div class="med-stock">📦 30 <span data-i18n="left">left</span></div>
+        </div>
+      </div>
+    </div>
+    <button class="add-med-btn" onclick="openAddMedicine()">➕ <span data-i18n="add_reminder">Add Medicine / Reminder</span></button>
+  </div>
+
+  <div class="schedule-card">
+    <div class="section-title">🕐 <span data-i18n="schedule_title">Daily Schedule Overview</span></div>
+    <div class="schedule-grid">
+      <div class="schedule-slot">
+        <div class="slot-time">7:30 AM</div>
+        <div class="slot-label" data-i18n="slot_early_morning">🌅 Early Morning</div>
+        <div class="slot-meds"><div class="slot-med green">✅ Amlodipine</div></div>
+        <div class="slot-count">1 <span data-i18n="medicine">medicine</span></div>
+      </div>
+      <div class="schedule-slot">
+        <div class="slot-time">8:00 AM</div>
+        <div class="slot-label" data-i18n="slot_breakfast">🌅 Breakfast</div>
+        <div class="slot-meds"><div class="slot-med green">✅ Metformin</div></div>
+        <div class="slot-count">1 <span data-i18n="medicine">medicine</span></div>
+      </div>
+      <div class="schedule-slot">
+        <div class="slot-time">1:00 PM</div>
+        <div class="slot-label" data-i18n="slot_lunch">☀️ Lunch</div>
+        <div class="slot-meds"><div class="slot-med yellow">⏳ Vitamin D3</div></div>
+        <div class="slot-count">1 <span data-i18n="medicine">medicine</span></div>
+      </div>
+      <div class="schedule-slot">
+        <div class="slot-time">7:30 PM</div>
+        <div class="slot-label" data-i18n="slot_dinner">🌙 Dinner</div>
+        <div class="slot-meds"><div class="slot-med">Omeprazole</div></div>
+        <div class="slot-count">1 <span data-i18n="medicine">medicine</span></div>
+      </div>
+      <div class="schedule-slot">
+        <div class="slot-time">9:00 PM</div>
+        <div class="slot-label" data-i18n="slot_after_dinner">🌙 After Dinner</div>
+        <div class="slot-meds"><div class="slot-med">Metformin</div></div>
+        <div class="slot-count">1 <span data-i18n="medicine">medicine</span></div>
+      </div>
+      <div class="schedule-slot">
+        <div class="slot-time">10:00 PM</div>
+        <div class="slot-label" data-i18n="slot_bedtime">🌙 Bedtime</div>
+        <div class="slot-meds"><div class="slot-med">Atorvastatin</div></div>
+        <div class="slot-count">1 <span data-i18n="medicine">medicine</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mymed-card">
+    <div class="section-title" style="margin-bottom:16px;">
+      🗂️ <span data-i18n="my_medicines">My Medicines</span>
+      <button style="margin-left:auto;background:var(--primary-light);color:var(--primary);border:none;border-radius:10px;padding:6px 14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;" onclick="openAddMedicine()">➕ <span data-i18n="add_medicine_btn">Add Medicine</span></button>
+    </div>
+    <div class="mymed-list" id="mymed-list">
+      <div class="mymed-item">
+        <div class="mymed-color" style="background:#6C63FF;"></div>
+        <div class="mymed-info">
+          <div class="mymed-name">Metformin 500mg</div>
+          <div class="mymed-detail">💊 <span data-i18n="tablet">Tablet</span> • 2x <span data-i18n="daily">daily</span> • <span data-i18n="diabetes">Diabetes</span></div>
+        </div>
+        <div class="mymed-stock-bar">
+          <div class="stock-pills">42 <span data-i18n="pills">pills</span></div>
+          <div class="stock-sub">~21 <span data-i18n="days_left">days left</span></div>
+        </div>
+        <div class="mymed-actions">
+          <button class="icon-btn" onclick="showToast(t('toast_edit'))">✏️</button>
+          <button class="icon-btn del" onclick="removeMedicine(this)">🗑️</button>
+        </div>
+      </div>
+      <div class="mymed-item">
+        <div class="mymed-color" style="background:#3b82f6;"></div>
+        <div class="mymed-info">
+          <div class="mymed-name">Amlodipine 5mg</div>
+          <div class="mymed-detail">🔶 <span data-i18n="tablet">Tablet</span> • 1x <span data-i18n="daily">daily</span> • <span data-i18n="blood_pressure">Blood Pressure</span></div>
+        </div>
+        <div class="mymed-stock-bar">
+          <div class="stock-pills">28 <span data-i18n="pills">pills</span></div>
+          <div class="stock-sub">~28 <span data-i18n="days_left">days left</span></div>
+        </div>
+        <div class="mymed-actions">
+          <button class="icon-btn" onclick="showToast(t('toast_edit'))">✏️</button>
+          <button class="icon-btn del" onclick="removeMedicine(this)">🗑️</button>
+        </div>
+      </div>
+      <div class="mymed-item">
+        <div class="mymed-color" style="background:#10b981;"></div>
+        <div class="mymed-info">
+          <div class="mymed-name">Vitamin D3 Syrup</div>
+          <div class="mymed-detail">🧴 <span data-i18n="liquid">Liquid</span> • 1x <span data-i18n="daily">daily</span> • <span data-i18n="supplement">Supplement</span></div>
+        </div>
+        <div class="mymed-stock-bar">
+          <div class="stock-pills">180 ml</div>
+          <div class="stock-sub">~36 <span data-i18n="days_left">days left</span></div>
+        </div>
+        <div class="mymed-actions">
+          <button class="icon-btn" onclick="showToast(t('toast_edit'))">✏️</button>
+          <button class="icon-btn del" onclick="removeMedicine(this)">🗑️</button>
+        </div>
+      </div>
+      <div class="mymed-item">
+        <div class="mymed-color" style="background:#ef4444;"></div>
+        <div class="mymed-info">
+          <div class="mymed-name">Omeprazole 20mg</div>
+          <div class="mymed-detail">🔴 <span data-i18n="capsule">Capsule</span> • 1x <span data-i18n="daily">daily</span> • <span data-i18n="acidity">Acidity</span></div>
+        </div>
+        <div class="mymed-stock-bar">
+          <div class="stock-pills" style="color:var(--red);">15 <span data-i18n="pills">pills</span> ⚠️</div>
+          <div class="stock-sub">~15 <span data-i18n="days_left">days left</span></div>
+        </div>
+        <div class="mymed-actions">
+          <button class="icon-btn" onclick="showToast(t('toast_edit'))">✏️</button>
+          <button class="icon-btn del" onclick="removeMedicine(this)">🗑️</button>
+        </div>
+      </div>
+      <div class="mymed-item">
+        <div class="mymed-color" style="background:#f59e0b;"></div>
+        <div class="mymed-info">
+          <div class="mymed-name">Atorvastatin 10mg</div>
+          <div class="mymed-detail">🔶 <span data-i18n="tablet">Tablet</span> • 1x <span data-i18n="daily">daily</span> • <span data-i18n="cholesterol">Cholesterol</span></div>
+        </div>
+        <div class="mymed-stock-bar">
+          <div class="stock-pills">30 <span data-i18n="pills">pills</span></div>
+          <div class="stock-sub">~30 <span data-i18n="days_left">days left</span></div>
+        </div>
+        <div class="mymed-actions">
+          <button class="icon-btn" onclick="showToast(t('toast_edit'))">✏️</button>
+          <button class="icon-btn del" onclick="removeMedicine(this)">🗑️</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="refill-card">
+    <div class="section-title">⚠️ <span data-i18n="refill_title">Refill Alerts</span></div>
+    <div class="refill-list">
+      <div class="refill-item low">
+        <div class="refill-icon">💊</div>
+        <div class="refill-info">
+          <div class="refill-name">Omeprazole 20mg</div>
+          <div class="refill-msg" data-i18n="refill_msg_low">Only 15 tablets left — refill in the next 3–4 days</div>
+        </div>
+        <button class="refill-btn" onclick="showToast(t('toast_refill_set'))">🔔 <span data-i18n="remind_me">Remind Me</span></button>
+      </div>
+      <div class="refill-item medium">
+        <div class="refill-icon">🔶</div>
+        <div class="refill-info">
+          <div class="refill-name">Amlodipine 5mg</div>
+          <div class="refill-msg" data-i18n="refill_msg_med">28 tablets left — stock up within 2 weeks</div>
+        </div>
+        <button class="refill-btn" onclick="showToast(t('toast_refill_set'))">📅 <span data-i18n="set_reminder">Set Reminder</span></button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL: ADD MEDICINE -->
+<div class="modal-overlay" id="modal-add-med">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">💊 <span data-i18n="modal_add_title">Add Medicine</span></div>
+      <button class="modal-close" onclick="closeModal('modal-add-med')">✕</button>
+    </div>
+    <div class="field-group">
+      <label data-i18n="label_name">Medicine Name</label>
+      <input type="text" id="m-name" placeholder="e.g. Metformin 500mg"/>
+    </div>
+    <div class="form-row">
+      <div class="field-group">
+        <label data-i18n="label_type">Type</label>
+        <select id="m-type">
+          <option value="💊">💊 Tablet</option>
+          <option value="🔴">🔴 Capsule</option>
+          <option value="🧴">🧴 Liquid / Syrup</option>
+          <option value="💉">💉 Injection</option>
+          <option value="🩹">🩹 Patch</option>
+          <option value="👁️">👁️ Eye Drops</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label data-i18n="label_dose">Dose</label>
+        <input type="text" id="m-dose" placeholder="e.g. 1 tablet / 5 ml"/>
+      </div>
+    </div>
+    <div class="field-group">
+      <label data-i18n="label_when">When to take</label>
+      <select id="m-food">
+        <option data-i18n="food_before">Before food</option>
+        <option data-i18n="food_after">After food</option>
+        <option data-i18n="food_with">With food</option>
+        <option data-i18n="food_empty">Empty stomach</option>
+        <option data-i18n="food_any">Any time</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label data-i18n="label_times">Reminder Times</label>
+      <div class="time-slots" id="time-slots">
+        <button class="time-slot-btn" onclick="toggleSlot(this)">🌅 7:30 AM</button>
+        <button class="time-slot-btn" onclick="toggleSlot(this)">🌅 8:00 AM</button>
+        <button class="time-slot-btn" onclick="toggleSlot(this)">☀️ 1:00 PM</button>
+        <button class="time-slot-btn" onclick="toggleSlot(this)">🌙 7:30 PM</button>
+        <button class="time-slot-btn" onclick="toggleSlot(this)">🌙 9:00 PM</button>
+        <button class="time-slot-btn" onclick="toggleSlot(this)">🌙 10:00 PM</button>
+        <button class="time-slot-btn" onclick="addCustomTime()">➕ <span data-i18n="custom">Custom</span></button>
+      </div>
+    </div>
+    <div class="field-group">
+      <label data-i18n="label_days">Repeat Days</label>
+      <div class="days-picker">
+        <button class="day-btn selected" onclick="toggleDay(this)" data-i18n="day_mo">Mo</button>
+        <button class="day-btn selected" onclick="toggleDay(this)" data-i18n="day_tu">Tu</button>
+        <button class="day-btn selected" onclick="toggleDay(this)" data-i18n="day_we">We</button>
+        <button class="day-btn selected" onclick="toggleDay(this)" data-i18n="day_th">Th</button>
+        <button class="day-btn selected" onclick="toggleDay(this)" data-i18n="day_fr">Fr</button>
+        <button class="day-btn selected" onclick="toggleDay(this)" data-i18n="day_sa">Sa</button>
+        <button class="day-btn selected" onclick="toggleDay(this)" data-i18n="day_su">Su</button>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="field-group">
+        <label data-i18n="label_stock">Current Stock (pills / ml)</label>
+        <input type="number" id="m-stock" placeholder="e.g. 30"/>
+      </div>
+      <div class="field-group">
+        <label data-i18n="label_purpose">Purpose / Condition</label>
+        <input type="text" id="m-purpose" placeholder="e.g. Diabetes"/>
+      </div>
+    </div>
+    <div class="field-group">
+      <label data-i18n="label_color">Color Label</label>
+      <div class="color-picker">
+        <div class="color-dot selected" style="background:#6C63FF" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#ef4444" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#10b981" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#3b82f6" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#f59e0b" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#f97316" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#8b5cf6" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#ec4899" onclick="selectColor(this)"></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-add-med')" data-i18n="cancel">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveMedicine()">💾 <span data-i18n="save_medicine">Save Medicine</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: TAKEN CONFIRMATION -->
+<div class="modal-overlay" id="modal-taken">
+  <div class="modal" style="max-width:360px;">
+    <div class="taken-modal-body">
+      <div class="taken-icon">✅</div>
+      <div class="taken-title" data-i18n="taken_title">Great job! Dose marked!</div>
+      <div class="taken-sub" id="taken-sub-text" data-i18n="taken_sub">Keep up the streak. Your health thanks you! 🏆</div>
+    </div>
+    <div class="btn-row" style="justify-content:center;margin-top:20px;">
+      <button class="btn btn-primary" onclick="closeModal('modal-taken')">👍 <span data-i18n="close">Close</span></button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TRANSLATIONS = {
+  en:{
+    lang_label:'🌐 Language:',back:'Back',page_title:'Medicine Reminders — Swasthya Setu',
+    badge:'Reminders Active Today',hero_title:'Medicine Reminders',
+    hero_sub:'Never miss a dose. Track, schedule and get reminded for all your medicines.',
+    add_med_short:'ADD MED',chip_morning:'🌅 Morning: 3',chip_afternoon:'☀️ Afternoon: 1',chip_night:'🌙 Night: 2',chip_taken:'✅ Taken: 2',
+    stat_streak:'Day Streak',stat_taken:'Taken Today',stat_pending:'Pending Today',stat_missed:'Missed Today',
+    today_title:"Today's Schedule",add_reminder:'Add Medicine / Reminder',
+    schedule_title:'Daily Schedule Overview',my_medicines:'My Medicines',add_medicine_btn:'Add Medicine',
+    refill_title:'Refill Alerts',refill_msg_low:'Only 15 tablets left — refill in the next 3–4 days',refill_msg_med:'28 tablets left — stock up within 2 weeks',
+    remind_me:'Remind Me',set_reminder:'Set Reminder',
+    dose_after_breakfast:'1 tablet • After breakfast',dose_before_breakfast:'1 tablet • Before breakfast',
+    dose_after_lunch:'5 ml • After lunch',dose_before_dinner:'1 capsule • Before dinner',
+    dose_after_dinner:'1 tablet • After dinner',dose_bedtime:'1 tablet • At bedtime',
+    after_food:'🍽️ After food',before_food:'🚫 Before food',tag_taken:'✅ Taken',tag_daily:'📆 Daily',left:'left',
+    slot_early_morning:'🌅 Early Morning',slot_breakfast:'🌅 Breakfast',slot_lunch:'☀️ Lunch',
+    slot_dinner:'🌙 Dinner',slot_after_dinner:'🌙 After Dinner',slot_bedtime:'🌙 Bedtime',medicine:'medicine',
+    tablet:'Tablet',liquid:'Liquid',capsule:'Capsule',daily:'daily',
+    diabetes:'Diabetes',blood_pressure:'Blood Pressure',supplement:'Supplement',acidity:'Acidity',cholesterol:'Cholesterol',
+    pills:'pills',days_left:'days left',
+    modal_add_title:'Add Medicine',label_name:'Medicine Name',label_type:'Type',label_dose:'Dose',
+    label_when:'When to take',food_before:'Before food',food_after:'After food',food_with:'With food',food_empty:'Empty stomach',food_any:'Any time',
+    label_times:'Reminder Times',custom:'Custom',label_days:'Repeat Days',
+    day_mo:'Mo',day_tu:'Tu',day_we:'We',day_th:'Th',day_fr:'Fr',day_sa:'Sa',day_su:'Su',
+    label_stock:'Current Stock (pills / ml)',label_purpose:'Purpose / Condition',label_color:'Color Label',
+    cancel:'Cancel',save_medicine:'Save Medicine',
+    taken_title:'Great job! Dose marked!',taken_sub:'Keep up the streak. Your health thanks you! 🏆',close:'Close',
+    toast_edit:'✏️ Edit medicine coming soon',toast_refill_set:'⏰ Refill reminder set!',
+    toast_unmarked:'↩️ Dose unmarked',toast_added:'added to your reminders!'
+  },
+  hi:{
+    lang_label:'🌐 भाषा:',back:'वापस',page_title:'दवा रिमाइंडर — स्वास्थ्य सेतु',
+    badge:'आज रिमाइंडर सक्रिय',hero_title:'दवा रिमाइंडर',
+    hero_sub:'कोई खुराक न चूकें। अपनी सभी दवाओं को ट्रैक करें, शेड्यूल करें और रिमाइंडर पाएं।',
+    add_med_short:'दवा जोड़ें',chip_morning:'🌅 सुबह: 3',chip_afternoon:'☀️ दोपहर: 1',chip_night:'🌙 रात: 2',chip_taken:'✅ लिया: 2',
+    stat_streak:'दिन की लय',stat_taken:'आज लिया',stat_pending:'आज बाकी',stat_missed:'आज चूका',
+    today_title:'आज का कार्यक्रम',add_reminder:'दवा / रिमाइंडर जोड़ें',
+    schedule_title:'दैनिक कार्यक्रम अवलोकन',my_medicines:'मेरी दवाइयाँ',add_medicine_btn:'दवा जोड़ें',
+    refill_title:'रिफिल अलर्ट',refill_msg_low:'केवल 15 टैबलेट बचे हैं — 3-4 दिन में रिफिल करें',refill_msg_med:'28 टैबलेट बचे — 2 हफ्ते में स्टॉक करें',
+    remind_me:'याद दिलाएं',set_reminder:'रिमाइंडर सेट करें',
+    dose_after_breakfast:'1 गोली • नाश्ते के बाद',dose_before_breakfast:'1 गोली • नाश्ते से पहले',
+    dose_after_lunch:'5 ml • दोपहर के खाने के बाद',dose_before_dinner:'1 कैप्सूल • रात के खाने से पहले',
+    dose_after_dinner:'1 गोली • रात के खाने के बाद',dose_bedtime:'1 गोली • सोते समय',
+    after_food:'🍽️ खाने के बाद',before_food:'🚫 खाने से पहले',tag_taken:'✅ लिया',tag_daily:'📆 प्रतिदिन',left:'बचे',
+    slot_early_morning:'🌅 सुबह जल्दी',slot_breakfast:'🌅 नाश्ता',slot_lunch:'☀️ दोपहर का खाना',
+    slot_dinner:'🌙 रात का खाना',slot_after_dinner:'🌙 खाने के बाद',slot_bedtime:'🌙 सोने का समय',medicine:'दवा',
+    tablet:'गोली',liquid:'तरल',capsule:'कैप्सूल',daily:'प्रतिदिन',
+    diabetes:'मधुमेह',blood_pressure:'रक्तचाप',supplement:'पूरक',acidity:'एसिडिटी',cholesterol:'कोलेस्ट्रॉल',
+    pills:'गोलियाँ',days_left:'दिन बचे',
+    modal_add_title:'दवा जोड़ें',label_name:'दवा का नाम',label_type:'प्रकार',label_dose:'खुराक',
+    label_when:'कब लें',food_before:'खाने से पहले',food_after:'खाने के बाद',food_with:'खाने के साथ',food_empty:'खाली पेट',food_any:'कभी भी',
+    label_times:'रिमाइंडर समय',custom:'कस्टम',label_days:'दिन दोहराएं',
+    day_mo:'सो',day_tu:'मं',day_we:'बु',day_th:'गु',day_fr:'शु',day_sa:'श',day_su:'र',
+    label_stock:'मौजूदा स्टॉक',label_purpose:'उद्देश्य / बीमारी',label_color:'रंग लेबल',
+    cancel:'रद्द करें',save_medicine:'दवा सेव करें',
+    taken_title:'शाबाश! खुराक दर्ज हो गई!',taken_sub:'लय बनाए रखें। आपकी सेहत आपका धन्यवाद करती है! 🏆',close:'बंद करें',
+    toast_edit:'✏️ संपादन जल्द आएगा',toast_refill_set:'⏰ रिफिल रिमाइंडर सेट हो गया!',
+    toast_unmarked:'↩️ खुराक चिह्न हटाया',toast_added:'आपके रिमाइंडर में जोड़ा गया!'
+  },
+  kn:{
+    lang_label:'🌐 ಭಾಷೆ:',back:'ಹಿಂದೆ',page_title:'ಔಷಧ ರಿಮೈಂಡರ್‌ಗಳು — ಸ್ವಾಸ್ಥ್ಯ ಸೇತು',
+    badge:'ಇಂದು ರಿಮೈಂಡರ್‌ಗಳು ಸಕ್ರಿಯ',hero_title:'ಔಷಧ ರಿಮೈಂಡರ್‌ಗಳು',
+    hero_sub:'ಯಾವುದೇ ಡೋಸ್ ತಪ್ಪಿಸಬೇಡಿ. ನಿಮ್ಮ ಎಲ್ಲಾ ಔಷಧಿಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ, ನಿಗದಿ ಮಾಡಿ ಮತ್ತು ರಿಮೈಂಡರ್ ಪಡೆಯಿರಿ.',
+    add_med_short:'ಔಷಧ ಸೇರಿಸಿ',chip_morning:'🌅 ಬೆಳಿಗ್ಗೆ: 3',chip_afternoon:'☀️ ಮಧ್ಯಾಹ್ನ: 1',chip_night:'🌙 ರಾತ್ರಿ: 2',chip_taken:'✅ ತೆಗೆದುಕೊಂಡಿದೆ: 2',
+    stat_streak:'ದಿನ ಸ್ಟ್ರೀಕ್',stat_taken:'ಇಂದು ತೆಗೆದುಕೊಂಡಿದೆ',stat_pending:'ಇಂದು ಬಾಕಿ',stat_missed:'ಇಂದು ಮಿಸ್',
+    today_title:'ಇಂದಿನ ವೇಳಾಪಟ್ಟಿ',add_reminder:'ಔಷಧ / ರಿಮೈಂಡರ್ ಸೇರಿಸಿ',
+    schedule_title:'ದೈನಂದಿನ ವೇಳಾಪಟ್ಟಿ ಅವಲೋಕನ',my_medicines:'ನನ್ನ ಔಷಧಿಗಳು',add_medicine_btn:'ಔಷಧ ಸೇರಿಸಿ',
+    refill_title:'ರಿಫಿಲ್ ಎಚ್ಚರಿಕೆಗಳು',refill_msg_low:'ಕೇವಲ 15 ಮಾತ್ರೆಗಳು ಉಳಿದಿವೆ — 3-4 ದಿನಗಳಲ್ಲಿ ರಿಫಿಲ್ ಮಾಡಿ',refill_msg_med:'28 ಮಾತ್ರೆಗಳು ಉಳಿದಿವೆ — 2 ವಾರಗಳಲ್ಲಿ ಸ್ಟಾಕ್ ಮಾಡಿ',
+    remind_me:'ನೆನಪಿಸು',set_reminder:'ರಿಮೈಂಡರ್ ಹೊಂದಿಸಿ',
+    dose_after_breakfast:'1 ಮಾತ್ರೆ • ಉಪಾಹಾರದ ನಂತರ',dose_before_breakfast:'1 ಮಾತ್ರೆ • ಉಪಾಹಾರದ ಮೊದಲು',
+    dose_after_lunch:'5 ml • ಊಟದ ನಂತರ',dose_before_dinner:'1 ಕ್ಯಾಪ್ಸ್ಯೂಲ್ • ರಾತ್ರಿ ಊಟದ ಮೊದಲು',
+    dose_after_dinner:'1 ಮಾತ್ರೆ • ರಾತ್ರಿ ಊಟದ ನಂತರ',dose_bedtime:'1 ಮಾತ್ರೆ • ಮಲಗುವ ಸಮಯ',
+    after_food:'🍽️ ಊಟದ ನಂತರ',before_food:'🚫 ಊಟದ ಮೊದಲು',tag_taken:'✅ ತೆಗೆದುಕೊಂಡಿದೆ',tag_daily:'📆 ಪ್ರತಿದಿನ',left:'ಉಳಿದಿದೆ',
+    slot_early_morning:'🌅 ಬೆಳಿಗ್ಗೆ ಮುಂಚೆ',slot_breakfast:'🌅 ತಿಂಡಿ',slot_lunch:'☀️ ಊಟ',
+    slot_dinner:'🌙 ರಾತ್ರಿ ಊಟ',slot_after_dinner:'🌙 ಊಟದ ನಂತರ',slot_bedtime:'🌙 ಮಲಗುವ ಸಮಯ',medicine:'ಔಷಧ',
+    tablet:'ಮಾತ್ರೆ',liquid:'ಲಿಕ್ವಿಡ್',capsule:'ಕ್ಯಾಪ್ಸ್ಯೂಲ್',daily:'ಪ್ರತಿದಿನ',
+    diabetes:'ಮಧುಮೇಹ',blood_pressure:'ರಕ್ತದೊತ್ತಡ',supplement:'ಪೂರಕ',acidity:'ಆ್ಯಸಿಡಿಟಿ',cholesterol:'ಕೊಲೆಸ್ಟ್ರಾಲ್',
+    pills:'ಮಾತ್ರೆಗಳು',days_left:'ದಿನಗಳು ಉಳಿದಿವೆ',
+    modal_add_title:'ಔಷಧ ಸೇರಿಸಿ',label_name:'ಔಷಧದ ಹೆಸರು',label_type:'ಪ್ರಕಾರ',label_dose:'ಡೋಸ್',
+    label_when:'ಯಾವಾಗ ತೆಗೆದುಕೊಳ್ಳಬೇಕು',food_before:'ಊಟದ ಮೊದಲು',food_after:'ಊಟದ ನಂತರ',food_with:'ಊಟದ ಜೊತೆ',food_empty:'ಖಾಲಿ ಹೊಟ್ಟೆಯಲ್ಲಿ',food_any:'ಯಾವಾಗ ಬೇಕಾದರೂ',
+    label_times:'ರಿಮೈಂಡರ್ ಸಮಯಗಳು',custom:'ಕಸ್ಟಮ್',label_days:'ದಿನಗಳು ಮತ್ತೆ ಮಾಡಿ',
+    day_mo:'ಸೋ',day_tu:'ಮಂ',day_we:'ಬು',day_th:'ಗು',day_fr:'ಶು',day_sa:'ಶ',day_su:'ರ',
+    label_stock:'ಈಗಿನ ಸ್ಟಾಕ್',label_purpose:'ಉದ್ದೇಶ / ಸ್ಥಿತಿ',label_color:'ಬಣ್ಣ ಲೇಬಲ್',
+    cancel:'ರದ್ದುಮಾಡಿ',save_medicine:'ಔಷಧ ಉಳಿಸಿ',
+    taken_title:'ಶಾಭಾಷ್! ಡೋಸ್ ಗುರುತಿಸಲಾಗಿದೆ!',taken_sub:'ಸ್ಟ್ರೀಕ್ ಮುಂದುವರಿಸಿ. ನಿಮ್ಮ ಆರೋಗ್ಯ ಧನ್ಯವಾದ ಹೇಳುತ್ತದೆ! 🏆',close:'ಮುಚ್ಚಿ',
+    toast_edit:'✏️ ಸಂಪಾದನೆ ಶೀಘ್ರದಲ್ಲಿ ಬರಲಿದೆ',toast_refill_set:'⏰ ರಿಫಿಲ್ ರಿಮೈಂಡರ್ ಹೊಂದಿಸಲಾಗಿದೆ!',
+    toast_unmarked:'↩️ ಡೋಸ್ ಗುರುತು ತೆಗೆಯಲಾಗಿದೆ',toast_added:'ನಿಮ್ಮ ರಿಮೈಂಡರ್‌ಗೆ ಸೇರಿಸಲಾಗಿದೆ!'
+  },
+  te:{
+    lang_label:'🌐 భాష:',back:'వెనకకు',page_title:'మందు రిమైండర్లు — స్వాస్థ్య సేతు',
+    badge:'ఇవాళ రిమైండర్లు యాక్టివ్',hero_title:'మందు రిమైండర్లు',
+    hero_sub:'ఏ డోసూ మిస్ చేయకండి. మీ అన్ని మందులను ట్రాక్ చేయండి, షెడ్యూల్ చేయండి మరియు రిమైండర్లు పొందండి.',
+    add_med_short:'మందు జోడించు',chip_morning:'🌅 ఉదయం: 3',chip_afternoon:'☀️ మధ్యాహ్నం: 1',chip_night:'🌙 రాత్రి: 2',chip_taken:'✅ తీసుకున్నారు: 2',
+    stat_streak:'రోజు స్ట్రీక్',stat_taken:'ఈరోజు తీసుకున్నారు',stat_pending:'ఈరోజు పెండింగ్',stat_missed:'ఈరోజు మిస్',
+    today_title:'ఈరోజు షెడ్యూల్',add_reminder:'మందు / రిమైండర్ జోడించు',
+    schedule_title:'రోజువారీ షెడ్యూల్ అవలోకనం',my_medicines:'నా మందులు',add_medicine_btn:'మందు జోడించు',
+    refill_title:'రీఫిల్ అలర్ట్లు',refill_msg_low:'కేవలం 15 టాబ్లెట్లు మిగిలాయి — 3-4 రోజుల్లో రీఫిల్ చేయండి',refill_msg_med:'28 టాబ్లెట్లు మిగిలాయి — 2 వారాల్లో స్టాక్ చేయండి',
+    remind_me:'గుర్తుచేయి',set_reminder:'రిమైండర్ సెట్ చేయండి',
+    dose_after_breakfast:'1 మాత్ర • అల్పాహారం తర్వాత',dose_before_breakfast:'1 మాత్ర • అల్పాహారం ముందు',
+    dose_after_lunch:'5 ml • మధ్యాహ్న భోజనం తర్వాత',dose_before_dinner:'1 క్యాప్సూల్ • రాత్రి భోజనం ముందు',
+    dose_after_dinner:'1 మాత్ర • రాత్రి భోజనం తర్వాత',dose_bedtime:'1 మాత్ర • పడుకునే సమయంలో',
+    after_food:'🍽️ తిన్న తర్వాత',before_food:'🚫 తినడానికి ముందు',tag_taken:'✅ తీసుకున్నారు',tag_daily:'📆 రోజూ',left:'మిగిలింది',
+    slot_early_morning:'🌅 తెల్లవారుజామున',slot_breakfast:'🌅 అల్పాహారం',slot_lunch:'☀️ భోజనం',
+    slot_dinner:'🌙 రాత్రి భోజనం',slot_after_dinner:'🌙 భోజనం తర్వాత',slot_bedtime:'🌙 పడుకునే సమయం',medicine:'మందు',
+    tablet:'మాత్ర',liquid:'లిక్విడ్',capsule:'క్యాప్సూల్',daily:'రోజూ',
+    diabetes:'మధుమేహం',blood_pressure:'రక్తపోటు',supplement:'సప్లిమెంట్',acidity:'యాసిడిటీ',cholesterol:'కొలెస్ట్రాల్',
+    pills:'మాత్రలు',days_left:'రోజులు మిగిలాయి',
+    modal_add_title:'మందు జోడించు',label_name:'మందు పేరు',label_type:'రకం',label_dose:'మోతాదు',
+    label_when:'ఎప్పుడు తీసుకోవాలి',food_before:'తినడానికి ముందు',food_after:'తిన్న తర్వాత',food_with:'తింటూ',food_empty:'ఖాళీ కడుపుతో',food_any:'ఎప్పుడైనా',
+    label_times:'రిమైండర్ సమయాలు',custom:'కస్టమ్',label_days:'పునరావృత రోజులు',
+    day_mo:'సో',day_tu:'మం',day_we:'బు',day_th:'గు',day_fr:'శు',day_sa:'శ',day_su:'ఆ',
+    label_stock:'ప్రస్తుత స్టాక్',label_purpose:'ఉద్దేశ్యం / పరిస్థితి',label_color:'రంగు లేబల్',
+    cancel:'రద్దు చేయి',save_medicine:'మందు సేవ్ చేయి',
+    taken_title:'బ్రావో! డోసు మార్క్ అయింది!',taken_sub:'స్ట్రీక్ కొనసాగించండి. మీ ఆరోగ్యం ధన్యవాదాలు చెప్తోంది! 🏆',close:'మూసివేయి',
+    toast_edit:'✏️ ఎడిట్ త్వరలో వస్తుంది',toast_refill_set:'⏰ రీఫిల్ రిమైండర్ సెట్ అయింది!',
+    toast_unmarked:'↩️ డోసు అన్‌మార్క్ చేయబడింది',toast_added:'మీ రిమైండర్లకు జోడించబడింది!'
+  },
+  ta:{
+    lang_label:'🌐 மொழி:',back:'பின்செல்',page_title:'மருந்து நினைவூட்டல்கள் — ஸ்வாஸ்த்ய சேது',
+    badge:'இன்று நினைவூட்டல்கள் செயலில்',hero_title:'மருந்து நினைவூட்டல்கள்',
+    hero_sub:'எந்த மருந்தையும் தவறவிடாதீர்கள். உங்கள் அனைத்து மருந்துகளையும் கண்காணிக்கவும், திட்டமிடவும், நினைவூட்டல்கள் பெறவும்.',
+    add_med_short:'மருந்து சேர்',chip_morning:'🌅 காலை: 3',chip_afternoon:'☀️ மதியம்: 1',chip_night:'🌙 இரவு: 2',chip_taken:'✅ எடுத்தது: 2',
+    stat_streak:'நாள் தொடர்',stat_taken:'இன்று எடுத்தது',stat_pending:'இன்று நிலுவை',stat_missed:'இன்று தவறியது',
+    today_title:'இன்றைய அட்டவணை',add_reminder:'மருந்து / நினைவூட்டல் சேர்க்கவும்',
+    schedule_title:'தினசரி அட்டவணை கண்ணோட்டம்',my_medicines:'என் மருந்துகள்',add_medicine_btn:'மருந்து சேர்க்கவும்',
+    refill_title:'நிரப்பல் எச்சரிக்கைகள்',refill_msg_low:'15 மாத்திரைகள் மட்டுமே உள்ளன — 3-4 நாட்களில் நிரப்பவும்',refill_msg_med:'28 மாத்திரைகள் உள்ளன — 2 வாரங்களில் வாங்கவும்',
+    remind_me:'நினைவூட்டு',set_reminder:'நினைவூட்டல் அமை',
+    dose_after_breakfast:'1 மாத்திரை • காலை உணவுக்கு பிறகு',dose_before_breakfast:'1 மாத்திரை • காலை உணவுக்கு முன்',
+    dose_after_lunch:'5 ml • மதிய உணவுக்கு பிறகு',dose_before_dinner:'1 கேப்சூல் • இரவு உணவுக்கு முன்',
+    dose_after_dinner:'1 மாத்திரை • இரவு உணவுக்கு பிறகு',dose_bedtime:'1 மாத்திரை • தூங்கும் நேரத்தில்',
+    after_food:'🍽️ சாப்பிட்ட பிறகு',before_food:'🚫 சாப்பிடுவதற்கு முன்',tag_taken:'✅ எடுத்தது',tag_daily:'📆 தினசரி',left:'மீதமுள்ளது',
+    slot_early_morning:'🌅 விடியற்காலை',slot_breakfast:'🌅 காலை உணவு',slot_lunch:'☀️ மதிய உணவு',
+    slot_dinner:'🌙 இரவு உணவு',slot_after_dinner:'🌙 இரவு உணவுக்கு பிறகு',slot_bedtime:'🌙 தூங்கும் நேரம்',medicine:'மருந்து',
+    tablet:'மாத்திரை',liquid:'திரவம்',capsule:'கேப்சூல்',daily:'தினசரி',
+    diabetes:'நீரிழிவு',blood_pressure:'இரத்த அழுத்தம்',supplement:'சத்துணவு',acidity:'அமிலத்தன்மை',cholesterol:'கொழுப்பு',
+    pills:'மாத்திரைகள்',days_left:'நாட்கள் மீதமுள்ளன',
+    modal_add_title:'மருந்து சேர்க்கவும்',label_name:'மருந்தின் பெயர்',label_type:'வகை',label_dose:'அளவு',
+    label_when:'எப்போது எடுக்க வேண்டும்',food_before:'சாப்பிடுவதற்கு முன்',food_after:'சாப்பிட்ட பிறகு',food_with:'சாப்பிடும்போது',food_empty:'வெறும் வயிற்றில்',food_any:'எப்போது வேண்டுமானாலும்',
+    label_times:'நினைவூட்டல் நேரங்கள்',custom:'தனிப்பயன்',label_days:'மீண்டும் மீண்டும் நாட்கள்',
+    day_mo:'தி',day_tu:'செ',day_we:'பு',day_th:'வி',day_fr:'வெ',day_sa:'ச',day_su:'ஞா',
+    label_stock:'தற்போதைய இருப்பு',label_purpose:'நோக்கம் / நிலை',label_color:'வண்ண லேபல்',
+    cancel:'ரத்து செய்',save_medicine:'மருந்து சேமி',
+    taken_title:'சாபாஷ்! டோஸ் குறிக்கப்பட்டது!',taken_sub:'தொடரை தொடருங்கள். உங்கள் ஆரோக்கியம் நன்றி சொல்கிறது! 🏆',close:'மூடு',
+    toast_edit:'✏️ திருத்தம் விரைவில் வரும்',toast_refill_set:'⏰ நிரப்பல் நினைவூட்டல் அமைக்கப்பட்டது!',
+    toast_unmarked:'↩️ டோஸ் குறியீடு அகற்றப்பட்டது',toast_added:'உங்கள் நினைவூட்டல்களில் சேர்க்கப்பட்டது!'
+  },
+  mr:{
+    lang_label:'🌐 भाषा:',back:'मागे',page_title:'औषध स्मरणपत्रे — स्वास्थ्य सेतू',
+    badge:'आज स्मरणपत्रे सक्रिय',hero_title:'औषध स्मरणपत्रे',
+    hero_sub:'कोणताही डोस चुकवू नका. आपल्या सर्व औषधांना ट्रॅक करा, वेळापत्रक करा आणि स्मरणपत्रे मिळवा.',
+    add_med_short:'औषध जोडा',chip_morning:'🌅 सकाळ: 3',chip_afternoon:'☀️ दुपार: 1',chip_night:'🌙 रात्र: 2',chip_taken:'✅ घेतले: 2',
+    stat_streak:'दिवस मालिका',stat_taken:'आज घेतले',stat_pending:'आज प्रलंबित',stat_missed:'आज चुकले',
+    today_title:'आजचे वेळापत्रक',add_reminder:'औषध / स्मरणपत्र जोडा',
+    schedule_title:'दैनंदिन वेळापत्रक आढावा',my_medicines:'माझी औषधे',add_medicine_btn:'औषध जोडा',
+    refill_title:'रिफिल सूचना',refill_msg_low:'केवळ 15 गोळ्या शिल्लक — 3-4 दिवसांत रिफिल करा',refill_msg_med:'28 गोळ्या शिल्लक — 2 आठवड्यांत स्टॉक करा',
+    remind_me:'आठव करा',set_reminder:'स्मरणपत्र सेट करा',
+    dose_after_breakfast:'1 गोळी • नाश्त्यानंतर',dose_before_breakfast:'1 गोळी • नाश्त्यापूर्वी',
+    dose_after_lunch:'5 ml • जेवणानंतर',dose_before_dinner:'1 कॅप्सूल • रात्रीच्या जेवणापूर्वी',
+    dose_after_dinner:'1 गोळी • रात्रीच्या जेवणानंतर',dose_bedtime:'1 गोळी • झोपताना',
+    after_food:'🍽️ जेवणानंतर',before_food:'🚫 जेवणापूर्वी',tag_taken:'✅ घेतले',tag_daily:'📆 दररोज',left:'शिल्लक',
+    slot_early_morning:'🌅 पहाटे',slot_breakfast:'🌅 नाश्ता',slot_lunch:'☀️ जेवण',
+    slot_dinner:'🌙 रात्रीचे जेवण',slot_after_dinner:'🌙 जेवणानंतर',slot_bedtime:'🌙 झोपण्याची वेळ',medicine:'औषध',
+    tablet:'गोळी',liquid:'द्रव',capsule:'कॅप्सूल',daily:'दररोज',
+    diabetes:'मधुमेह',blood_pressure:'रक्तदाब',supplement:'पूरक',acidity:'आम्लता',cholesterol:'कोलेस्ट्रॉल',
+    pills:'गोळ्या',days_left:'दिवस शिल्लक',
+    modal_add_title:'औषध जोडा',label_name:'औषधाचे नाव',label_type:'प्रकार',label_dose:'डोस',
+    label_when:'कधी घ्यावे',food_before:'जेवणापूर्वी',food_after:'जेवणानंतर',food_with:'जेवणासोबत',food_empty:'रिकाम्या पोटी',food_any:'कधीही',
+    label_times:'स्मरणपत्र वेळा',custom:'सानुकूल',label_days:'पुनरावृत्ती दिवस',
+    day_mo:'सो',day_tu:'मं',day_we:'बु',day_th:'गु',day_fr:'शु',day_sa:'श',day_su:'र',
+    label_stock:'सध्याचा साठा',label_purpose:'उद्देश / स्थिती',label_color:'रंग लेबल',
+    cancel:'रद्द करा',save_medicine:'औषध जतन करा',
+    taken_title:'शाबास! डोस नोंदवला!',taken_sub:'मालिका सुरू ठेवा. तुमचे आरोग्य तुम्हाला धन्यवाद देते! 🏆',close:'बंद करा',
+    toast_edit:'✏️ संपादन लवकरच येईल',toast_refill_set:'⏰ रिफिल स्मरणपत्र सेट केले!',
+    toast_unmarked:'↩️ डोस चिन्ह काढले',toast_added:'तुमच्या स्मरणपत्रांमध्ये जोडले!'
+  }
+};
+
+let currentLang = localStorage.getItem('ss_lang') || 'en';
+function t(key) { return (TRANSLATIONS[currentLang] || TRANSLATIONS.en)[key] || key; }
+
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = t(key);
+    if (val) el.textContent = val;
+  });
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.getAttribute('onclick') === "setLang('" + currentLang + "')") btn.classList.add('active');
+  });
+  updateStats();
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('ss_lang', lang);
+  applyTranslations();
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
+
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) closeModal(o.id); });
+});
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+let takenCount = 2, totalCount = 6, missedCount = 0;
+
+function updateStats() {
+  const pct = Math.round((takenCount / totalCount) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = takenCount + ' / ' + totalCount + ' ' + (t('stat_taken') || 'Taken Today').toLowerCase();
+  document.getElementById('taken-val').textContent = takenCount;
+  document.getElementById('pending-val').textContent = Math.max(0, totalCount - takenCount - missedCount);
+  document.getElementById('missed-val').textContent = missedCount;
+}
+
+function toggleTaken(btn) {
+  const item = btn.closest('.medicine-item');
+  const wasTaken = item.classList.contains('taken');
+  if (wasTaken) {
+    item.classList.remove('taken');
+    item.classList.add('upcoming');
+    btn.textContent = '⏳';
+    const takenTag = item.querySelector('.med-tag.taken');
+    if (takenTag) { takenTag.className = 'med-tag freq'; takenTag.textContent = t('tag_daily'); }
+    takenCount = Math.max(0, takenCount - 1);
+    updateStats();
+    showToast(t('toast_unmarked'));
+  } else {
+    item.classList.remove('upcoming', 'missed');
+    item.classList.add('taken');
+    btn.textContent = '✅';
+    const freqTag = item.querySelector('.med-tag.freq');
+    if (freqTag) { freqTag.className = 'med-tag taken'; freqTag.textContent = t('tag_taken'); }
+    takenCount++;
+    updateStats();
+    const medName = item.querySelector('.med-name').textContent;
+    document.getElementById('taken-sub-text').textContent = medName + ' — ' + t('taken_sub');
+    openModal('modal-taken');
+    setTimeout(() => closeModal('modal-taken'), 2500);
+  }
+}
+
+function openAddMedicine() { openModal('modal-add-med'); }
+
+let selectedColor = '#6C63FF';
+
+function selectColor(dot) {
+  document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
+  dot.classList.add('selected');
+  selectedColor = dot.style.background;
+}
+
+function toggleDay(btn) { btn.classList.toggle('selected'); }
+function toggleSlot(btn) { btn.classList.toggle('selected'); }
+function addCustomTime() { showToast('⏰ Custom time picker coming soon!'); }
+
+function saveMedicine() {
+  const name = document.getElementById('m-name').value.trim();
+  const type = document.getElementById('m-type').value;
+  const dose = document.getElementById('m-dose').value.trim();
+  const food = document.getElementById('m-food').value;
+  const stock = document.getElementById('m-stock').value.trim();
+  const purpose = document.getElementById('m-purpose').value.trim();
+
+  if (!name) { showToast('⚠️ Medicine name is required'); return; }
+
+  // Add to today's list
+  const list = document.getElementById('medicine-list');
+  const item = document.createElement('div');
+  item.className = 'medicine-item';
+  item.innerHTML =
+    '<div class="med-check" onclick="toggleTaken(this)">○</div>' +
+    '<div class="med-icon-wrap pill">' + type + '</div>' +
+    '<div class="med-info">' +
+      '<div class="med-name">' + name + '</div>' +
+      '<div class="med-dose">' + (dose || '1 dose') + ' • ' + food + '</div>' +
+      '<div class="med-tags">' +
+        '<span class="med-tag freq">📆 ' + t('tag_daily') + '</span>' +
+        '<span class="med-tag food">' + (food.toLowerCase().includes('after') ? t('after_food') : t('before_food')) + '</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="med-right">' +
+      '<div class="med-time">As scheduled</div>' +
+      '<div class="med-stock">📦 ' + (stock ? stock + ' ' + t('left') : '') + '</div>' +
+    '</div>';
+  list.appendChild(item);
+  totalCount++;
+
+  // Add to My Medicines
+  const myList = document.getElementById('mymed-list');
+  const myItem = document.createElement('div');
+  myItem.className = 'mymed-item';
+  myItem.innerHTML =
+    '<div class="mymed-color" style="background:' + selectedColor + ';"></div>' +
+    '<div class="mymed-info">' +
+      '<div class="mymed-name">' + name + '</div>' +
+      '<div class="mymed-detail">' + type + ' • ' + t('daily') + (purpose ? ' • ' + purpose : '') + '</div>' +
+    '</div>' +
+    '<div class="mymed-stock-bar">' +
+      '<div class="stock-pills">' + (stock ? stock + ' ' + t('left') : '—') + '</div>' +
+      '<div class="stock-sub">Tracking</div>' +
+    '</div>' +
+    '<div class="mymed-actions">' +
+      '<button class="icon-btn" onclick="showToast(t(\'toast_edit\'))">✏️</button>' +
+      '<button class="icon-btn del" onclick="removeMedicine(this)">🗑️</button>' +
+    '</div>';
+  myList.appendChild(myItem);
+
+  updateStats();
+  ['m-name', 'm-dose', 'm-stock', 'm-purpose'].forEach(id => document.getElementById(id).value = '');
+  closeModal('modal-add-med');
+  showToast('✅ ' + name + ' ' + t('toast_added'));
+}
+
+function removeMedicine(btn) {
+  if (confirm('Remove this medicine?')) {
+    btn.closest('.mymed-item').remove();
+    showToast('🗑️ Medicine removed');
+  }
+}
+
+// Init
+applyTranslations();
+</script>
+</body>
+</html>
