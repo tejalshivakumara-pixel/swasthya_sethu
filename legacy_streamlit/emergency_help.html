@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Emergency Help — Swasthya Setu</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:#f8fafc; --card:#ffffff; --text:#0f172a; --text2:#64748b;
+    --accent:#3b82f6; --accent2:#8b5cf6; --border:#e2e8f0;
+    --shadow:0 4px 20px rgba(0,0,0,0.08); --green:#22c55e; --red:#ef4444;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); padding:24px; }
+  h1,h2,h3 { font-family:'Poppins',sans-serif; }
+  .page-header { text-align:center; margin-bottom:32px; }
+  .page-header h1 { font-size:2rem; margin-bottom:4px; color:var(--red); }
+  .page-header p { color:var(--text2); font-size:0.92rem; }
+
+  .section-title { font-size:1.3rem; margin:32px 0 16px 0; display:flex; align-items:center; gap:8px; }
+  .section-line { flex:1; height:2px; background:linear-gradient(90deg,var(--accent),transparent); border-radius:2px; }
+
+  /* Emergency service cards */
+  .services-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; max-width:800px; margin:0 auto; }
+  .service-card {
+    background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:24px; text-align:center; box-shadow:var(--shadow); transition:all 0.2s;
+  }
+  .service-card:hover { transform:translateY(-3px); box-shadow:0 8px 30px rgba(0,0,0,0.12); }
+  .service-icon { font-size:2.5rem; margin-bottom:8px; }
+  .service-name { font-weight:700; font-size:1.1rem; margin-bottom:4px; }
+  .service-number { font-size:1.5rem; font-weight:800; color:var(--accent); margin-bottom:12px; }
+  .call-btn {
+    display:inline-block; padding:10px 24px; background:linear-gradient(135deg,var(--green),#16a34a);
+    color:white; border-radius:50px; text-decoration:none; font-weight:700; font-size:0.95rem;
+    transition:all 0.2s; box-shadow:0 4px 12px rgba(34,197,94,0.3);
+  }
+  .call-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(34,197,94,0.4); }
+  .sos-btn {
+    display:inline-block; margin-top:8px; padding:8px 18px; background:rgba(239,68,68,0.1);
+    color:var(--red); border:2px solid var(--red); border-radius:50px; cursor:pointer;
+    font-weight:700; font-size:0.85rem; transition:all 0.2s; border:none; font-family:'Inter',sans-serif;
+  }
+  .sos-btn:hover { background:var(--red); color:white; }
+
+  /* Hospital cards */
+  .hospital-card {
+    background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px;
+    margin-bottom:14px; box-shadow:var(--shadow); max-width:800px; margin-left:auto; margin-right:auto; margin-bottom:14px;
+  }
+  .hospital-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px; }
+  .hospital-name { font-weight:700; font-size:1.05rem; }
+  .hospital-type { font-size:0.8rem; padding:4px 12px; background:rgba(59,130,246,0.1); color:var(--accent); border-radius:50px; font-weight:600; }
+  .hospital-address { font-size:0.88rem; color:var(--text2); margin-bottom:12px; }
+  .hospital-metrics { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:12px; }
+  .metric { text-align:center; }
+  .metric-value { font-weight:700; font-size:1.1rem; color:var(--accent); }
+  .metric-label { font-size:0.75rem; color:var(--text2); text-transform:uppercase; font-weight:600; }
+  .hospital-tags { display:flex; flex-wrap:wrap; gap:8px; }
+  .hospital-tag { font-size:0.8rem; padding:4px 10px; background:#f1f5f9; border-radius:50px; color:var(--text2); font-weight:500; }
+
+  /* Contact cards */
+  .contact-card {
+    background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px;
+    margin-bottom:10px; display:flex; align-items:center; gap:14px; max-width:800px; margin-left:auto; margin-right:auto; margin-bottom:10px;
+  }
+  .contact-avatar { width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:1.1rem; }
+  .contact-info { flex:1; }
+  .contact-name { font-weight:700; font-size:0.95rem; }
+  .contact-rel { font-size:0.85rem; color:var(--text2); }
+  .contact-actions { display:flex; gap:8px; }
+  .contact-call { padding:8px 16px; border-radius:10px; background:var(--green); color:white; text-decoration:none; font-weight:600; font-size:0.88rem; }
+  .contact-remove { padding:8px 12px; border-radius:10px; background:rgba(239,68,68,0.1); color:var(--red); border:none; cursor:pointer; font-weight:600; font-size:0.88rem; font-family:'Inter',sans-serif; }
+
+  /* Add contact form */
+  .add-form { max-width:800px; margin:0 auto; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:24px; box-shadow:var(--shadow); display:none; }
+  .form-group { margin-bottom:16px; }
+  .form-group label { display:block; font-weight:600; font-size:0.9rem; margin-bottom:6px; }
+  .form-group input, .form-group select {
+    width:100%; padding:12px 16px; border:2px solid var(--border); border-radius:12px;
+    font-size:1rem; font-family:'Inter',sans-serif; background:#f1f5f9; color:var(--text); outline:none;
+  }
+  .form-group input:focus, .form-group select:focus { border-color:var(--accent); }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+
+  .btn { padding:12px 24px; border:none; border-radius:12px; font-size:1rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.3s; }
+  .btn-primary { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:white; }
+  .btn-outline { background:none; border:2px solid var(--accent); color:var(--accent); }
+
+  .toast { position:fixed; bottom:30px; right:30px; background:var(--green); color:white; padding:14px 24px; border-radius:12px; font-weight:600; box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:9999; transform:translateY(100px); opacity:0; transition:all 0.3s; }
+  .toast.show { transform:translateY(0); opacity:1; }
+
+  @media(max-width:600px) { .services-grid,.form-row,.hospital-metrics { grid-template-columns:1fr; } body{padding:12px;} }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🚨 Emergency Help</h1>
+  <p>Quick access to emergency services, nearby hospitals, and your contacts</p>
+</div>
+
+<!-- ═══ Emergency Services ═══ -->
+<div class="section-title"><h2>📞 Emergency Services</h2><div class="section-line"></div></div>
+<div class="services-grid">
+  <div class="service-card">
+    <div class="service-icon">🚑</div>
+    <div class="service-name">Ambulance</div>
+    <div class="service-number">108</div>
+    <a href="tel:108" class="call-btn">👆 Tap to Call</a><br>
+    <button class="sos-btn" onclick="logSOS('Ambulance','108')">🆘 Log SOS</button>
+  </div>
+  <div class="service-card">
+    <div class="service-icon">🚔</div>
+    <div class="service-name">Police</div>
+    <div class="service-number">100</div>
+    <a href="tel:100" class="call-btn">👆 Tap to Call</a><br>
+    <button class="sos-btn" onclick="logSOS('Police','100')">🆘 Log SOS</button>
+  </div>
+  <div class="service-card">
+    <div class="service-icon">🔥</div>
+    <div class="service-name">Fire Brigade</div>
+    <div class="service-number">101</div>
+    <a href="tel:101" class="call-btn">👆 Tap to Call</a>
+  </div>
+  <div class="service-card">
+    <div class="service-icon">🤰</div>
+    <div class="service-name">Women Helpline</div>
+    <div class="service-number">1091</div>
+    <a href="tel:1091" class="call-btn">👆 Tap to Call</a>
+  </div>
+  <div class="service-card" style="grid-column: span 2;">
+    <div class="service-icon">🧠</div>
+    <div class="service-name">Mental Health (iCall)</div>
+    <div class="service-number">1800-111-565</div>
+    <a href="tel:1800111565" class="call-btn">👆 Tap to Call</a>
+  </div>
+</div>
+
+<!-- ═══ Nearby Hospitals ═══ -->
+<div class="section-title"><h2>🏥 Nearby Hospitals</h2><div class="section-line"></div></div>
+
+<div class="hospital-card">
+  <div class="hospital-header">
+    <span class="hospital-name">🏥 District General Hospital</span>
+    <span class="hospital-type">Government</span>
+  </div>
+  <div class="hospital-address">NH-2, Varanasi, Uttar Pradesh 221001</div>
+  <div class="hospital-metrics">
+    <div class="metric"><div class="metric-value">2.3 km</div><div class="metric-label">Distance</div></div>
+    <div class="metric"><div class="metric-value">8 min</div><div class="metric-label">Travel Time</div></div>
+    <div class="metric"><div class="metric-value"><a href="tel:05422501234" style="color:var(--accent);text-decoration:none;">📞 Call</a></div><div class="metric-label">Phone</div></div>
+  </div>
+  <div class="hospital-tags">
+    <span class="hospital-tag">🩺 Emergency ward</span>
+    <span class="hospital-tag">🛏️ ICU</span>
+    <span class="hospital-tag">🩸 Blood bank</span>
+    <span class="hospital-tag">🚑 Ambulance</span>
+  </div>
+</div>
+
+<div class="hospital-card">
+  <div class="hospital-header">
+    <span class="hospital-name">🏥 Primary Health Centre — Chandauli</span>
+    <span class="hospital-type">PHC</span>
+  </div>
+  <div class="hospital-address">Chandauli Block, UP 232104</div>
+  <div class="hospital-metrics">
+    <div class="metric"><div class="metric-value">5.1 km</div><div class="metric-label">Distance</div></div>
+    <div class="metric"><div class="metric-value">15 min</div><div class="metric-label">Travel Time</div></div>
+    <div class="metric"><div class="metric-value"><a href="tel:05412309876" style="color:var(--accent);text-decoration:none;">📞 Call</a></div><div class="metric-label">Phone</div></div>
+  </div>
+  <div class="hospital-tags">
+    <span class="hospital-tag">🩺 Emergency ward</span>
+  </div>
+</div>
+
+<div class="hospital-card">
+  <div class="hospital-header">
+    <span class="hospital-name">🏥 Apollo Clinic — Varanasi City</span>
+    <span class="hospital-type">Private</span>
+  </div>
+  <div class="hospital-address">Sigra, Varanasi, UP 221010</div>
+  <div class="hospital-metrics">
+    <div class="metric"><div class="metric-value">8.4 km</div><div class="metric-label">Distance</div></div>
+    <div class="metric"><div class="metric-value">22 min</div><div class="metric-label">Travel Time</div></div>
+    <div class="metric"><div class="metric-value"><a href="tel:05422345678" style="color:var(--accent);text-decoration:none;">📞 Call</a></div><div class="metric-label">Phone</div></div>
+  </div>
+  <div class="hospital-tags">
+    <span class="hospital-tag">🩺 Emergency ward</span>
+    <span class="hospital-tag">🛏️ ICU</span>
+    <span class="hospital-tag">🩸 Blood bank</span>
+    <span class="hospital-tag">🚑 Ambulance</span>
+  </div>
+</div>
+
+<!-- ═══ Emergency Contacts ═══ -->
+<div class="section-title"><h2>👨‍👩‍👧 My Emergency Contacts</h2><div class="section-line"></div></div>
+
+<div id="contactsList" style="max-width:800px;margin:0 auto;">
+  <div class="contact-card">
+    <div class="contact-avatar">SK</div>
+    <div class="contact-info">
+      <div class="contact-name">Suresh Kumar</div>
+      <div class="contact-rel">Brother · Primary</div>
+    </div>
+    <div class="contact-actions">
+      <a href="tel:+919876543210" class="contact-call">📞 Call</a>
+      <button class="contact-remove" onclick="this.closest('.contact-card').remove()">✕</button>
+    </div>
+  </div>
+  <div class="contact-card">
+    <div class="contact-avatar">AV</div>
+    <div class="contact-info">
+      <div class="contact-name">Dr. Anjali Verma</div>
+      <div class="contact-rel">Doctor · Secondary</div>
+    </div>
+    <div class="contact-actions">
+      <a href="tel:+919234567890" class="contact-call">📞 Call</a>
+      <button class="contact-remove" onclick="this.closest('.contact-card').remove()">✕</button>
+    </div>
+  </div>
+</div>
+
+<div style="max-width:800px;margin:16px auto;">
+  <button class="btn btn-outline" onclick="toggleAddForm()" style="width:100%;">➕ Add Emergency Contact</button>
+</div>
+
+<div class="add-form" id="addForm">
+  <h3 style="margin-bottom:16px;">➕ Add Emergency Contact</h3>
+  <div class="form-row">
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" id="ec_name" placeholder="Contact name" />
+    </div>
+    <div class="form-group">
+      <label>Relationship</label>
+      <select id="ec_rel">
+        <option>Wife</option><option>Husband</option><option>Son</option><option>Daughter</option>
+        <option>Father</option><option>Mother</option><option>Brother</option><option>Sister</option>
+        <option>Friend</option><option>Neighbour</option><option>Doctor</option><option>Other</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>Phone Number</label>
+      <input type="tel" id="ec_phone" placeholder="+91 XXXXX XXXXX" />
+    </div>
+    <div class="form-group">
+      <label>Priority</label>
+      <select id="ec_priority">
+        <option value="Primary">Primary</option><option value="Secondary">Secondary</option><option value="Tertiary">Tertiary</option>
+      </select>
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="addContact()" style="width:100%;">💾 Save Contact</button>
+</div>
+
+<div class="toast" id="toast">✅ Action logged!</div>
+
+<script>
+  function logSOS(type, number) {
+    const toast = document.getElementById('toast');
+    toast.textContent = `🆘 SOS logged for ${type}. Tap the call button above.`;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  function toggleAddForm() {
+    const form = document.getElementById('addForm');
+    form.style.display = form.style.display === 'none' || !form.style.display ? 'block' : 'none';
+  }
+
+  function addContact() {
+    const name = document.getElementById('ec_name').value;
+    const phone = document.getElementById('ec_phone').value;
+    const rel = document.getElementById('ec_rel').value;
+    const priority = document.getElementById('ec_priority').value;
+
+    if (!name || !phone) { alert('Name and phone number are required.'); return; }
+
+    const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+    const html = `<div class="contact-card">
+      <div class="contact-avatar">${initials}</div>
+      <div class="contact-info">
+        <div class="contact-name">${name}</div>
+        <div class="contact-rel">${rel} · ${priority}</div>
+      </div>
+      <div class="contact-actions">
+        <a href="tel:${phone}" class="contact-call">📞 Call</a>
+        <button class="contact-remove" onclick="this.closest('.contact-card').remove()">✕</button>
+      </div>
+    </div>`;
+
+    document.getElementById('contactsList').insertAdjacentHTML('beforeend', html);
+    document.getElementById('ec_name').value = '';
+    document.getElementById('ec_phone').value = '';
+    document.getElementById('addForm').style.display = 'none';
+
+    const toast = document.getElementById('toast');
+    toast.textContent = '✅ Contact saved!';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+</html>

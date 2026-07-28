@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Medicine Reminders — Swasthya Setu</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:#f8fafc; --card:#ffffff; --text:#0f172a; --text2:#64748b;
+    --accent:#3b82f6; --accent2:#8b5cf6; --border:#e2e8f0;
+    --shadow:0 4px 20px rgba(0,0,0,0.08); --green:#22c55e; --red:#ef4444;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); padding:24px; }
+  h1,h2,h3 { font-family:'Poppins',sans-serif; }
+  .page-header { text-align:center; margin-bottom:32px; }
+  .page-header h1 { font-size:2rem; margin-bottom:4px; }
+  .page-header p { color:var(--text2); font-size:0.92rem; }
+
+  .tabs { display:flex; gap:4px; margin-bottom:24px; background:var(--border); border-radius:14px; padding:4px; max-width:700px; margin-left:auto; margin-right:auto; }
+  .tab { flex:1; padding:12px; text-align:center; border-radius:10px; cursor:pointer; font-weight:600; font-size:0.95rem; transition:all 0.2s; color:var(--text2); }
+  .tab.active { background:var(--card); color:var(--accent); box-shadow:var(--shadow); }
+
+  .card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:32px; box-shadow:var(--shadow); max-width:700px; margin:0 auto; }
+  .form-group { margin-bottom:18px; }
+  .form-group label { display:block; font-weight:600; font-size:0.9rem; margin-bottom:6px; }
+  .form-group input, .form-group select {
+    width:100%; padding:12px 16px; border:2px solid var(--border); border-radius:12px;
+    font-size:1rem; font-family:'Inter',sans-serif; background:#f1f5f9; color:var(--text); outline:none;
+  }
+  .form-group input:focus, .form-group select:focus { border-color:var(--accent); }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+
+  /* Days selector */
+  .days-group { display:flex; gap:8px; flex-wrap:wrap; }
+  .day-btn {
+    width:42px; height:42px; border-radius:50%; border:2px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:0.85rem; cursor:pointer; transition:all 0.2s;
+  }
+  .day-btn.active { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:white; border-color:transparent; }
+
+  .btn { padding:14px 28px; border:none; border-radius:12px; font-size:1rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.3s; width:100%; margin-top:8px; }
+  .btn-primary { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:white; box-shadow:0 4px 15px rgba(59,130,246,0.3); }
+  .btn-primary:hover { transform:translateY(-2px); }
+
+  /* Reminder cards */
+  .reminder-card {
+    border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom:14px;
+    display:flex; align-items:center; gap:16px; background:#fafbfc; transition:all 0.2s;
+  }
+  .reminder-card:hover { box-shadow:var(--shadow); }
+  .reminder-icon { font-size:2.2rem; }
+  .reminder-info { flex:1; }
+  .reminder-name { font-weight:700; font-size:1.05rem; margin-bottom:4px; }
+  .reminder-detail { font-size:0.88rem; color:var(--text2); }
+  .reminder-time {
+    background:rgba(59,130,246,0.1); color:var(--accent); padding:8px 16px;
+    border-radius:10px; font-weight:700; font-size:0.95rem; text-align:center; min-width:90px;
+  }
+  .reminder-delete {
+    background:none; border:none; cursor:pointer; font-size:1.2rem; color:var(--red);
+    padding:8px; border-radius:8px; transition:all 0.2s;
+  }
+  .reminder-delete:hover { background:rgba(239,68,68,0.1); }
+
+  .empty-state { text-align:center; padding:40px; color:var(--text2); }
+  .empty-state .icon { font-size:3rem; margin-bottom:12px; }
+
+  .toast { position:fixed; bottom:30px; right:30px; background:var(--green); color:white; padding:14px 24px; border-radius:12px; font-weight:600; box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:9999; transform:translateY(100px); opacity:0; transition:all 0.3s; }
+  .toast.show { transform:translateY(0); opacity:1; }
+
+  .hidden { display:none !important; }
+  @media(max-width:600px) { .form-row { grid-template-columns:1fr; } body{padding:12px;} .card{padding:20px;} }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>💊 Medicine Reminders</h1>
+  <p>Never miss a dose with smart scheduling</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('add')">➕ Add Reminder</div>
+  <div class="tab" onclick="switchTab('view')">🔔 My Reminders</div>
+</div>
+
+<!-- Add -->
+<div class="card" id="tabAdd">
+  <h2 style="margin-bottom:20px;">💊 New Reminder</h2>
+  <div class="form-row">
+    <div class="form-group">
+      <label>Medicine Name</label>
+      <input type="text" id="med_name" placeholder="e.g. Metformin 500mg" />
+    </div>
+    <div class="form-group">
+      <label>Dosage</label>
+      <input type="text" id="med_dose" placeholder="e.g. 1 tablet" />
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>Frequency</label>
+      <select id="med_frequency">
+        <option>Once daily</option><option>Twice daily</option><option>Three times daily</option>
+        <option>Every 6 hours</option><option>Every 8 hours</option><option>Weekly</option><option>As needed</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Reminder Time</label>
+      <input type="time" id="med_time" value="08:00" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>Days</label>
+    <div class="days-group" id="daysGroup">
+      <div class="day-btn active" onclick="toggleDay(this)">Mo</div>
+      <div class="day-btn active" onclick="toggleDay(this)">Tu</div>
+      <div class="day-btn active" onclick="toggleDay(this)">We</div>
+      <div class="day-btn active" onclick="toggleDay(this)">Th</div>
+      <div class="day-btn active" onclick="toggleDay(this)">Fr</div>
+      <div class="day-btn active" onclick="toggleDay(this)">Sa</div>
+      <div class="day-btn active" onclick="toggleDay(this)">Su</div>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>Purpose (optional)</label>
+    <input type="text" id="med_purpose" placeholder="e.g. Diabetes, Blood Pressure" />
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>Start Date</label>
+      <input type="date" id="med_start" />
+    </div>
+    <div class="form-group">
+      <label>End Date (optional)</label>
+      <input type="date" id="med_end" />
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="saveReminder()">💾 Save Reminder</button>
+</div>
+
+<!-- View -->
+<div class="card hidden" id="tabView">
+  <h2 style="margin-bottom:20px;">🔔 My Reminders</h2>
+  <div id="remindersList">
+    <div class="empty-state"><div class="icon">💊</div><p>No reminders yet. Add one from the first tab!</p></div>
+  </div>
+</div>
+
+<div class="toast" id="toast">✅ Reminder saved!</div>
+
+<script>
+  let reminders = [];
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('med_start').value = today;
+  });
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach((t,i) => { t.classList.toggle('active', (tab==='add'&&i===0)||(tab==='view'&&i===1)); });
+    document.getElementById('tabAdd').classList.toggle('hidden', tab!=='add');
+    document.getElementById('tabView').classList.toggle('hidden', tab!=='view');
+    if (tab === 'view') renderReminders();
+  }
+
+  function toggleDay(el) { el.classList.toggle('active'); }
+
+  function getSelectedDays() {
+    return Array.from(document.querySelectorAll('#daysGroup .day-btn.active')).map(d => d.textContent);
+  }
+
+  function saveReminder() {
+    const name = document.getElementById('med_name').value;
+    const dose = document.getElementById('med_dose').value;
+    if (!name || !dose) { alert('Please enter medicine name and dosage.'); return; }
+
+    const timeVal = document.getElementById('med_time').value;
+    const [h,m] = timeVal.split(':');
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    const timeStr = `${h12}:${m} ${ampm}`;
+
+    reminders.push({
+      id: Date.now(),
+      name,
+      dose,
+      frequency: document.getElementById('med_frequency').value,
+      time: timeStr,
+      days: getSelectedDays().join(', ') || 'Daily',
+      purpose: document.getElementById('med_purpose').value,
+      start: document.getElementById('med_start').value,
+      end: document.getElementById('med_end').value
+    });
+
+    // Clear
+    document.getElementById('med_name').value = '';
+    document.getElementById('med_dose').value = '';
+    document.getElementById('med_purpose').value = '';
+
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  function deleteReminder(id) {
+    reminders = reminders.filter(r => r.id !== id);
+    renderReminders();
+  }
+
+  function renderReminders() {
+    const container = document.getElementById('remindersList');
+    if (!reminders.length) {
+      container.innerHTML = '<div class="empty-state"><div class="icon">💊</div><p>No reminders yet. Add one from the first tab!</p></div>';
+      return;
+    }
+    let html = '';
+    reminders.forEach(r => {
+      html += `<div class="reminder-card">
+        <div class="reminder-icon">💊</div>
+        <div class="reminder-info">
+          <div class="reminder-name">${r.name}</div>
+          <div class="reminder-detail">${r.dose} · ${r.frequency} · ${r.days}</div>
+          <div class="reminder-detail">${r.purpose ? 'For: ' + r.purpose + ' · ' : ''}From ${r.start}${r.end ? ' to ' + r.end : ' (ongoing)'}</div>
+        </div>
+        <div class="reminder-time">⏰ ${r.time}</div>
+        <button class="reminder-delete" onclick="deleteReminder(${r.id})">🗑️</button>
+      </div>`;
+    });
+    container.innerHTML = html;
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Prescription Scanner — Swasthya Setu</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:#f8fafc; --card:#ffffff; --text:#0f172a; --text2:#64748b;
+    --accent:#3b82f6; --accent2:#8b5cf6; --border:#e2e8f0;
+    --shadow:0 4px 20px rgba(0,0,0,0.08); --green:#22c55e;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); padding:24px; }
+  h1,h2,h3 { font-family:'Poppins',sans-serif; }
+  .page-header { text-align:center; margin-bottom:32px; }
+  .page-header h1 { font-size:2rem; margin-bottom:4px; }
+  .page-header p { color:var(--text2); font-size:0.92rem; }
+
+  .card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:32px; box-shadow:var(--shadow); max-width:700px; margin:0 auto 24px auto; }
+
+  /* Upload area */
+  .upload-area {
+    border:3px dashed var(--border); border-radius:16px; padding:48px 24px;
+    text-align:center; cursor:pointer; transition:all 0.3s; background:#fafbfc;
+  }
+  .upload-area:hover { border-color:var(--accent); background:rgba(59,130,246,0.03); }
+  .upload-area.dragover { border-color:var(--accent); background:rgba(59,130,246,0.08); }
+  .upload-icon { font-size:3.5rem; margin-bottom:12px; }
+  .upload-text { font-weight:600; font-size:1.05rem; margin-bottom:4px; }
+  .upload-subtext { color:var(--text2); font-size:0.88rem; }
+  .upload-input { display:none; }
+
+  /* Preview */
+  .preview-container { display:none; text-align:center; margin-top:20px; }
+  .preview-img {
+    max-width:100%; max-height:300px; border-radius:12px; border:1px solid var(--border);
+    box-shadow:var(--shadow);
+  }
+  .preview-name { font-size:0.85rem; color:var(--text2); margin-top:8px; }
+
+  .btn { padding:14px 28px; border:none; border-radius:12px; font-size:1rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.3s; width:100%; margin-top:16px; }
+  .btn-primary { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:white; box-shadow:0 4px 15px rgba(59,130,246,0.3); }
+  .btn-primary:hover { transform:translateY(-2px); }
+  .btn-primary:disabled { opacity:0.5; transform:none; cursor:not-allowed; }
+  .btn-secondary { background:#f1f5f9; color:var(--text); border:2px solid var(--border); margin-top:12px; }
+
+  /* Results */
+  .result-section { display:none; }
+  .medicine-card {
+    border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:12px;
+    display:flex; align-items:center; gap:14px; background:#fafbfc;
+  }
+  .medicine-icon { font-size:2rem; }
+  .medicine-info { flex:1; }
+  .medicine-name { font-weight:700; font-size:1rem; margin-bottom:4px; }
+  .medicine-detail { font-size:0.85rem; color:var(--text2); }
+
+  .diagnosis-box {
+    background:rgba(59,130,246,0.08); border-left:4px solid var(--accent);
+    padding:14px 18px; border-radius:0 12px 12px 0; margin-bottom:16px;
+  }
+
+  /* Past prescriptions */
+  .past-card {
+    border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:12px; background:#fafbfc;
+  }
+  .past-date { font-size:0.82rem; color:var(--text2); margin-bottom:8px; }
+
+  .spinner-overlay {
+    display:none; position:fixed; top:0; left:0; right:0; bottom:0;
+    background:rgba(255,255,255,0.85); z-index:999;
+    justify-content:center; align-items:center; flex-direction:column;
+  }
+  .spinner { width:48px; height:48px; border:4px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .spinner-text { margin-top:16px; font-weight:600; color:var(--text2); }
+
+  .empty-state { text-align:center; padding:30px; color:var(--text2); }
+  .empty-state .icon { font-size:3rem; margin-bottom:12px; }
+  .hidden { display:none !important; }
+  @media(max-width:600px) { body{padding:12px;} .card{padding:20px;} }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🔬 Prescription Scanner</h1>
+  <p>Upload a photo of your prescription and let AI read it for you</p>
+</div>
+
+<!-- Upload Card -->
+<div class="card" id="uploadCard">
+  <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+    <div class="upload-icon">📷</div>
+    <div class="upload-text">Click or drag a prescription photo here</div>
+    <div class="upload-subtext">Supports PNG, JPG, JPEG</div>
+  </div>
+  <input type="file" id="fileInput" class="upload-input" accept="image/png,image/jpg,image/jpeg" onchange="handleFileSelect(event)" />
+
+  <div class="preview-container" id="previewContainer">
+    <img id="previewImg" class="preview-img" />
+    <div class="preview-name" id="previewName"></div>
+  </div>
+
+  <button class="btn btn-primary" id="scanBtn" onclick="scanPrescription()" disabled>🔍 Scan Prescription</button>
+  <button class="btn btn-secondary hidden" id="clearBtn" onclick="clearUpload()">🗑️ Clear & Upload Another</button>
+</div>
+
+<!-- Result Card -->
+<div class="card result-section" id="resultCard">
+  <h2 style="margin-bottom:16px;">📋 Scan Results</h2>
+  <div id="resultContent"></div>
+  <button class="btn btn-secondary" onclick="clearUpload()">📷 Scan Another Prescription</button>
+</div>
+
+<!-- Past Prescriptions -->
+<div class="card">
+  <h2 style="margin-bottom:16px;">📖 Past Prescriptions</h2>
+  <div id="pastList">
+    <div class="empty-state"><div class="icon">📂</div><p>No scanned prescriptions yet.</p></div>
+  </div>
+</div>
+
+<!-- Spinner -->
+<div class="spinner-overlay" id="spinnerOverlay">
+  <div class="spinner"></div>
+  <div class="spinner-text">Reading your prescription...</div>
+</div>
+
+<script>
+  let pastPrescriptions = [];
+
+  // Drag and drop
+  const uploadArea = document.getElementById('uploadArea');
+  uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+  uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+  uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault(); uploadArea.classList.remove('dragover');
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+  });
+
+  function handleFileSelect(e) { if (e.target.files.length) handleFile(e.target.files[0]); }
+
+  function handleFile(file) {
+    if (!file.type.startsWith('image/')) { alert('Please upload an image file.'); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      document.getElementById('previewImg').src = e.target.result;
+      document.getElementById('previewName').textContent = file.name;
+      document.getElementById('previewContainer').style.display = 'block';
+      document.getElementById('scanBtn').disabled = false;
+      document.getElementById('clearBtn').classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function scanPrescription() {
+    document.getElementById('spinnerOverlay').style.display = 'flex';
+
+    // Simulate AI scanning (replace with real Gemini Vision API call)
+    setTimeout(() => {
+      document.getElementById('spinnerOverlay').style.display = 'none';
+
+      const result = {
+        diagnosis: "Upper respiratory tract infection with mild fever",
+        medicines: [
+          { name:"Amoxicillin 500mg", dosage:"1 tablet", frequency:"Twice daily for 5 days" },
+          { name:"Paracetamol 650mg", dosage:"1 tablet", frequency:"Every 6 hours if fever" },
+          { name:"Cetirizine 10mg", dosage:"1 tablet", frequency:"Once daily at bedtime" },
+          { name:"Cough Syrup (Benadryl)", dosage:"10ml", frequency:"Three times daily" },
+        ],
+        raw_text_notes: "Follow up after 5 days if symptoms persist. Drink warm fluids. Rest advised."
+      };
+
+      showResult(result);
+
+      pastPrescriptions.unshift({
+        date: new Date().toLocaleString('en-IN', { dateStyle:'medium', timeStyle:'short' }),
+        diagnosis: result.diagnosis,
+        medicines: result.medicines
+      });
+    }, 2500);
+  }
+
+  function showResult(result) {
+    let html = '';
+    if (result.diagnosis) {
+      html += `<div class="diagnosis-box"><strong>📝 Diagnosis:</strong> ${result.diagnosis}</div>`;
+    }
+    html += '<h3 style="margin-bottom:12px;">💊 Medicines Found:</h3>';
+    result.medicines.forEach(m => {
+      html += `<div class="medicine-card">
+        <div class="medicine-icon">💊</div>
+        <div class="medicine-info">
+          <div class="medicine-name">${m.name}</div>
+          <div class="medicine-detail">Dosage: ${m.dosage} · ${m.frequency}</div>
+        </div>
+      </div>`;
+    });
+    if (result.raw_text_notes) {
+      html += `<details style="margin-top:16px;"><summary style="cursor:pointer;font-weight:600;color:var(--accent);">📜 Other text found on prescription</summary><p style="margin-top:8px;color:var(--text2);line-height:1.6;">${result.raw_text_notes}</p></details>`;
+    }
+
+    document.getElementById('resultContent').innerHTML = html;
+    document.getElementById('uploadCard').style.display = 'none';
+    document.getElementById('resultCard').style.display = 'block';
+  }
+
+  function clearUpload() {
+    document.getElementById('fileInput').value = '';
+    document.getElementById('previewContainer').style.display = 'none';
+    document.getElementById('scanBtn').disabled = true;
+    document.getElementById('clearBtn').classList.add('hidden');
+    document.getElementById('uploadCard').style.display = 'block';
+    document.getElementById('resultCard').style.display = 'none';
+    renderPast();
+  }
+
+  function renderPast() {
+    const container = document.getElementById('pastList');
+    if (!pastPrescriptions.length) {
+      container.innerHTML = '<div class="empty-state"><div class="icon">📂</div><p>No scanned prescriptions yet.</p></div>';
+      return;
+    }
+    let html = '';
+    pastPrescriptions.forEach(p => {
+      html += `<div class="past-card">
+        <div class="past-date">🕐 ${p.date}</div>
+        ${p.diagnosis ? `<p><strong>Diagnosis:</strong> ${p.diagnosis}</p>` : ''}
+        <p style="color:var(--text2);font-size:0.88rem;">${p.medicines.map(m => m.name).join(', ')}</p>
+      </div>`;
+    });
+    container.innerHTML = html;
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Doctor Appointment — Swasthya Setu</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --text2: #64748b;
+    --accent: #3b82f6; --accent2: #8b5cf6; --border: #e2e8f0;
+    --shadow: 0 4px 20px rgba(0,0,0,0.08); --green: #22c55e;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); padding:24px; }
+  h1,h2,h3 { font-family:'Poppins',sans-serif; }
+  .page-header { text-align:center; margin-bottom:32px; }
+  .page-header h1 { font-size:2rem; margin-bottom:4px; }
+  .page-header p { color:var(--text2); font-size:0.92rem; }
+
+  .progress-bar-bg { width:100%; height:8px; background:var(--border); border-radius:8px; overflow:hidden; margin-bottom:10px; }
+  .progress-bar-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:8px; transition:width 0.4s ease; }
+  .step-label { font-weight:600; font-size:0.95rem; color:var(--text2); margin-bottom:24px; }
+
+  .card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:32px; box-shadow:var(--shadow); max-width:700px; margin:0 auto; }
+  .form-group { margin-bottom:18px; }
+  .form-group label { display:block; font-weight:600; font-size:0.9rem; margin-bottom:6px; }
+  .form-group input, .form-group select, .form-group textarea {
+    width:100%; padding:12px 16px; border:2px solid var(--border); border-radius:12px;
+    font-size:1rem; font-family:'Inter',sans-serif; background:#f1f5f9; color:var(--text); outline:none;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:var(--accent); }
+  .form-group textarea { min-height:80px; resize:vertical; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+
+  /* Hospital / Doctor cards */
+  .option-card {
+    padding:16px; border:2px solid var(--border); border-radius:14px;
+    cursor:pointer; margin-bottom:10px; transition:all 0.2s; background:#f8fafc;
+  }
+  .option-card:hover { border-color:var(--accent); background:rgba(59,130,246,0.04); }
+  .option-card.selected { border-color:var(--accent); background:rgba(59,130,246,0.08); }
+  .option-card h3 { font-size:1rem; margin-bottom:4px; }
+  .option-card p { font-size:0.85rem; color:var(--text2); margin:0; }
+
+  /* Time slots */
+  .slots-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .slot {
+    padding:12px; text-align:center; border:2px solid var(--border); border-radius:12px;
+    cursor:pointer; font-weight:600; font-size:0.95rem; transition:all 0.2s;
+  }
+  .slot:hover { border-color:var(--accent); }
+  .slot.selected { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:white; border-color:transparent; }
+
+  /* Buttons */
+  .btn-row { display:flex; gap:12px; margin-top:24px; }
+  .btn { flex:1; padding:14px 24px; border:none; border-radius:12px; font-size:1rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.3s; }
+  .btn-primary { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:white; box-shadow:0 4px 15px rgba(59,130,246,0.3); }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow:0 6px 25px rgba(59,130,246,0.4); }
+  .btn-secondary { background:#f1f5f9; color:var(--text); border:2px solid var(--border); }
+  .btn-confirm { background:linear-gradient(135deg,var(--green),#16a34a); color:white; box-shadow:0 4px 15px rgba(34,197,94,0.3); }
+  .btn-confirm:hover { transform:translateY(-2px); }
+
+  /* Review */
+  .review-row { display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border); }
+  .review-row:last-child { border-bottom:none; }
+  .review-label { font-weight:600; color:var(--text2); font-size:0.9rem; }
+  .review-value { font-weight:600; color:var(--text); font-size:0.95rem; }
+
+  /* Success */
+  .success-box { text-align:center; padding:40px 20px; }
+  .success-icon { font-size:4rem; margin-bottom:16px; }
+  .success-box h2 { color:var(--green); margin-bottom:8px; }
+
+  .hidden { display:none !important; }
+  @media(max-width:600px) { .form-row,.slots-grid { grid-template-columns:1fr; } body{padding:12px;} .card{padding:20px;} }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>📅 Book a Doctor Appointment</h1>
+  <p>Find a hospital, choose a doctor, and book your visit</p>
+</div>
+
+<div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+<div class="step-label" id="stepLabel">Step 1 of 5 — Choose Hospital</div>
+
+<div class="card">
+
+  <!-- STEP 1: Hospital -->
+  <div id="step1">
+    <h2 style="margin-bottom:16px;">🏥 Choose a Hospital</h2>
+    <div id="hospitalList">
+      <div class="option-card selected" onclick="selectHospital(this,'h1')" data-id="h1">
+        <h3>🏥 District General Hospital — Varanasi</h3>
+        <p>Government • 5.2 km away • Emergency ward available</p>
+      </div>
+      <div class="option-card" onclick="selectHospital(this,'h2')" data-id="h2">
+        <h3>🏥 Primary Health Centre — Chandauli</h3>
+        <p>Government • 2.1 km away • OPD available</p>
+      </div>
+      <div class="option-card" onclick="selectHospital(this,'h3')" data-id="h3">
+        <h3>🏥 Apollo Clinic — Varanasi City</h3>
+        <p>Private • 8.4 km away • All specialties</p>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="apGoTo(2)">Next: Choose Doctor →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Doctor -->
+  <div id="step2" class="hidden">
+    <h2 style="margin-bottom:16px;">👨‍⚕️ Choose a Doctor</h2>
+    <div id="doctorList">
+      <div class="option-card selected" onclick="selectDoctor(this,'d1')" data-id="d1">
+        <h3>👨‍⚕️ Dr. Rajesh Kumar</h3>
+        <p>General Physician • 15 yrs experience • ⭐ 4.8</p>
+      </div>
+      <div class="option-card" onclick="selectDoctor(this,'d2')" data-id="d2">
+        <h3>👩‍⚕️ Dr. Priya Sharma</h3>
+        <p>Pediatrics • 10 yrs experience • ⭐ 4.9</p>
+      </div>
+      <div class="option-card" onclick="selectDoctor(this,'d3')" data-id="d3">
+        <h3>👨‍⚕️ Dr. Anil Verma</h3>
+        <p>Orthopedics • 20 yrs experience • ⭐ 4.7</p>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="apGoTo(1)">← Back</button>
+      <button class="btn btn-primary" onclick="apGoTo(3)">Next: Date & Time →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Date & Time -->
+  <div id="step3" class="hidden">
+    <h2 style="margin-bottom:16px;">📆 Date & Time</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Appointment Date</label>
+        <input type="date" id="ap_date" />
+      </div>
+      <div class="form-group">
+        <label>Visit Type</label>
+        <select id="ap_visit_type">
+          <option>In-person</option>
+          <option>Follow-up</option>
+          <option>Video consultation</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Available Time Slots</label>
+      <div class="slots-grid" id="slotsGrid">
+        <div class="slot selected" onclick="selectSlot(this)">09:00 AM</div>
+        <div class="slot" onclick="selectSlot(this)">10:00 AM</div>
+        <div class="slot" onclick="selectSlot(this)">11:00 AM</div>
+        <div class="slot" onclick="selectSlot(this)">02:00 PM</div>
+        <div class="slot" onclick="selectSlot(this)">03:00 PM</div>
+        <div class="slot" onclick="selectSlot(this)">04:00 PM</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="apGoTo(2)">← Back</button>
+      <button class="btn btn-primary" onclick="apGoTo(4)">Next: Your Details →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Details -->
+  <div id="step4" class="hidden">
+    <h2 style="margin-bottom:16px;">📝 Your Details</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="ap_name" placeholder="Your full name" />
+      </div>
+      <div class="form-group">
+        <label>Age</label>
+        <input type="number" id="ap_age" value="30" min="1" max="120" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Gender</label>
+        <select id="ap_gender"><option>Male</option><option>Female</option><option>Other</option></select>
+      </div>
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="tel" id="ap_phone" placeholder="+91 XXXXX XXXXX" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Village / Town</label>
+        <input type="text" id="ap_village" />
+      </div>
+      <div class="form-group">
+        <label>District</label>
+        <input type="text" id="ap_district" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Reason for visit / Symptoms</label>
+      <textarea id="ap_symptoms" placeholder="Briefly describe your symptoms"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Allergies (optional)</label>
+        <input type="text" id="ap_allergies" placeholder="e.g. Penicillin" />
+      </div>
+      <div class="form-group">
+        <label>Current medicines (optional)</label>
+        <input type="text" id="ap_meds" />
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="apGoTo(3)">← Back</button>
+      <button class="btn btn-primary" onclick="apGoTo(5)">Review & Confirm →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: Review -->
+  <div id="step5" class="hidden">
+    <h2 style="margin-bottom:16px;">✅ Review Your Appointment</h2>
+    <div id="reviewContent"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="apGoTo(4)">← Edit Details</button>
+      <button class="btn btn-confirm" onclick="confirmAppointment()">✅ Confirm Appointment</button>
+    </div>
+  </div>
+
+  <!-- STEP 6: Success -->
+  <div id="step6" class="hidden">
+    <div class="success-box">
+      <div class="success-icon">🎉</div>
+      <h2>Appointment Booked Successfully!</h2>
+      <p style="color:var(--text2);margin-bottom:20px;">You will receive a confirmation SMS shortly.</p>
+      <button class="btn btn-primary" onclick="resetAppointment()" style="max-width:300px;">📋 Book Another Appointment</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let apStep = 1;
+  let selectedHospital = 'h1', selectedDoctor = 'd1', selectedSlot = '09:00 AM';
+  const hospitalNames = { h1:'District General Hospital — Varanasi', h2:'Primary Health Centre — Chandauli', h3:'Apollo Clinic — Varanasi City' };
+  const doctorNames = { d1:'Dr. Rajesh Kumar', d2:'Dr. Priya Sharma', d3:'Dr. Anil Verma' };
+
+  // Set min date to today
+  document.addEventListener('DOMContentLoaded', () => {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('ap_date').setAttribute('min', today);
+    document.getElementById('ap_date').value = today;
+  });
+
+  function apGoTo(step) {
+    if (step === 5) {
+      if (!document.getElementById('ap_name').value || !document.getElementById('ap_phone').value) {
+        alert('Please fill in your name and phone number.');
+        return;
+      }
+      buildReview();
+    }
+    document.getElementById('step' + apStep).classList.add('hidden');
+    document.getElementById('step' + step).classList.remove('hidden');
+    apStep = step;
+    const pct = Math.min(((step - 1) / 4) * 100, 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    const labels = ['Step 1 of 5 — Choose Hospital','Step 2 of 5 — Choose Doctor','Step 3 of 5 — Date & Time','Step 4 of 5 — Your Details','Step 5 of 5 — Confirm','Booked!'];
+    document.getElementById('stepLabel').textContent = labels[step-1] || '';
+  }
+
+  function selectHospital(el, id) {
+    document.querySelectorAll('#hospitalList .option-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedHospital = id;
+  }
+  function selectDoctor(el, id) {
+    document.querySelectorAll('#doctorList .option-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedDoctor = id;
+  }
+  function selectSlot(el) {
+    document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedSlot = el.textContent;
+  }
+
+  function buildReview() {
+    const rows = [
+      ['Hospital', hospitalNames[selectedHospital]],
+      ['Doctor', doctorNames[selectedDoctor]],
+      ['Date', document.getElementById('ap_date').value],
+      ['Time', selectedSlot],
+      ['Visit Type', document.getElementById('ap_visit_type').value],
+      ['Patient', document.getElementById('ap_name').value + ', ' + document.getElementById('ap_age').value + ', ' + document.getElementById('ap_gender').value],
+      ['Phone', document.getElementById('ap_phone').value],
+      ['Reason', document.getElementById('ap_symptoms').value || '—'],
+    ];
+    let html = '';
+    rows.forEach(([l,v]) => { html += `<div class="review-row"><span class="review-label">${l}</span><span class="review-value">${v}</span></div>`; });
+    document.getElementById('reviewContent').innerHTML = html;
+  }
+
+  function confirmAppointment() {
+    document.getElementById('progressFill').style.width = '100%';
+    apGoTo(6);
+  }
+
+  function resetAppointment() {
+    ['ap_name','ap_phone','ap_village','ap_district','ap_symptoms','ap_allergies','ap_meds'].forEach(id => { document.getElementById(id).value = ''; });
+    document.getElementById('ap_age').value = '30';
+    document.querySelectorAll('.option-card').forEach((c,i) => { c.classList.toggle('selected', i === 0); });
+    document.querySelectorAll('.slot').forEach((s,i) => { s.classList.toggle('selected', i === 0); });
+    selectedHospital = 'h1'; selectedDoctor = 'd1'; selectedSlot = '09:00 AM';
+    apGoTo(1);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Health Records — Swasthya Setu</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:#f8fafc; --card:#ffffff; --text:#0f172a; --text2:#64748b;
+    --accent:#3b82f6; --accent2:#8b5cf6; --border:#e2e8f0;
+    --shadow:0 4px 20px rgba(0,0,0,0.08); --green:#22c55e;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); padding:24px; }
+  h1,h2,h3 { font-family:'Poppins',sans-serif; }
+  .page-header { text-align:center; margin-bottom:32px; }
+  .page-header h1 { font-size:2rem; margin-bottom:4px; }
+  .page-header p { color:var(--text2); font-size:0.92rem; }
+
+  /* Tabs */
+  .tabs { display:flex; gap:4px; margin-bottom:24px; background:var(--border); border-radius:14px; padding:4px; max-width:700px; margin-left:auto; margin-right:auto; }
+  .tab { flex:1; padding:12px; text-align:center; border-radius:10px; cursor:pointer; font-weight:600; font-size:0.95rem; transition:all 0.2s; color:var(--text2); }
+  .tab.active { background:var(--card); color:var(--accent); box-shadow:var(--shadow); }
+
+  .card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:32px; box-shadow:var(--shadow); max-width:700px; margin:0 auto; }
+  .form-group { margin-bottom:18px; }
+  .form-group label { display:block; font-weight:600; font-size:0.9rem; margin-bottom:6px; }
+  .form-group input, .form-group textarea {
+    width:100%; padding:12px 16px; border:2px solid var(--border); border-radius:12px;
+    font-size:1rem; font-family:'Inter',sans-serif; background:#f1f5f9; color:var(--text); outline:none;
+  }
+  .form-group input:focus, .form-group textarea:focus { border-color:var(--accent); }
+  .form-group textarea { min-height:80px; resize:vertical; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+
+  .btn { padding:14px 28px; border:none; border-radius:12px; font-size:1rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.3s; width:100%; margin-top:8px; }
+  .btn-primary { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:white; box-shadow:0 4px 15px rgba(59,130,246,0.3); }
+  .btn-primary:hover { transform:translateY(-2px); }
+
+  /* Records */
+  .record-card { border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom:16px; background:#fafbfc; }
+  .record-date { font-size:0.82rem; color:var(--text2); margin-bottom:12px; font-weight:500; }
+  .vitals-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:12px; }
+  .vital-item { text-align:center; }
+  .vital-label { font-size:0.75rem; color:var(--text2); font-weight:600; text-transform:uppercase; letter-spacing:0.05em; }
+  .vital-value { font-size:1.2rem; font-weight:700; color:var(--text); margin-top:4px; }
+  .record-info { font-size:0.9rem; margin-top:8px; line-height:1.6; }
+  .record-info strong { color:var(--text); }
+
+  .empty-state { text-align:center; padding:40px; color:var(--text2); }
+  .empty-state .icon { font-size:3rem; margin-bottom:12px; }
+
+  .toast {
+    position:fixed; bottom:30px; right:30px; background:var(--green); color:white;
+    padding:14px 24px; border-radius:12px; font-weight:600; font-size:0.95rem;
+    box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:9999; transform:translateY(100px);
+    opacity:0; transition:all 0.3s ease;
+  }
+  .toast.show { transform:translateY(0); opacity:1; }
+
+  .hidden { display:none !important; }
+  @media(max-width:600px) { .form-row,.vitals-grid { grid-template-columns:1fr 1fr; } body{padding:12px;} .card{padding:20px;} }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>📋 My Health Records</h1>
+  <p>Track your vitals and health information</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('add')">➕ Add a Record</div>
+  <div class="tab" onclick="switchTab('view')">📖 View History</div>
+</div>
+
+<!-- Add Record Tab -->
+<div class="card" id="tabAdd">
+  <h2 style="margin-bottom:20px;">📝 New Health Record</h2>
+  <div class="form-row">
+    <div class="form-group">
+      <label>🫀 Blood Pressure</label>
+      <input type="text" id="hr_bp" placeholder="e.g. 120/80" />
+    </div>
+    <div class="form-group">
+      <label>🩸 Sugar Level</label>
+      <input type="text" id="hr_sugar" placeholder="e.g. 95 mg/dL" />
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>📏 Height</label>
+      <input type="text" id="hr_height" placeholder="e.g. 170 cm" />
+    </div>
+    <div class="form-group">
+      <label>⚖️ Weight</label>
+      <input type="text" id="hr_weight" placeholder="e.g. 68 kg" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>⚠️ Allergies</label>
+    <input type="text" id="hr_allergies" placeholder="e.g. Penicillin, Dust, None" />
+  </div>
+  <div class="form-group">
+    <label>🏥 Chronic Conditions</label>
+    <input type="text" id="hr_chronic" placeholder="e.g. Diabetes, High BP, None" />
+  </div>
+  <div class="form-group">
+    <label>📝 Notes</label>
+    <textarea id="hr_notes" placeholder="Anything else worth recording..."></textarea>
+  </div>
+  <button class="btn btn-primary" onclick="saveRecord()">💾 Save Record</button>
+</div>
+
+<!-- View History Tab -->
+<div class="card hidden" id="tabView">
+  <h2 style="margin-bottom:20px;">📖 Health History</h2>
+  <div id="recordsList">
+    <div class="empty-state">
+      <div class="icon">📂</div>
+      <p>No health records yet. Add one from the first tab!</p>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">✅ Record saved successfully!</div>
+
+<script>
+  let records = [];
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach((t,i) => {
+      t.classList.toggle('active', (tab === 'add' && i === 0) || (tab === 'view' && i === 1));
+    });
+    document.getElementById('tabAdd').classList.toggle('hidden', tab !== 'add');
+    document.getElementById('tabView').classList.toggle('hidden', tab !== 'view');
+    if (tab === 'view') renderRecords();
+  }
+
+  function saveRecord() {
+    const bp = document.getElementById('hr_bp').value;
+    const sugar = document.getElementById('hr_sugar').value;
+    const height = document.getElementById('hr_height').value;
+    const weight = document.getElementById('hr_weight').value;
+    const allergies = document.getElementById('hr_allergies').value;
+    const chronic = document.getElementById('hr_chronic').value;
+    const notes = document.getElementById('hr_notes').value;
+
+    if (!bp && !sugar && !height && !weight && !allergies && !chronic && !notes) {
+      alert('Please fill in at least one field before saving.');
+      return;
+    }
+
+    records.unshift({
+      date: new Date().toLocaleString('en-IN', { dateStyle:'medium', timeStyle:'short' }),
+      bp, sugar, height, weight, allergies, chronic, notes
+    });
+
+    // Clear form
+    ['hr_bp','hr_sugar','hr_height','hr_weight','hr_allergies','hr_chronic','hr_notes'].forEach(id => { document.getElementById(id).value = ''; });
+
+    showToast();
+  }
+
+  function renderRecords() {
+    const container = document.getElementById('recordsList');
+    if (!records.length) {
+      container.innerHTML = '<div class="empty-state"><div class="icon">📂</div><p>No health records yet. Add one from the first tab!</p></div>';
+      return;
+    }
+    let html = '';
+    records.forEach(r => {
+      html += `<div class="record-card">
+        <div class="record-date">🕐 ${r.date}</div>
+        <div class="vitals-grid">
+          <div class="vital-item"><div class="vital-label">BP</div><div class="vital-value">${r.bp || '—'}</div></div>
+          <div class="vital-item"><div class="vital-label">Sugar</div><div class="vital-value">${r.sugar || '—'}</div></div>
+          <div class="vital-item"><div class="vital-label">Height</div><div class="vital-value">${r.height || '—'}</div></div>
+          <div class="vital-item"><div class="vital-label">Weight</div><div class="vital-value">${r.weight || '—'}</div></div>
+        </div>
+        ${r.allergies ? `<div class="record-info"><strong>Allergies:</strong> ${r.allergies}</div>` : ''}
+        ${r.chronic ? `<div class="record-info"><strong>Chronic conditions:</strong> ${r.chronic}</div>` : ''}
+        ${r.notes ? `<div class="record-info"><strong>Notes:</strong> ${r.notes}</div>` : ''}
+      </div>`;
+    });
+    container.innerHTML = html;
+  }
+
+  function showToast() {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+</html>

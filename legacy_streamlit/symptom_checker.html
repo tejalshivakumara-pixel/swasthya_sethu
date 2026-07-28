@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Symptom Checker — Swasthya Setu</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #0f172a;
+    --text2: #64748b;
+    --accent: #3b82f6;
+    --accent2: #8b5cf6;
+    --border: #e2e8f0;
+    --shadow: 0 4px 20px rgba(0,0,0,0.08);
+    --green: #22c55e;
+    --yellow: #eab308;
+    --red: #ef4444;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px;
+    min-height: 100vh;
+  }
+  h1, h2, h3 { font-family: 'Poppins', sans-serif; }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .page-header h1 { font-size: 2rem; margin-bottom: 4px; }
+  .page-header p { color: var(--text2); font-size: 0.92rem; }
+
+  /* Progress */
+  .progress-container { margin-bottom: 28px; }
+  .progress-bar-bg {
+    width: 100%;
+    height: 8px;
+    background: var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    transition: width 0.4s ease;
+  }
+  .step-label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text2);
+  }
+
+  /* Card */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: var(--shadow);
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  /* Form elements */
+  .form-group { margin-bottom: 20px; }
+  .form-group label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    background: #f1f5f9;
+    color: var(--text);
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+  }
+  .form-group textarea { min-height: 100px; resize: vertical; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* Radio / Severity */
+  .severity-group { display: flex; gap: 12px; flex-wrap: wrap; }
+  .severity-option {
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+    padding: 12px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    background: #f1f5f9;
+  }
+  .severity-option:hover { border-color: var(--accent); }
+  .severity-option.active {
+    border-color: var(--accent);
+    background: rgba(59,130,246,0.1);
+    color: var(--accent);
+  }
+
+  /* Checkbox group */
+  .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; }
+  .checkbox-item {
+    padding: 8px 16px;
+    border: 2px solid var(--border);
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .checkbox-item:hover { border-color: var(--accent); }
+  .checkbox-item.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+    border-color: transparent;
+  }
+
+  /* Buttons */
+  .btn-row { display: flex; gap: 12px; margin-top: 24px; }
+  .btn {
+    flex: 1;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+    box-shadow: 0 4px 15px rgba(59,130,246,0.3);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(59,130,246,0.4);
+  }
+  .btn-secondary {
+    background: #f1f5f9;
+    color: var(--text);
+    border: 2px solid var(--border);
+  }
+  .btn-secondary:hover { background: var(--border); }
+  .btn-analyze {
+    background: linear-gradient(135deg, var(--green), #16a34a);
+    color: white;
+    box-shadow: 0 4px 15px rgba(34,197,94,0.3);
+  }
+  .btn-analyze:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(34,197,94,0.4);
+  }
+
+  /* Result */
+  .result-section { display: none; }
+  .urgency-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+  }
+  .urgency-low { background: rgba(34,197,94,0.15); color: #16a34a; }
+  .urgency-medium { background: rgba(234,179,8,0.15); color: #ca8a04; }
+  .urgency-high { background: rgba(239,68,68,0.15); color: var(--red); }
+
+  .condition-list, .tip-list { list-style: none; padding: 0; }
+  .condition-list li, .tip-list li {
+    padding: 10px 16px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .recommendation-box {
+    background: rgba(59,130,246,0.08);
+    border-left: 4px solid var(--accent);
+    padding: 16px 20px;
+    border-radius: 0 12px 12px 0;
+    margin: 16px 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  .result-subtitle {
+    font-weight: 700;
+    font-size: 1rem;
+    margin: 20px 0 10px 0;
+    color: var(--text);
+  }
+
+  /* Spinner */
+  .spinner-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,0.85);
+    z-index: 999;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner-text {
+    margin-top: 16px;
+    font-weight: 600;
+    color: var(--text2);
+  }
+
+  .disclaimer {
+    margin-top: 24px;
+    padding: 12px 16px;
+    background: rgba(234,179,8,0.1);
+    border-left: 4px solid var(--yellow);
+    border-radius: 0 10px 10px 0;
+    font-size: 0.82rem;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+  .hidden { display: none !important; }
+
+  @media (max-width: 600px) {
+    .form-row { grid-template-columns: 1fr; }
+    .severity-group { flex-direction: column; }
+    body { padding: 12px; }
+    .card { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🩺 AI Symptom Checker</h1>
+  <p>Answer a few questions and get an AI-assisted assessment</p>
+</div>
+
+<div class="progress-container">
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+  </div>
+  <div class="step-label" id="stepLabel">Step 1 of 3 — About You</div>
+</div>
+
+<div class="card">
+
+  <!-- ═══════ STEP 1 ═══════ -->
+  <div id="step1">
+    <h2 style="margin-bottom:20px;">👤 About You</h2>
+    <div class="form-group">
+      <label>Your Name</label>
+      <input type="text" id="sc_name" placeholder="Enter your name" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Age</label>
+        <input type="number" id="sc_age" value="30" min="1" max="120" />
+      </div>
+      <div class="form-group">
+        <label>Gender</label>
+        <select id="sc_gender">
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Village / Town / PIN Code</label>
+      <input type="text" id="sc_location" placeholder="e.g. Varanasi, 221001" />
+    </div>
+    <div class="form-group">
+      <label>Phone (optional)</label>
+      <input type="tel" id="sc_phone" placeholder="+91 XXXXX XXXXX" />
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goToStep(2)">Next: Symptoms →</button>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 2 ═══════ -->
+  <div id="step2" class="hidden">
+    <h2 style="margin-bottom:20px;">🤒 Your Symptoms</h2>
+    <div class="form-group">
+      <label>Describe your symptoms</label>
+      <textarea id="sc_symptoms" placeholder="E.g., throbbing headache on the right side for 2 days, mild fever, runny nose..."></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Duration</label>
+        <select id="sc_duration">
+          <option>Less than a day</option>
+          <option>1-3 days</option>
+          <option>4-7 days</option>
+          <option>More than a week</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Temperature (if measured)</label>
+        <input type="text" id="sc_temperature" placeholder="e.g. 100.4°F or 38°C" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Severity</label>
+      <div class="severity-group" id="severityGroup">
+        <div class="severity-option active" data-value="Mild" onclick="selectSeverity(this)">😌 Mild</div>
+        <div class="severity-option" data-value="Moderate" onclick="selectSeverity(this)">😟 Moderate</div>
+        <div class="severity-option" data-value="Severe" onclick="selectSeverity(this)">😣 Severe</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goToStep(1)">← Back</button>
+      <button class="btn btn-primary" onclick="goToStep(3)">Next: Medical History →</button>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 3 ═══════ -->
+  <div id="step3" class="hidden">
+    <h2 style="margin-bottom:20px;">🏥 Medical History</h2>
+    <div class="form-group">
+      <label>Existing conditions (select all that apply)</label>
+      <div class="checkbox-group" id="conditionsGroup">
+        <div class="checkbox-item" onclick="toggleCheckbox(this)">Diabetes</div>
+        <div class="checkbox-item" onclick="toggleCheckbox(this)">High BP</div>
+        <div class="checkbox-item" onclick="toggleCheckbox(this)">Asthma</div>
+        <div class="checkbox-item" onclick="toggleCheckbox(this)">Heart Disease</div>
+        <div class="checkbox-item" onclick="toggleCheckbox(this)">Thyroid</div>
+        <div class="checkbox-item" onclick="toggleCheckbox(this)">Kidney Disease</div>
+        <div class="checkbox-item" onclick="toggleCheckbox(this)">Liver Disease</div>
+        <div class="checkbox-item" onclick="toggleCheckbox(this)">Obesity</div>
+        <div class="checkbox-item" onclick="toggleCheckbox(this)">None</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Other conditions</label>
+      <input type="text" id="sc_other_conditions" placeholder="e.g. Migraine, Anemia..." />
+    </div>
+    <div class="form-group">
+      <label>Current medicines</label>
+      <textarea id="sc_medicines" placeholder="e.g. Metformin 500mg..." style="min-height:70px;"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Allergies</label>
+      <input type="text" id="sc_allergies" placeholder="e.g. Penicillin, Sulfa drugs, Peanuts..." />
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goToStep(2)">← Back</button>
+      <button class="btn btn-analyze" onclick="analyzeSymptoms()">🔍 Analyze Symptoms</button>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 4: Results ═══════ -->
+  <div id="step4" class="hidden">
+    <div id="resultContent"></div>
+    <div class="btn-row" style="margin-top:28px;">
+      <button class="btn btn-primary" onclick="resetChecker()">🔄 Check Again</button>
+    </div>
+    <div class="disclaimer">
+      ⚠️ This AI-generated assessment is for informational purposes only and does not
+      constitute medical advice, diagnosis, or treatment. Always consult a qualified
+      healthcare professional for medical concerns.
+    </div>
+  </div>
+
+</div>
+
+<!-- Spinner Overlay -->
+<div class="spinner-overlay" id="spinnerOverlay">
+  <div class="spinner"></div>
+  <div class="spinner-text">Analyzing your symptoms...</div>
+</div>
+
+<script>
+  let currentStep = 1;
+  let selectedSeverity = "Mild";
+
+  const stepLabels = [
+    "Step 1 of 3 — About You",
+    "Step 2 of 3 — Your Symptoms",
+    "Step 3 of 3 — Medical History",
+    "Results"
+  ];
+
+  function goToStep(step) {
+    // Validation
+    if (step === 2 && currentStep === 1) {
+      if (!document.getElementById('sc_name').value.trim()) {
+        alert('Please enter your name.');
+        return;
+      }
+    }
+    if (step === 3 && currentStep === 2) {
+      if (!document.getElementById('sc_symptoms').value.trim()) {
+        alert('Please describe your symptoms.');
+        return;
+      }
+    }
+
+    document.getElementById('step' + currentStep).classList.add('hidden');
+    document.getElementById('step' + step).classList.remove('hidden');
+    currentStep = step;
+
+    const pct = step === 4 ? 100 : ((step - 1) / 3) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('stepLabel').textContent = stepLabels[step - 1];
+  }
+
+  function selectSeverity(el) {
+    document.querySelectorAll('.severity-option').forEach(o => o.classList.remove('active'));
+    el.classList.add('active');
+    selectedSeverity = el.dataset.value;
+  }
+
+  function toggleCheckbox(el) {
+    el.classList.toggle('active');
+  }
+
+  function getSelectedConditions() {
+    const items = document.querySelectorAll('#conditionsGroup .checkbox-item.active');
+    return Array.from(items).map(i => i.textContent);
+  }
+
+  function analyzeSymptoms() {
+    const overlay = document.getElementById('spinnerOverlay');
+    overlay.style.display = 'flex';
+
+    const data = {
+      name: document.getElementById('sc_name').value,
+      age: document.getElementById('sc_age').value,
+      gender: document.getElementById('sc_gender').value,
+      location: document.getElementById('sc_location').value,
+      symptoms: document.getElementById('sc_symptoms').value,
+      duration: document.getElementById('sc_duration').value,
+      severity: selectedSeverity,
+      temperature: document.getElementById('sc_temperature').value || 'Not measured',
+      conditions: getSelectedConditions().join(', ') || 'None',
+      other_conditions: document.getElementById('sc_other_conditions').value || 'None',
+      medicines: document.getElementById('sc_medicines').value || 'None',
+      allergies: document.getElementById('sc_allergies').value || 'None'
+    };
+
+    const prompt = `A patient describes their symptoms. Give a cautious, informational (not diagnostic) assessment. Respond ONLY with JSON in this exact shape:
+{
+  "possible_conditions": ["string"],
+  "urgency": "low | medium | high",
+  "recommendation": "string",
+  "self_care_tips": ["string"]
+}
+
+Patient: age ${data.age}, gender ${data.gender}.
+Symptoms: ${data.symptoms}
+Duration: ${data.duration}
+Severity: ${data.severity}
+Temperature: ${data.temperature}
+Existing conditions: ${data.conditions} ${data.other_conditions}
+Current medicines: ${data.medicines}
+Allergies: ${data.allergies}`;
+
+    const apiKey = '';  // Will be injected by Streamlit or set manually
+    const geminiKey = window.GEMINI_API_KEY || apiKey;
+
+    if (!geminiKey) {
+      // Simulate a result for demo purposes
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        showResult({
+          possible_conditions: ["Common Cold", "Sinusitis", "Viral Fever"],
+          urgency: "low",
+          recommendation: "Your symptoms suggest a minor viral infection. Rest well, stay hydrated, and monitor your temperature. If symptoms worsen or persist beyond 5 days, consult a doctor.",
+          self_care_tips: [
+            "Drink warm fluids like soup, tea, or warm water with honey",
+            "Rest adequately — aim for 8+ hours of sleep",
+            "Use steam inhalation for nasal congestion",
+            "Take paracetamol for fever (as directed)",
+            "Avoid cold beverages and fried food"
+          ]
+        });
+      }, 2000);
+      return;
+    }
+
+    fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }]
+      })
+    })
+    .then(r => r.json())
+    .then(resp => {
+      overlay.style.display = 'none';
+      let text = resp.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      try {
+        const result = JSON.parse(text);
+        showResult(result);
+      } catch(e) {
+        showResult({
+          possible_conditions: [],
+          urgency: "unknown",
+          recommendation: "Could not parse AI response. Please consult a doctor directly.",
+          self_care_tips: []
+        });
+      }
+    })
+    .catch(err => {
+      overlay.style.display = 'none';
+      showResult({
+        possible_conditions: [],
+        urgency: "unknown",
+        recommendation: "Error connecting to AI service: " + err.message + ". Please consult a doctor directly.",
+        self_care_tips: []
+      });
+    });
+  }
+
+  function showResult(result) {
+    const urgency = result.urgency || 'unknown';
+    const icons = { low: '🟢', medium: '🟡', high: '🔴', unknown: '⚪' };
+    const classes = { low: 'urgency-low', medium: 'urgency-medium', high: 'urgency-high', unknown: '' };
+
+    let html = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h2 style="margin:0;">📋 Medical Prescription & Assessment Report</h2>
+      <button onclick="copySymptomReport()" id="copy-report-btn" style="padding:8px 16px; background:#059669; color:white; border:none; border-radius:10px; font-weight:700; cursor:pointer; font-size:0.9rem; box-shadow:0 4px 12px rgba(5,150,105,0.25);">📋 Copy Prescription</button>
+    </div>`;
+    html += `<div class="urgency-badge ${classes[urgency] || ''}">${icons[urgency] || '⚪'} Urgency: ${urgency.charAt(0).toUpperCase() + urgency.slice(1)}</div>`;
+
+    if (result.possible_conditions && result.possible_conditions.length) {
+      html += `<div class="result-subtitle">🔎 Possible conditions to discuss with a doctor:</div>`;
+      html += `<ul class="condition-list">`;
+      result.possible_conditions.forEach(c => {
+        html += `<li>• ${c}</li>`;
+      });
+      html += `</ul>`;
+    }
+
+    html += `<div class="result-subtitle">💡 Recommendation:</div>`;
+    html += `<div class="recommendation-box" id="report-rec-box">${result.recommendation || 'No recommendation available.'}</div>`;
+
+    if (result.self_care_tips && result.self_care_tips.length) {
+      html += `<div class="result-subtitle">🌿 Self-care tips:</div>`;
+      html += `<ul class="tip-list">`;
+      result.self_care_tips.forEach(t => {
+        html += `<li>✅ ${t}</li>`;
+      });
+      html += `</ul>`;
+    }
+
+    document.getElementById('resultContent').innerHTML = html;
+    goToStep(4);
+  }
+
+  function copySymptomReport() {
+    const text = document.getElementById('resultContent').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copy-report-btn');
+      if (btn) {
+        btn.innerText = '✅ Copied!';
+        setTimeout(() => { btn.innerText = '📋 Copy Report'; }, 2000);
+      }
+    });
+  }
+
+  function resetChecker() {
+    document.getElementById('sc_name').value = '';
+    document.getElementById('sc_age').value = '30';
+    document.getElementById('sc_gender').selectedIndex = 0;
+    document.getElementById('sc_location').value = '';
+    document.getElementById('sc_phone').value = '';
+    document.getElementById('sc_symptoms').value = '';
+    document.getElementById('sc_duration').selectedIndex = 0;
+    document.getElementById('sc_temperature').value = '';
+    document.getElementById('sc_other_conditions').value = '';
+    document.getElementById('sc_medicines').value = '';
+    document.getElementById('sc_allergies').value = '';
+    document.querySelectorAll('.checkbox-item').forEach(i => i.classList.remove('active'));
+    document.querySelectorAll('.severity-option').forEach(o => o.classList.remove('active'));
+    document.querySelector('.severity-option[data-value="Mild"]').classList.add('active');
+    selectedSeverity = 'Mild';
+    goToStep(1);
+  }
+</script>
+</body>
+</html>
